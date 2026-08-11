@@ -437,7 +437,7 @@
   (function detect() {
     const ua = navigator.userAgent || '';
     const uad = navigator.userAgentData;
-    const brands = `${uad && uad.brands ? uad.brands.map((b) => b.brand).join(' ') : ''} ${ua}`;
+    const brands = `${uad?.brands ? uad.brands.map((b) => b.brand).join(' ') : ''} ${ua}`;
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
     let browser = 'chromium';
     if (/Edg\//.test(ua)) browser = 'edge';
