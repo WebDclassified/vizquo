@@ -1,0 +1,46 @@
+{
+  "name": "vizquo",
+  "description": "Inspect anything. Understand everything. Build faster. — a design-intelligence layer for the web.",
+  "private": true,
+  "version": "0.10.1",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "build:firefox:mv3": "wxt build -b firefox --mv3",
+    "zip": "wxt zip",
+    "compile": "tsc --noEmit",
+    "prepare": "wxt prepare",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@kobalte/core": "^0.13.12",
+    "@webext-core/messaging": "^4.0.0",
+    "comlink": "^4.4.2",
+    "css-tree": "^3.2.1",
+    "culori": "^4.0.2",
+    "dexie": "^4.4.4",
+    "fflate": "^0.8.3",
+    "lucide-solid": "^1.30.0",
+    "solid-js": "^1.9.14",
+    "unocss": "^66.7.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.7",
+    "@playwright/test": "^1.62.1",
+    "@types/chrome": "^0.2.5",
+    "@unocss/reset": "^66.7.5",
+    "@wxt-dev/module-solid": "^1.1.4",
+    "fake-indexeddb": "^6.2.5",
+    "happy-dom": "^20.11.2",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.10",
+    "wxt": "^0.21.3"
+  }
+}

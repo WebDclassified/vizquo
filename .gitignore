@@ -1,0 +1,11 @@
+node_modules
+.output
+.wxt
+.DS_Store
+*.log
+.vscode
+.idea
+test-resultsplaywright-report
+blob-report
+.env
+.env.*

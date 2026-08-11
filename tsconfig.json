@@ -1,0 +1,29 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@storage/*": ["storage/*"],
+      "@ui/*": ["ui/*"]
+    }
+  },
+  "include": [
+    ".wxt/types",
+    "entrypoints",
+    "shared",
+    "storage",
+    "engine",
+    "ui",
+    "tests",
+    "types",
+    "uno.config.ts",
+    "wxt.config.ts",
+    "vitest.config.ts"
+  ]
+}

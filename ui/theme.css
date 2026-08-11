@@ -1,0 +1,281 @@
+/**
+ * Vizquo design tokens — brand system v2.
+ *
+ * Near-black surfaces, hairline borders, one controlled accent (#6E7BFF),
+ * system font stacks for UI + monospace for instrumentation (no third-party
+ * font CDNs — opening the panel must stay network-silent), restrained radius,
+ * and motion in the 120/180/280ms family. Light mode is its own palette
+ * (never an inversion of dark). Everything is a CSS custom property — theming
+ * is a token swap, never a component rewrite.
+ *
+ * `data-theme` is resolved to 'light' | 'dark' at runtime (auto follows
+ * prefers-color-scheme via JS, see App.tsx) so the palette is defined once.
+ */
+
+:root {
+  /* ---- Type ---- (system stacks — no webfont CDN, network-silent by design) */
+  --vq-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --vq-font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  --vq-font-display: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* ---- Spacing scale (4px base) ---- */
+  --vq-space-1: 4px;
+  --vq-space-2: 8px;
+  --vq-space-3: 12px;
+  --vq-space-4: 16px;
+  --vq-space-5: 24px;
+  --vq-space-6: 32px;
+  --vq-space-7: 48px;
+  --vq-space-8: 64px;
+
+  /* ---- Radii (restrained: 4 technical · 6 inputs · 8 cards · 12 dialogs) ---- */
+  --vq-radius-sm: 4px;
+  --vq-radius-md: 6px;
+  --vq-radius-lg: 8px;
+  --vq-radius-xl: 12px;
+  --vq-radius-2xl: 16px;
+
+  /* ---- Type scale (11 technical → 20 heading) ---- */
+  --vq-text-xs: 11px;
+  --vq-text-sm: 12px;
+  --vq-text-base: 14px;
+  --vq-text-lg: 15px;
+  --vq-text-xl: 17px;
+  --vq-text-2xl: 20px;
+  --vq-leading-tight: 1.3;
+  --vq-leading-normal: 1.5;
+
+  /* ---- Motion (fast / standard / slow — prefers-reduced-motion honored) ---- */
+  --vq-ease: cubic-bezier(0.2, 0, 0, 1);
+  --vq-duration-fast: 120ms;
+  --vq-duration-base: 180ms;
+  --vq-duration-slow: 280ms;
+
+  /* ---- Layout ---- */
+  --vq-header-height: 46px;
+  --vq-nav-height: 42px;
+
+  /* ---- Shadows (borders first, shadows second) ---- */
+  --vq-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.06);
+  --vq-shadow-md: 0 8px 24px -8px rgb(0 0 0 / 0.18);
+  --vq-shadow-lg: 0 12px 32px rgb(0 0 0 / 0.24);
+
+  /* Accessibility override (Settings → Font scale) */
+  --vq-font-scale: 1;
+
+  /* ---- Light palette (its own values, not an inverted dark) ---- */
+  --vq-bg: #f8f9fb;
+  --vq-bg-raised: #ffffff;
+  --vq-bg-elevated: #fdfdfe;
+  --vq-bg-sunken: #f1f2f5;
+  --vq-bg-hover: #eef0f3;
+  --vq-fg: #111318;
+  --vq-fg-muted: #555b66;
+  --vq-fg-subtle: #7a808b;
+  --vq-border: rgb(15 18 24 / 0.1);
+  --vq-border-strong: rgb(15 18 24 / 0.18);
+  --vq-accent: #5a66e6;
+  --vq-accent-hover: #4c57cf;
+  --vq-accent-active: #4149b8;
+  --vq-accent-fg: #ffffff;
+  --vq-accent-soft: rgb(90 102 230 / 0.12);
+  --vq-accent-border: rgb(90 102 230 / 0.35);
+  --vq-success: #2f9e63;
+  --vq-success-fg: #1d7a49;
+  --vq-success-soft: rgb(47 158 99 / 0.12);
+  --vq-warning: #b9892e;
+  --vq-warning-fg: #91691a;
+  --vq-warning-soft: rgb(185 137 46 / 0.12);
+  --vq-danger: #d94857;
+  --vq-danger-fg: #b32f3d;
+  --vq-danger-soft: rgb(217 72 87 / 0.1);
+  --vq-danger-hover: #c23a49;
+  --vq-info: #2e7fd9;
+  --vq-info-fg: #1f63b0;
+  --vq-info-soft: rgb(46 127 217 / 0.1);
+  --vq-ring: #5a66e6;
+  --vq-code-bg: #eef0f3;
+  --vq-overlay: rgb(9 10 13 / 0.45);
+  --vq-grid-line: rgb(15 18 24 / 0.05);
+}
+
+[data-theme="dark"] {
+  /* ---- Dark palette: near-black + one accent ---- */
+  --vq-bg: #090a0d;
+  --vq-bg-raised: #101217;
+  --vq-bg-elevated: #14171d;
+  --vq-bg-sunken: #0c0e12;
+  --vq-bg-hover: #181b22;
+  --vq-fg: #f5f7fa;
+  --vq-fg-muted: #b4bac5;
+  --vq-fg-subtle: #747b87;
+  --vq-border: rgb(255 255 255 / 0.08);
+  --vq-border-strong: rgb(255 255 255 / 0.14);
+  --vq-accent: #6e7bff;
+  --vq-accent-hover: #7c86ff;
+  --vq-accent-active: #5c68f2;
+  --vq-accent-fg: #0b0c10;
+  --vq-accent-soft: rgb(110 123 255 / 0.14);
+  --vq-accent-border: rgb(110 123 255 / 0.4);
+  --vq-success: #45d483;
+  --vq-success-fg: #8ce8b4;
+  --vq-success-soft: rgb(69 212 131 / 0.14);
+  --vq-warning: #e7b75b;
+  --vq-warning-fg: #f2d08a;
+  --vq-warning-soft: rgb(231 183 91 / 0.14);
+  --vq-danger: #f06b73;
+  --vq-danger-fg: #f79aa0;
+  --vq-danger-soft: rgb(240 107 115 / 0.14);
+  --vq-danger-hover: #e2555e;
+  --vq-info: #5aa9ff;
+  --vq-info-fg: #9cc9ff;
+  --vq-info-soft: rgb(90 169 255 / 0.14);
+  --vq-ring: #6e7bff;
+  --vq-code-bg: #14171d;
+  --vq-overlay: rgb(0 0 0 / 0.65);
+  --vq-grid-line: rgb(255 255 255 / 0.04);
+  --vq-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --vq-shadow-md: 0 8px 24px -8px rgb(0 0 0 / 0.55);
+  --vq-shadow-lg: 0 12px 32px rgb(0 0 0 / 0.6);
+}
+
+/* ---- High-contrast variant (Settings → Accessibility) ---- */
+[data-high-contrast="true"] {
+  --vq-border: var(--vq-fg-muted);
+  --vq-border-strong: var(--vq-fg);
+  --vq-fg-muted: var(--vq-fg);
+  --vq-fg-subtle: var(--vq-fg-muted);
+}
+
+/* ---- Reduced motion (OS-level, always honored) ---- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- Reduced motion (in-app override, Settings → Accessibility) ---- */
+[data-reduced-motion="true"] *,
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ---- Base ---- */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--vq-font-sans);
+  font-size: calc(var(--vq-text-base) * var(--vq-font-scale));
+  line-height: var(--vq-leading-normal);
+  color: var(--vq-fg);
+  background: var(--vq-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--vq-accent-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--vq-ring);
+  outline-offset: 1px;
+}
+
+/* Tabular numerals for anything measurement-like */
+.vq-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ */
+/* Instrumentation layer (brand signature)                            */
+/* ------------------------------------------------------------------ */
+
+/* Sparse technical grid — empty states, brand surfaces, never busy. */
+.vq-grid {
+  background-image:
+    linear-gradient(var(--vq-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--vq-grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Technical metadata label — monospace, uppercase, muted. */
+.vq-meta {
+  font-family: var(--vq-font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--vq-fg-subtle);
+}
+
+/* Process scanning line — used by loading states ("instrumentation"). */
+.vq-scanline {
+  position: relative;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 1px;
+  background: var(--vq-accent-soft);
+}
+.vq-scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--vq-accent), transparent);
+  animation: vq-scan 1.4s var(--vq-ease) infinite;
+}
+@keyframes vq-scan {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(350%);
+  }
+}
+
+/*
+ * Note: the inspect-mode crosshair cursor is NOT defined here — the content
+ * script runs in the page's world where this stylesheet doesn't exist, so
+ * InspectController injects a tiny `cursor: crosshair` rule for the duration
+ * of the session (brand system §14.3).
+ */
+
+/* ---- Slim scrollbars ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--vq-border-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--vq-border-strong);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}

@@ -1,0 +1,74 @@
+name: CI
+
+# Free tier: runs on GitHub-hosted runners (compile, lint, unit tests, builds,
+# and E2E). The E2E job needs a display for the persistent Chromium context, so
+# it runs under xvfb — Playwright's standard CI setup for headed extensions.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  check:
+    name: Typecheck · lint · unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx wxt prepare
+      - name: Typecheck
+        run: npm run compile
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm run test
+
+  build:
+    name: Build (Chrome + Firefox)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Build Chrome (MV3)
+        run: npm run build
+      - name: Build Firefox (MV3 — AMO-ready)
+        run: npm run build:firefox:mv3
+      - name: Upload Chrome build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-mv3
+          path: .output/chrome-mv3
+
+  e2e:
+    name: E2E (Playwright, Chrome)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+      - name: Build extension
+        run: npm run build
+      - name: Run E2E smoke tests
+        run: xvfb-run -a npm run test:e2e
+      - name: Upload Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results/
