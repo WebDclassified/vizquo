@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.10.3 — Typography hierarchy fixes
+
+- **Fixed: the Typography section showed raw computed font stacks and split
+  one style into multiple rows.** The analysis grouped styles by the full
+  `font-family` string, so `jakarta, "jakarta Fallback", ui-sans-serif,
+  system-ui, …` (17 fallback entries) appeared verbatim in the panel, and
+  the same 14px body style became three rows when fallbacks differed. Styles
+  now group by the *visual* family (first concrete family), and the panel
+  shows the short name (`jakarta`). Verified against openrouter.ai: 15
+  noisy rows → 10 clean hierarchy rows.
+- **Typography counts only elements that actually render text.** Empty
+  containers inflated usage (525 "elements" for a style used by 85 text
+  nodes) and skewed the body anchor; text-bearing elements and form controls
+  are counted instead, so usage, confidence, and the hierarchy are honest.
+- **Line-height no longer splits styles**: line-height is contextual
+  (container-driven), not a style identity — variants collapse into one row
+  with the dominant representative.
+- **Cleaner hierarchy**: single-use non-heading rows (one-off spans) are
+  dropped as noise, while rare display/heading text is always kept. The body
+  anchor prefers the most-used style in the 12–20px band, so small-text-heavy
+  pages no longer mislabel their real body as a heading.
+- **Fonts panel shows every weight**: one token per family × weight, so a
+  family rendered at 450/500/600/700 shows all four specimens (previously
+  only the dominant weight).
+- **Alignment pass**: type-style rows use a proper fixed badge column
+  (84px, grows under font-scale), top-aligned rows, and a two-line font
+  family card (name + actions, then weights/count/source) — no more cramped
+  one-line headers or wrapped badges.
+- Added diagnostics: `scripts/diag-typography.mjs` (samples a real page) +
+  `scripts/verify-typography-panel.mjs` (loads the built extension, scans a
+  live site, verifies the panel end-to-end).
+
 ## 0.10.2 — Grant-access fix
 
 - **Fixed: "Grant access to this tab" never connected the inspector on

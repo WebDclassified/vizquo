@@ -25,7 +25,7 @@ WXT (web-extension toolkit, v0.21) · SolidJS · UnoCSS · TypeScript (strict) �
 Dexie/IndexedDB · Comlink worker · Vitest + Playwright · Biome
 
 ### Current version
-- `package.json` version: **0.10.2** ✅ (in sync with CHANGELOG).
+- `package.json` version: **0.10.3** ✅ (in sync with CHANGELOG).
 
 ---
 
@@ -41,7 +41,7 @@ Last full validation (all passed):
 | Production build (Chrome MV3) | `npm run build` | ✅ keyless, 1.24 MB |
 | Firefox AMO-ready build | `npm run build:firefox:mv3` | ✅ |
 | E2E (Playwright, 7 tests) | `npm run test:e2e` | ✅ 7/7, zero console errors |
-| Store ZIP | `npm run zip` | ✅ `vizquo-0.10.2-chrome.zip` (~411 kB, 42 files) |
+| Store ZIP | `npm run zip` | ✅ `vizquo-0.10.3-chrome.zip` (~411 kB, 42 files) |
 
 Manifest permissions (minimal, all used): `storage`, `sidePanel`, `downloads`,
 `contextMenus`, `activeTab`. No unused `scripting`/`offscreen` (WXT auto-adds

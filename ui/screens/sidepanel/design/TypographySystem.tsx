@@ -21,6 +21,7 @@ function FontFamilyCard(props: { family: string; tokens: FontToken[] }) {
   const [favorite, setFavorite] = createSignal(false);
   const weightSet = () => weightsOf(props.tokens);
   const first = () => props.tokens[0];
+  const totalUsage = () => props.tokens.reduce((acc, t) => acc + t.usageCount, 0);
 
   onMount(() => {
     const token = first();
@@ -45,46 +46,53 @@ function FontFamilyCard(props: { family: string; tokens: FontToken[] }) {
   const stack = () => `'${props.family}', sans-serif`;
 
   return (
-    <div class="group rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg)] p-2 transition-colors hover:border-[var(--vq-border-strong)]">
-      <div class="mb-1.5 flex items-center gap-2">
-        <span class="min-w-0 flex-1 truncate text-[12px] font-semibold text-[var(--vq-fg)]">
-          {props.family}
-        </span>
-        <span class="shrink-0 text-[10.5px] text-[var(--vq-fg-subtle)]">
-          {weightSet().join(' · ')} · {countLabel(props.tokens[0]?.usageCount ?? 0, 'element')}
-        </span>
-        <span class="shrink-0 rounded-[var(--vq-radius-sm)] bg-[var(--vq-bg-sunken)] px-1.5 py-0.5 text-[10px] text-[var(--vq-fg-muted)]">
-          {first() ? FONT_SOURCE_LABEL[first()?.value.source ?? 'unknown'] : ''}
-        </span>
-        <button
-          type="button"
-          class="vq-icon-btn h-6 w-6 shrink-0"
-          aria-label={
-            favorite()
-              ? `Remove ${props.family} from favorites`
-              : `Add ${props.family} to favorites`
-          }
-          title="Add to Favorites collection"
-          onClick={() => void toggle()}
-        >
-          <Star
-            class={`size-3.5 ${favorite() ? 'fill-[var(--vq-accent)] text-[var(--vq-accent)]' : ''}`}
-          />
-        </button>
-        <button
-          type="button"
-          class="vq-icon-btn h-6 w-6 shrink-0 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
-          aria-label={`Copy font stack for ${props.family}`}
-          title="Copy the font stack"
-          onClick={() => void copyText(stack(), 'Font stack')}
-        >
-          <Copy class="size-3.5" />
-        </button>
+    <div class="group rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg)] p-2.5 transition-colors hover:border-[var(--vq-border-strong)]">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0 flex-1">
+          <div class="truncate text-[12px] font-semibold text-[var(--vq-fg)]">{props.family}</div>
+          <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <span class="shrink-0 rounded-[var(--vq-radius-sm)] bg-[var(--vq-bg-sunken)] px-1.5 py-0.5 text-[10px] text-[var(--vq-fg-muted)]">
+              {weightSet().join(' · ')}
+            </span>
+            <span class="shrink-0 text-[10.5px] text-[var(--vq-fg-subtle)]">
+              {countLabel(totalUsage(), 'text element')}
+            </span>
+            <span class="shrink-0 rounded-[var(--vq-radius-sm)] bg-[var(--vq-bg-sunken)] px-1.5 py-0.5 text-[10px] text-[var(--vq-fg-muted)]">
+              {first() ? FONT_SOURCE_LABEL[first()?.value.source ?? 'unknown'] : ''}
+            </span>
+          </div>
+        </div>
+        <div class="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            class="vq-icon-btn h-6 w-6"
+            aria-label={
+              favorite()
+                ? `Remove ${props.family} from favorites`
+                : `Add ${props.family} to favorites`
+            }
+            title="Add to Favorites collection"
+            onClick={() => void toggle()}
+          >
+            <Star
+              class={`size-3.5 ${favorite() ? 'fill-[var(--vq-accent)] text-[var(--vq-accent)]' : ''}`}
+            />
+          </button>
+          <button
+            type="button"
+            class="vq-icon-btn h-6 w-6 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+            aria-label={`Copy font stack for ${props.family}`}
+            title="Copy the font stack"
+            onClick={() => void copyText(stack(), 'Font stack')}
+          >
+            <Copy class="size-3.5" />
+          </button>
+        </div>
       </div>
       <For each={weightSet()}>
         {(weight) => (
           <p
-            class="truncate text-[15px] leading-snug text-[var(--vq-fg)]"
+            class="mt-1.5 truncate text-[15px] leading-snug text-[var(--vq-fg)]"
             style={{
               'font-family': `'${props.family}', sans-serif`,
               'font-weight': String(weight),
@@ -132,8 +140,8 @@ export function TypographySystem() {
           <div class="flex flex-col gap-1">
             <For each={ordered()}>
               {(style) => (
-                <div class="group flex items-center gap-2 rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg)] px-2 py-1.5">
-                  <div class="w-14 shrink-0">
+                <div class="flex items-start gap-2.5 rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg)] px-2.5 py-2 transition-colors hover:border-[var(--vq-border-strong)]">
+                  <div class="min-w-[84px] shrink-0 pt-0.5">
                     <ConfidenceBadge
                       level={style.confidence.level}
                       score={style.confidence.score}
@@ -142,24 +150,28 @@ export function TypographySystem() {
                   </div>
                   <div class="min-w-0 flex-1">
                     <div class="flex items-baseline gap-1.5">
-                      <span class="text-[10.5px] font-semibold tracking-wider text-[var(--vq-fg-muted)] uppercase">
+                      <span class="shrink-0 text-[10px] font-semibold tracking-wider text-[var(--vq-fg-muted)] uppercase">
                         {TYPE_ROLE_META[style.role].label}
                       </span>
-                      <span class="truncate text-[12px] font-medium text-[var(--vq-fg)]">
+                      <span class="truncate text-[12.5px] font-medium text-[var(--vq-fg)]">
                         {style.family}
                       </span>
                     </div>
-                    <p class="truncate text-[10.5px] text-[var(--vq-fg-subtle)]">
+                    <p class="mt-0.5 truncate text-[10.5px] text-[var(--vq-fg-subtle)]">
                       {style.size} · {style.weight}
-                      {style.lineHeight ? ` · lh ${style.lineHeight}` : ''}
-                      {style.letterSpacing ? ` · ls ${style.letterSpacing}` : ''}
+                      {style.lineHeight && style.lineHeight !== 'normal'
+                        ? ` · lh ${style.lineHeight}`
+                        : ''}
+                      {style.letterSpacing && style.letterSpacing !== 'normal'
+                        ? ` · ls ${style.letterSpacing}`
+                        : ''}
                       <Show when={style.textTransform && style.textTransform !== 'none'}>
                         {' · '}
                         {style.textTransform}
                       </Show>
                     </p>
                   </div>
-                  <span class="shrink-0 text-[10.5px] text-[var(--vq-fg-subtle)]">
+                  <span class="shrink-0 pt-0.5 text-[10.5px] text-[var(--vq-fg-subtle)]">
                     {countLabel(style.usageCount, 'element')}
                   </span>
                 </div>

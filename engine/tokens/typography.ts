@@ -52,11 +52,14 @@ export function parsePx(value: string): number | null {
 }
 
 function styleKey(s: ElementSample): string {
+  // Group by the VISUAL family (firstFamily), not the raw computed stack —
+  // the same font with a different fallback list is the same style. Line
+  // height is contextual (container-driven), not a style identity, so it's
+  // collapsed into the representative variant instead of splitting rows.
   return [
-    s.fontFamily,
+    firstFamily(s.fontFamily),
     s.fontSize,
     s.fontWeight,
-    s.lineHeight,
     s.letterSpacing,
     s.textTransform,
   ].join('|');
@@ -67,6 +70,8 @@ interface StyleGroup {
   count: number;
   refs: ElementRef[];
   buttonShare: number;
+  /** lineHeight → variant — the dominant one becomes the representative. */
+  variants: Map<string, { sample: ElementSample; count: number }>;
 }
 
 function classifyRole(
@@ -118,14 +123,25 @@ export function analyzeTypography(
   samples: ElementSample[],
   fontSources: { family: string; source: FontSource; weight: number }[],
 ): TypographyAnalysis {
-  // 1. Group distinct styles.
+  // Typography counts only elements that actually render text (or are
+  // text-bearing controls) — invisible containers inflate usage and skew
+  // the body anchor. textLength is 0 for wrappers whose text lives in
+  // child elements; the leaf text node carries the same inherited style.
+  const textSamples = samples.filter((s) => s.textLength > 0 || s.isButton || s.isFormControl);
+  // 1. Group distinct styles (visual family × size × weight × tracking × transform).
   const groupsByKey = new Map<string, StyleGroup>();
-  for (const sample of samples) {
+  for (const sample of textSamples) {
     if (!sample.fontSize || !sample.fontFamily) continue;
     const key = styleKey(sample);
     const existing = groupsByKey.get(key);
     if (existing) {
       existing.count += 1;
+      const variant = existing.variants.get(sample.lineHeight) ?? {
+        sample,
+        count: 0,
+      };
+      variant.count += 1;
+      existing.variants.set(sample.lineHeight, variant);
       if (existing.refs.length < MAX_USAGE_REFS) existing.refs.push(sample.ref);
       if (sample.isButton) existing.buttonShare += 1;
     } else {
@@ -134,6 +150,7 @@ export function analyzeTypography(
         count: 1,
         refs: [sample.ref],
         buttonShare: sample.isButton ? 1 : 0,
+        variants: new Map([[sample.lineHeight, { sample, count: 1 }]]),
       });
     }
   }
@@ -142,13 +159,32 @@ export function analyzeTypography(
   if (groups.length === 0) {
     return { typeStyles: [], fonts: [], cached: false };
   }
-  for (const g of groups) g.buttonShare = g.buttonShare / Math.max(1, g.count);
+  for (const g of groups) {
+    g.buttonShare = g.buttonShare / Math.max(1, g.count);
+    // Representative sample = the dominant line-height variant.
+    const dominant = [...g.variants.values()].sort((a, b) => b.count - a.count)[0];
+    if (dominant) g.sample = dominant.sample;
+  }
 
-  // 2. Body anchor: the most-used style (fallback: closest to 16px).
-  const body = groups[0];
+  // 2. Body anchor: the most-used style, preferring one in the typical body
+  //    size band (12–20px) so dense pages dominated by small text don't
+  //    misanchor the hierarchy (a 12px-heavy dashboard must not promote its
+  //    real 16px body to h3). Falls back to the absolute most-used.
+  const body =
+    groups.find((g) => {
+      const size = parsePx(g.sample.fontSize) ?? 0;
+      return size >= 12 && size <= 20;
+    }) ?? groups[0];
   const bodySize = body ? (parsePx(body.sample.fontSize) ?? 16) : 16;
 
-  const typeStyles: TypeStyleUsage[] = groups.map((group) => {
+  // 3. Keep the hierarchy clean: drop single-use non-heading rows (one-off
+  //    spans/inline tweaks are noise), but always keep the body anchor and
+  //    any genuinely large display/heading text even when rare.
+  const visible = groups.filter(
+    (g) => g.count > 1 || g === body || (parsePx(g.sample.fontSize) ?? bodySize) >= bodySize * 1.1,
+  );
+
+  const typeStyles: TypeStyleUsage[] = visible.map((group) => {
     const { role, basis } = classifyRole(group, bodySize, body?.count ?? 1);
     const confidence: Confidence = {
       level: 'inferred',
@@ -157,7 +193,8 @@ export function analyzeTypography(
     };
     const s = group.sample;
     return {
-      family: s.fontFamily,
+      // Short visual family — the raw computed stack is noise in the panel.
+      family: firstFamily(s.fontFamily),
       size: s.fontSize,
       weight: s.fontWeight,
       lineHeight: s.lineHeight,
@@ -170,38 +207,34 @@ export function analyzeTypography(
     };
   });
 
-  // 3. Font tokens: per family, dominant weight, source from the snapshot.
-  const families = new Map<
-    string,
-    { count: number; weights: Map<string, number>; refs: ElementRef[] }
-  >();
-  for (const sample of samples) {
+  // 4. Font tokens: one token per (family × weight) — a family that renders
+  //    at 450/500/600 shows all three specimens, not just the dominant one.
+  const byFamilyWeight = new Map<string, { count: number; refs: ElementRef[] }>();
+  for (const sample of textSamples) {
     const family = firstFamily(sample.fontFamily);
     if (!family) continue;
-    const entry = families.get(family);
+    const weight = Number.parseInt(sample.fontWeight, 10) || 400;
+    const key = `${family}::${weight}`;
+    const entry = byFamilyWeight.get(key);
     if (entry) {
       entry.count += 1;
-      entry.weights.set(sample.fontWeight, (entry.weights.get(sample.fontWeight) ?? 0) + 1);
       if (entry.refs.length < MAX_USAGE_REFS) entry.refs.push(sample.ref);
     } else {
-      families.set(family, {
-        count: 1,
-        weights: new Map([[sample.fontWeight, 1]]),
-        refs: [sample.ref],
-      });
+      byFamilyWeight.set(key, { count: 1, refs: [sample.ref] });
     }
   }
   const sourceByFamily = new Map<string, FontSource>();
   for (const f of fontSources) {
     sourceByFamily.set(f.family, f.source);
   }
-  const fonts: FontToken[] = [...families.entries()]
-    .map(([family, entry]) => {
-      const dominantWeight =
-        [...entry.weights.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '400';
+  const fonts: FontToken[] = [...byFamilyWeight.entries()]
+    .map(([key, entry]) => {
+      const sep = key.lastIndexOf('::');
+      const family = key.slice(0, sep);
+      const weight = key.slice(sep + 2);
       const source = sourceByFamily.get(family) ?? 'unknown';
       return {
-        value: { family, source, weight: Number.parseInt(dominantWeight, 10) || 400 },
+        value: { family, source, weight: Number.parseInt(weight, 10) || 400 },
         confidence: { level: 'detected' } as Confidence,
         usageCount: entry.count,
         usedBy: entry.refs,
