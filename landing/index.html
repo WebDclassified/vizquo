@@ -484,6 +484,17 @@
   .note-box b { color: var(--fg); }
   .note-box .ic { font-size: 18px; flex-shrink: 0; }
 
+  /* ---------- OS selector ---------- */
+  .os-selector { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; border: none; padding: 0; margin-top: 0; min-inline-size: 0; }
+  .os-label { font-size: 13px; color: var(--dim); font-weight: 600; padding: 0; margin: 0; }
+  .os-tabs { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 4px; gap: 4px; }
+  .os-tab { background: none; border: none; color: var(--muted); font-size: 13.5px; font-weight: 600; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: color .15s ease, background .15s ease; }
+  .os-tab:hover { color: var(--fg); }
+  .os-tab.on { background: var(--grad); color: #0a0b14; }
+  .os-note { font-size: 12.5px; color: var(--dim); }
+  tr.os-current { background: rgba(110,123,255,.08); }
+  tr.os-current td:first-child::after { content: " — you're on this"; font-size: 11px; font-weight: 700; color: var(--teal); }
+
   /* ---------- Install guide ---------- */
   .pipeline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
   .pipe-step {
@@ -837,6 +848,15 @@
     <p class="kicker">Download</p>
     <h2 class="reveal">Pick your browser</h2>
     <p class="lead reveal" data-delay="1">Your browser is detected and highlighted below. Grab the right package and follow the setup guide — about a minute, no account needed.</p>
+    <fieldset class="os-selector reveal">
+      <legend class="os-label">You're on</legend>
+      <div class="os-tabs">
+        <button type="button" class="os-tab" aria-pressed="false" data-os="win">🪟 Windows</button>
+        <button type="button" class="os-tab" aria-pressed="false" data-os="mac">🍎 macOS</button>
+        <button type="button" class="os-tab" aria-pressed="false" data-os="linux">🐧 Linux</button>
+      </div>
+      <span class="os-note" id="osNote"></span>
+    </fieldset>
     <div class="browser-grid">
       <div class="browser reveal" data-browser="chrome">
         <span class="badge">Your browser</span>
@@ -1001,7 +1021,9 @@
         <tr><td>Chrome · Edge · Brave · Opera · Vivaldi · Arc</td><td>Chromium 110+ (Manifest V3)</td><td class="ok">✓ Supported</td></tr>
         <tr><td>Firefox</td><td>Firefox 121+ (Manifest V3)</td><td class="ok">✓ Supported</td></tr>
         <tr><td>Safari</td><td>macOS build (Xcode) + Apple Developer Program</td><td class="wip">◷ Coming soon</td></tr>
-        <tr><td>Operating systems</td><td>Windows 10+, macOS 12+, any Linux desktop</td><td class="ok">✓ All supported</td></tr>
+        <tr data-os="win"><td>Windows</td><td>Windows 10+</td><td class="ok">✓ Supported</td></tr>
+        <tr data-os="mac"><td>macOS</td><td>macOS 12+</td><td class="ok">✓ Supported</td></tr>
+        <tr data-os="linux"><td>Linux</td><td>Any desktop distribution</td><td class="ok">✓ Supported</td></tr>
         <tr><td>Mobile (Android / iOS)</td><td>—</td><td class="no">✗ Not yet</td></tr>
         <tr><td>Account / sign-up</td><td>None — fully local</td><td class="ok">✓ None</td></tr>
       </table>
@@ -1151,13 +1173,50 @@
     }
   })();
 
-  // ================= OS hint in setup guide =================
-  (function osHint() {
+  // ================= OS detection + selector =================
+  (function osSelect() {
     const ua = navigator.userAgent || '';
-    let hint = 'right-click → Extract All';
-    if (/Mac/i.test(ua)) hint = 'double-click the ZIP (macOS unzips it automatically)';
-    else if (/Linux/i.test(ua)) hint = 'run: unzip vizquo-0.10.1-chrome.zip';
-    document.querySelectorAll('.unzip-hint').forEach((el) => { el.textContent = hint; });
+    let detected = 'win';
+    if (/Mac/i.test(ua)) detected = 'mac';
+    else if (/Linux/i.test(ua)) detected = 'linux';
+
+    const labels = { win: 'Windows', mac: 'macOS', linux: 'Linux' };
+    const hints = {
+      win: 'right-click → Extract All',
+      mac: 'double-click the ZIP (macOS unzips it automatically)',
+      linux: 'unzip the file in a terminal (e.g. unzip vizquo-0.10.1-chrome.zip)'
+    };
+
+    let current = detected;
+    try {
+      const saved = localStorage.getItem('vizquo-os');
+      if (saved === 'win' || saved === 'mac' || saved === 'linux') current = saved;
+    } catch (e) {
+      // storage unavailable — use detection only
+    }
+
+    function apply(os) {
+      current = os;
+      document.querySelectorAll('.os-tab').forEach((t) => {
+        const on = t.getAttribute('data-os') === os;
+        t.classList.toggle('on', on);
+        t.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      document.querySelectorAll('.unzip-hint').forEach((el) => { el.textContent = hints[os]; });
+      document.querySelectorAll('tr[data-os]').forEach((tr) => {
+        tr.classList.toggle('os-current', tr.getAttribute('data-os') === os);
+      });
+      const note = document.getElementById('osNote');
+      if (note) {
+        note.textContent = os === detected ? `Detected: ${labels[os]}` : `Showing: ${labels[os]}`;
+      }
+      try { localStorage.setItem('vizquo-os', os); } catch (e) { /* storage unavailable */ }
+    }
+
+    document.querySelectorAll('.os-tab').forEach((t) => {
+      t.addEventListener('click', () => apply(t.getAttribute('data-os')));
+    });
+    apply(current);
   })();
 
   // ================= Download animation =================
