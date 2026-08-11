@@ -892,7 +892,7 @@
       btn.addEventListener('click', (e) => {
         if (btn.classList.contains('busy')) return;
         const href = btn.getAttribute('href');
-        if (!href || !href.startsWith('downloads/')) return; // only ZIPs animate
+        if (!href?.startsWith('downloads/')) return; // only ZIPs animate
         e.preventDefault();
         btn.classList.add('busy');
         start(btn, href);
