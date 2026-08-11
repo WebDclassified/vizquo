@@ -65,14 +65,30 @@ Version: 0.10.1 · Build ZIPs: `.output/vizquo-0.10.1-chrome.zip` (Chrome + Edge
 - Remote code: **No** — all code is bundled; the analysis worker loads bundled code from the package.
 - Privacy policy URL: see `deploy-kit/privacy-policy.md` (host it — GitHub Pages, or any static host — and paste the URL).
 
-## 8. Visual assets checklist
+## 8. Visual assets — already generated ✨
 
-- Extension icon: already in the ZIP (`icon/128.png`).
-- Small promo tile: **440×280 PNG** — create one (logo on the near-black surface with the tagline).
-- Screenshots (1280×800 or 640×400, up to 5): capture the real side panel —
-  1. Design Overview on a real site
-  2. Element Inspector (locked element with computed styles)
-  3. Assets panel
-  4. Screenshot studio
-  5. Library / Design DNA
-- Marquee promo tile (optional): 1400×560.
+All assets are produced by two scripts in this repo (no design tools needed):
+
+- `node scripts/generate-promo-tile.mjs` → `deploy-kit/promo/`
+- `node scripts/capture-screenshots.mjs` (run after `npm run build`) →
+  `deploy-kit/screenshots/` — captures the REAL panel connected to a styled
+  sample site, with a real Design DNA scan (a `CAPTURE_WIDTH=420` run adds
+  authentic side-panel-width shots)
+
+| Asset | File | Notes |
+|---|---|---|
+| Extension icon | `icon/128.png` (in the ZIP) | already in the package |
+| Small promo tile (440×280) | `deploy-kit/promo/promo-440x280.png` | required |
+| Marquee (1400×560, optional) | `deploy-kit/promo/marquee-1400x560.png` | featured placement |
+| Screenshot — Design overview | `deploy-kit/screenshots/design-overview.png` | 1280×800, post-scan |
+| Screenshot — Inspector | `deploy-kit/screenshots/inspector.png` | locked element |
+| Screenshot — Assets | `deploy-kit/screenshots/assets.png` | extracted assets |
+| Screenshot — Create | `deploy-kit/screenshots/create.png` | studio + export |
+| Screenshot — Library | `deploy-kit/screenshots/library.png` | collections/history |
+| Screenshot — Settings | `deploy-kit/screenshots/settings.png` | settings + diagnostics |
+| Screenshot — Command palette | `deploy-kit/screenshots/command-palette.png` | Ctrl/⌘K |
+
+Screenshot pick: upload 5 of the 1280×800 shots (Chrome Web Store limit). The
+`@420` variants show the authentic narrow side-panel layout for your website
+or socials. Resize to 640×400 only if a store asks — the 1280×800 files are
+already compliant.

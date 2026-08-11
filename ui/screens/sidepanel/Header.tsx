@@ -39,7 +39,7 @@ export function Header() {
         <Logo class="h-[21px] w-auto shrink-0 text-[var(--vq-fg)]" />
       </div>
 
-      <div class="flex items-center gap-0.5">
+      <div class="flex shrink-0 items-center gap-0.5">
         <IconButton
           id="vq-palette-btn"
           icon={Command}

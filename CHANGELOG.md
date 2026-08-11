@@ -15,6 +15,11 @@
   Google or any other third party. Fully offline by default.
 - **Overlay idempotency**: repeated overlay pushes no longer re-create
   identical overlays (defensive fix for rapid inspect/hover churn).
+- **Responsive side panel**: the header tab row now scrolls horizontally at
+  real side-panel widths (280–420px) instead of overflowing — the
+  Designer/Engineer toggle was previously crushed to a sliver with its labels
+  clipped off-screen. Verified: zero horizontal overflow on every panel at
+  360px and 420px.
 - **E2E hostile-page suite**: a 13k-node adversarial fixture now runs in CI —
   full scan completes, a malicious SVG canary never executes, the network
   stays silent, and CANCEL always beats START in a race.
