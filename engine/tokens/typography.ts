@@ -70,9 +70,26 @@ interface StyleGroup {
   count: number;
   refs: ElementRef[];
   buttonShare: number;
+  /** Usages on prose-like tags (p/li/td/…) — body-anchor evidence. */
+  proseCount: number;
   /** lineHeight → variant — the dominant one becomes the representative. */
   variants: Map<string, { sample: ElementSample; count: number }>;
 }
+
+/** Tags whose text is almost always running prose, not labels/controls. */
+const PROSE_TAGS = new Set([
+  'p',
+  'li',
+  'td',
+  'dd',
+  'dt',
+  'article',
+  'section',
+  'main',
+  'blockquote',
+  'pre',
+  'figcaption',
+]);
 
 function classifyRole(
   group: StyleGroup,
@@ -144,12 +161,14 @@ export function analyzeTypography(
       existing.variants.set(sample.lineHeight, variant);
       if (existing.refs.length < MAX_USAGE_REFS) existing.refs.push(sample.ref);
       if (sample.isButton) existing.buttonShare += 1;
+      if (PROSE_TAGS.has(sample.tag)) existing.proseCount += 1;
     } else {
       groupsByKey.set(key, {
         sample,
         count: 1,
         refs: [sample.ref],
         buttonShare: sample.isButton ? 1 : 0,
+        proseCount: PROSE_TAGS.has(sample.tag) ? 1 : 0,
         variants: new Map([[sample.lineHeight, { sample, count: 1 }]]),
       });
     }
@@ -166,15 +185,38 @@ export function analyzeTypography(
     if (dominant) g.sample = dominant.sample;
   }
 
-  // 2. Body anchor: the most-used style, preferring one in the typical body
-  //    size band (12–20px) so dense pages dominated by small text don't
-  //    misanchor the hierarchy (a 12px-heavy dashboard must not promote its
-  //    real 16px body to h3). Falls back to the absolute most-used.
-  const body =
-    groups.find((g) => {
-      const size = parsePx(g.sample.fontSize) ?? 0;
-      return size >= 12 && size <= 20;
-    }) ?? groups[0];
+  // 2. Body anchor — layered so extreme pages still classify sanely:
+  //    a) restrict to the typical body size band (12–20px) so small-text-heavy
+  //       pages (dashboards, HN's 9.3px subtext) don't anchor the hierarchy on
+  //       labels and promote the real body to a heading;
+  //    b) within the band, prefer a style with real prose evidence (p/li/td/…)
+  //       when it is within a third of the band's most-used count — a 14px
+  //       paragraph beat by a wall of 12px nav labels is still the body;
+  //    c) when nothing is in the band (all-text is tiny or huge), fall back to
+  //       the size closest to the median of all text sizes — the statistical
+  //       center of the page's typography, not an arbitrary 16px.
+  const inBand = groups.filter((g) => {
+    const size = parsePx(g.sample.fontSize) ?? 0;
+    return size >= 12 && size <= 20;
+  });
+  const bandMostUsed = inBand[0];
+  const proseCandidate = inBand.find(
+    (g) =>
+      g.proseCount / Math.max(1, g.count) >= 0.5 && g.count >= (bandMostUsed?.count ?? 0) * (1 / 3),
+  );
+  let body = proseCandidate ?? bandMostUsed;
+  if (!body) {
+    const sizes = groups
+      .map((g) => parsePx(g.sample.fontSize) ?? 0)
+      .filter((n) => n > 0)
+      .sort((a, b) => a - b);
+    const median = sizes[Math.floor(sizes.length / 2)] ?? 0;
+    body = [...groups].sort(
+      (a, b) =>
+        Math.abs((parsePx(a.sample.fontSize) ?? 0) - median) -
+        Math.abs((parsePx(b.sample.fontSize) ?? 0) - median),
+    )[0];
+  }
   const bodySize = body ? (parsePx(body.sample.fontSize) ?? 16) : 16;
 
   // 3. Keep the hierarchy clean: drop single-use non-heading rows (one-off

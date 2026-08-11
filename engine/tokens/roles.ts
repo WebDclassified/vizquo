@@ -49,6 +49,14 @@ function buildStats(usages: ColorUsage[]): RoleStats {
   let forms = 0;
   let hint: RoleStats['hint'] = null;
   const lengths: number[] = [];
+  // Count hint matches per role so a single error-hinted element among a
+  // thousand usages can't reclassify a whole token (white x1000 must not
+  // become "error" because one .error class happened to use it).
+  const hintCounts: Record<'success' | 'warning' | 'error', number> = {
+    success: 0,
+    warning: 0,
+    error: 0,
+  };
   for (const u of usages) {
     if (u.kind === 'text') {
       text += 1;
@@ -59,7 +67,21 @@ function buildStats(usages: ColorUsage[]): RoleStats {
     if (u.isLink) links += 1;
     if (u.isFormControl) forms += 1;
     const h = hintFor(u);
-    if (h && hint === null) hint = h;
+    if (h) hintCounts[h] += 1;
+  }
+  // The dominant hint wins only when it is representative of the token
+  // (at least a third of usages, and a couple of elements at minimum).
+  const total = usages.length;
+  const dominant = (Object.entries(hintCounts) as [RoleStats['hint'], number][]).sort(
+    (a, b) => b[1] - a[1],
+  )[0];
+  if (
+    dominant &&
+    dominant[0] != null &&
+    dominant[1] >= 2 &&
+    dominant[1] / Math.max(1, total) >= 0.3
+  ) {
+    hint = dominant[0];
   }
   lengths.sort((a, b) => a - b);
   const median = lengths.length > 0 ? (lengths[Math.floor(lengths.length / 2)] ?? 0) : 0;

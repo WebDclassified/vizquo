@@ -697,6 +697,14 @@ export interface ElementSample {
   color: string;
   backgroundColor: string;
   borderColor: string;
+  /** Border-top width — distinguishes a real border from the browser's
+   *  currentcolor default on borderless elements (border-color computes to
+   *  currentcolor even when no border exists; without this the scan would
+   *  count every borderless element as "using" a border color). */
+  borderTopWidth: string;
+  /** Border-bottom width — covers dividers and underline borders that only
+   *  exist on the bottom edge (the border-color check accepts either side). */
+  borderBottomWidth: string;
   borderRadius: string;
   boxShadow: string;
   fontFamily: string;

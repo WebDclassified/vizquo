@@ -32,15 +32,32 @@ describe('classifyColorRoles (Section 7.3)', () => {
     expect(bg!.value.hex).toBe('#ffffff');
   });
 
-  it('flags semantic hint colors (error/success) from class names', () => {
-    const samples = [sample({ color: '#d93025', classes: ['alert-error'], textLength: 12 })];
+  it('flags semantic hint colors (error/success) from class names when representative', () => {
+    const samples = [
+      sample({ color: '#d93025', classes: ['alert-error'], textLength: 12 }),
+      sample({ color: '#d93025', classes: ['alert-error'], textLength: 9 }),
+      sample({ color: '#d93025', classes: ['alert-error'], textLength: 14 }),
+    ];
     const tokens = classifyColorRoles(clusterColors(samples), samples);
     const error = tokens.find((t) => t.value.role === 'error');
     expect(error).toBeDefined();
   });
 
+  it('does not let one hint element reclassify a dominant color', () => {
+    // White used 1,000× as page background/text must not become "error"
+    // because one element with an .error class happens to use it.
+    const samples = [
+      ...Array.from({ length: 20 }, () => sample({ backgroundColor: '#ffffff' })),
+      sample({ backgroundColor: '#ffffff', classes: ['bg-error'], textLength: 8 }),
+    ];
+    const tokens = classifyColorRoles(clusterColors(samples), samples);
+    const white = tokens.find((t) => t.value.hex === '#ffffff');
+    expect(white).toBeDefined();
+    expect(white!.value.role).not.toBe('error');
+  });
+
   it('never fabricates a role when there is no signal', () => {
-    const samples = [sample({ borderColor: '#0f766e' })];
+    const samples = [sample({ borderColor: '#0f766e', borderTopWidth: '1px' })];
     const tokens = classifyColorRoles(clusterColors(samples), samples);
     for (const token of tokens) {
       expect(['border', 'accent', 'unknown']).toContain(token.value.role);

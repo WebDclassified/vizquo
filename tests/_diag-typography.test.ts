@@ -34,6 +34,8 @@ if (!existsSync(SAMPLES_PATH)) {
         color: '',
         backgroundColor: '',
         borderColor: '',
+        borderTopWidth: '0px',
+        borderBottomWidth: '0px',
         borderRadius: '',
         boxShadow: '',
         fontFamily: s.fontFamily,
@@ -51,7 +53,7 @@ if (!existsSync(SAMPLES_PATH)) {
         isButton: s.isButton,
         isLink: s.isLink,
         isFormControl: s.isFormControl,
-      }) as ElementSample,
+      }) as unknown as ElementSample,
   );
 
   const { typeStyles, fonts } = analyzeTypography(samples, []);

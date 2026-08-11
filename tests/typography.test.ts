@@ -155,6 +155,64 @@ describe('analyzeTypography (Sections 7.3/7.9)', () => {
     expect(sizes).not.toContain('12px');
   });
 
+  it('prefers a prose-tagged style as body over a wall of tiny nav labels', () => {
+    // 12px nav/label text dominates by count, but the 16px paragraphs are the
+    // real body — the anchor must not promote them to a heading.
+    const samples = [
+      ...Array.from({ length: 12 }, () =>
+        textSample({
+          tag: 'span',
+          fontFamily: 'Inter, sans-serif',
+          fontSize: '12px',
+          fontWeight: '500',
+        }),
+      ),
+      ...Array.from({ length: 5 }, () =>
+        textSample({
+          tag: 'p',
+          fontFamily: 'Inter, sans-serif',
+          fontSize: '16px',
+          fontWeight: '400',
+        }),
+      ),
+    ];
+    const { typeStyles } = analyzeTypography(samples, []);
+    const body = typeStyles.find((s) => s.role === 'body');
+    expect(body).toBeDefined();
+    expect(body!.size).toBe('16px');
+    // The 12px nav text is demoted to small/caption, never the body.
+    const twelve = typeStyles.find((s) => s.size === '12px');
+    expect(['small', 'caption']).toContain(twelve?.role);
+  });
+
+  it('anchors on the median size when all text is outside the 12–20px band', () => {
+    const samples = [
+      ...Array.from({ length: 10 }, () =>
+        textSample({
+          fontFamily: 'Inter, sans-serif',
+          fontSize: '9.3px',
+          fontWeight: '400',
+          tag: 'td',
+        }),
+      ),
+      ...Array.from({ length: 6 }, () =>
+        textSample({
+          fontFamily: 'Inter, sans-serif',
+          fontSize: '13.3px',
+          fontWeight: '400',
+          tag: 'td',
+        }),
+      ),
+    ];
+    const { typeStyles } = analyzeTypography(samples, []);
+    // Median of [9.3 ×10, 13.3 ×6] is 13.3 → body anchors there, 9.3 becomes
+    // caption instead of the reverse.
+    const body = typeStyles.find((s) => s.role === 'body');
+    expect(body).toBeDefined();
+    expect(body!.size).toBe('13.3px');
+    expect(typeStyles.some((s) => s.size === '9.3px' && s.role === 'caption')).toBe(true);
+  });
+
   it('emits one font token per family × weight with short family names', () => {
     const { fonts } = analyzeTypography(
       [

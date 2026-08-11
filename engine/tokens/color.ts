@@ -85,7 +85,17 @@ export function oklchDistanceBetween(a: NormalizedColor, b: NormalizedColor): nu
   );
 }
 
-/** Collect every color usage from the scan samples (text/bg/border). */
+/**
+ * Collect every color usage from the scan samples (text/bg/border).
+ *
+ * Text color is only collected from elements that actually render text (or
+ * are text-bearing controls) — the leaf text node carries the same computed
+ * color, so nothing is lost, but empty containers that merely *inherit* the
+ * page's text color stop inflating text usages (a page with 1,000 divs no
+ * longer reports its body text color with 1,000+ usages, which also skewed
+ * role classification). Background and border colors still count on every
+ * element: a wrapper's padding/background is a real design decision.
+ */
 export function collectColorUsages(samples: ElementSample[]): ColorUsage[] {
   const usages: ColorUsage[] = [];
   for (const s of samples) {
@@ -102,9 +112,17 @@ export function collectColorUsages(samples: ElementSample[]): ColorUsage[] {
       textLength: s.textLength,
       opacity: Number.isFinite(opacity) ? opacity : 1,
     };
-    if (s.color) usages.push({ ...base, value: s.color, kind: 'text' });
+    const rendersText = s.textLength > 0 || s.isButton || s.isFormControl;
+    if (s.color && rendersText) usages.push({ ...base, value: s.color, kind: 'text' });
     if (s.backgroundColor) usages.push({ ...base, value: s.backgroundColor, kind: 'background' });
-    if (s.borderColor && s.borderColor !== 'rgba(0, 0, 0, 0)') {
+    // A real border only: border-color computes to currentcolor on borderless
+    // elements, so without the width check every element would "use" the
+    // page's text color as a border. Either edge counts — bottom-border
+    // dividers (cards, table rows) are borders too.
+    const hasBorder =
+      (s.borderTopWidth !== '0px' && s.borderTopWidth !== '') ||
+      (s.borderBottomWidth !== '0px' && s.borderBottomWidth !== '');
+    if (s.borderColor && hasBorder && s.borderColor !== 'rgba(0, 0, 0, 0)') {
       usages.push({ ...base, value: s.borderColor, kind: 'border' });
     }
   }

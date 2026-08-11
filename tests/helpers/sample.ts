@@ -19,6 +19,8 @@ export function sample(overrides: Partial<ElementSample> = {}): ElementSample {
     color: '',
     backgroundColor: '',
     borderColor: '',
+    borderTopWidth: '0px',
+    borderBottomWidth: '0px',
     borderRadius: '',
     boxShadow: '',
     fontFamily: '',

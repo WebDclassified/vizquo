@@ -162,6 +162,13 @@ function sampleOf(el: Element, style: CSSStyleDeclaration): ElementSample {
     color: style.color,
     backgroundColor: style.backgroundColor,
     borderColor: style.borderTopColor,
+    // Border widths: the browser reports a border-color of currentcolor even
+    // when no border exists — this flag is what separates real borders from
+    // the default (borderColor alone would count every borderless element as
+    // using the page's text color as a border). Both top and bottom are
+    // sampled so bottom-border dividers (cards, table rows) count too.
+    borderTopWidth: style.borderTopWidth,
+    borderBottomWidth: style.borderBottomWidth,
     borderRadius: style.borderRadius,
     boxShadow: style.boxShadow,
     fontFamily: style.fontFamily,

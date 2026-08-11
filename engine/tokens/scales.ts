@@ -22,7 +22,9 @@ function collectPxValues(
     if (!parts) continue;
     for (const raw of parts.split(/\s+/)) {
       const n = parsePx(raw);
-      if (n == null || n === 0) continue;
+      // 0 and negatives are excluded: zero is the absence of spacing, and
+      // negative margins are layout hacks, not scale values.
+      if (n == null || n <= 0) continue;
       const rounded = Math.round(n * 10) / 10;
       const entry = byValue.get(rounded);
       if (entry) {
@@ -33,14 +35,19 @@ function collectPxValues(
       }
     }
   }
-  return [...byValue.entries()]
-    .map(([value, entry]) => ({
-      value,
-      confidence: { level: 'detected' as const },
-      usageCount: entry.count,
-      usedBy: entry.refs,
-    }))
-    .sort((a, b) => b.usageCount - a.usageCount);
+  return (
+    [...byValue.entries()]
+      // Single-use values are one-off layout tweaks, not a scale — the panel
+      // and the consistency score should only see recurring values.
+      .filter(([, entry]) => entry.count > 1)
+      .map(([value, entry]) => ({
+        value,
+        confidence: { level: 'detected' as const },
+        usageCount: entry.count,
+        usedBy: entry.refs,
+      }))
+      .sort((a, b) => b.usageCount - a.usageCount)
+  );
 }
 
 interface Cluster {

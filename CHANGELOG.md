@@ -1,6 +1,39 @@
 # Changelog
 
-## 0.10.3 — Typography hierarchy fixes
+## 0.10.4 — Color & spacing fixes, hardened body anchor
+
+- **Color counts were inflated by inherited text color.** The text color was
+  collected from *every* element, even empty containers that merely inherit
+  the page's color — a page with 1,000 divs reported its body text color with
+  1,000+ usages (openrouter.ai: `#03080a14` at 1,293 uses for 646 elements;
+  GitHub: white at 1,833). Text color now counts only on elements that
+  actually render text (or are buttons/form controls), so usage, confidence,
+  and role classification are honest (GitHub white 1,833 → 191).
+- **Borderless elements were counted as "using" a border color.** Chrome
+  computes `border-color` to `currentcolor` even when no border exists, so
+  every borderless element inflated the page's text color as a border usage.
+  A real border now requires a non-zero border width — and both top *and*
+  bottom edges are sampled, so bottom-border dividers (cards, table rows)
+  still count. Verified: GitHub link-blue went from `border x160` to the
+  correct `primary x30`.
+- **A single hint class could poison a whole color token.** One `.error`
+  element among a thousand usages reclassified the token's role to `error`.
+  Semantic hints (error/warning/success) now only win when they are
+  representative — at least two usages and a meaningful share of the token.
+- **Spacing scale de-noised**: negative margins (layout hacks) and
+  single-use one-off values (e.g. a lone 425px) no longer appear as scale
+  steps; real sub-pixel tokens that recur (GitHub's 2.1px/3.5px Primer
+  values) are preserved.
+- **Body-anchor hardening (typography)**: the body style anchor now prefers
+  the 12–20px band, weights tag-based prose evidence (`p`, `article`, `li`,
+  `blockquote`) when several candidates are in the band, and falls back to
+  the median size on all-tiny pages. Verified across openrouter.ai (body
+  14px), GitHub (body 14px), and Hacker News (body 13.33px with 9.33px
+  subtext staying `caption`) — the classic small-text misanchor case.
+- Diagnostics now sample the same fields as the real scan
+  (`scripts/diag-design.mjs`) and run the real engines against real sites.
+
+## 0.10.4 — Typography hierarchy fixes
 
 - **Fixed: the Typography section showed raw computed font stacks and split
   one style into multiple rows.** The analysis grouped styles by the full
