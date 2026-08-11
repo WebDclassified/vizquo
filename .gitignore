@@ -5,7 +5,8 @@ node_modules
 *.log
 .vscode
 .idea
-test-resultsplaywright-report
+test-results
+playwright-report
 blob-report
 .env
 .env.*

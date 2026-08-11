@@ -152,7 +152,10 @@ async function dismissOnboarding(panel) {
 async function waitForScanDone(panel, timeoutMs = 120_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const scanning = await panel.getByText(/scanning/i).count().catch(() => 0);
+    const scanning = await panel
+      .getByText(/scanning/i)
+      .count()
+      .catch(() => 0);
     if (scanning === 0) {
       await panel.waitForTimeout(2_500);
       step('scan done — panel settled');
