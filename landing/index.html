@@ -4,534 +4,813 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vizquo — Inspect any webpage. Extract its design system.</title>
-<meta name="description" content="Vizquo is a free, local-first browser extension that inspects any webpage and extracts its design system — colors, typography, spacing, components, and assets. Optional AI. Download for Chrome, Edge, Firefox, Brave, Opera, or any Chromium browser. Safari coming soon.">
+<meta name="description" content="Vizquo is a free, local-first browser extension that inspects any webpage and extracts its design system — colors, typography, spacing, components, and assets. Optional AI. Works in Chrome, Edge, Firefox, Brave, Opera, Vivaldi, and Arc. Safari coming soon.">
+<meta name="theme-color" content="#07080d">
+<meta property="og:title" content="Vizquo — Inspect any webpage. Extract its design system.">
+<meta property="og:description" content="The design-intelligence layer for your browser. Free, local-first, private by default. Optional AI.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://webdclassified.github.io/vizquo/landing/">
+<meta property="og:image" content="https://webdclassified.github.io/vizquo/deploy-kit/screenshots/design-overview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="../public/icon/32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Vizquo",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Windows, macOS, Linux",
+  "browserRequirements": "Chrome, Edge, Firefox, Brave, Opera, Vivaldi or Arc (Manifest V3)",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free, local-first browser extension that inspects any webpage and extracts its design system: colors, typography, spacing, components and assets. Optional AI, private by default."
+}
+</script>
 <style>
   :root {
-    --bg: #0a0b0f;
-    --surface: #101217;
-    --raised: #14171d;
-    --border: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.16);
-    --fg: #f2f3f5;
-    --muted: #9aa0ab;
+    --bg: #07080d;
+    --bg-2: #0b0d15;
+    --surface: rgba(255, 255, 255, 0.035);
+    --surface-2: rgba(255, 255, 255, 0.06);
+    --border: rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(255, 255, 255, 0.18);
+    --fg: #f4f6fb;
+    --muted: #a0a7b8;
+    --dim: #6f7689;
     --indigo: #6e7bff;
-    --indigo-strong: #5563f0;
-    --indigo-soft: rgba(110, 123, 255, 0.14);
+    --indigo-2: #8b7bff;
     --teal: #3fe0c8;
-    --teal-soft: rgba(63, 224, 200, 0.12);
+    --violet: #a78bfa;
     --green: #3ecf8e;
-    --radius: 14px;
+    --amber: #ffc857;
+    --red: #ff7b7b;
+    --grad: linear-gradient(120deg, #6e7bff 0%, #a78bfa 50%, #3fe0c8 100%);
+    --grad-soft: linear-gradient(120deg, rgba(110,123,255,.16), rgba(167,139,250,.12), rgba(63,224,200,.14));
+    --radius: 16px;
     --radius-sm: 10px;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
-    --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-display: "Sora", "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 16px 48px rgba(0,0,0,.45);
+    --shadow-glow: 0 0 0 1px rgba(110,123,255,.35), 0 16px 48px rgba(110,123,255,.22);
   }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; scroll-padding-top: 74px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 86px; }
   body {
-    margin: 0;
-    font-family: var(--font);
+    font-family: var(--font-sans);
     background: var(--bg);
     color: var(--fg);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
-  a { color: var(--indigo); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  ::selection { background: rgba(110,123,255,.35); color: #fff; }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  button { font-family: inherit; }
+  :focus-visible { outline: 2px solid var(--indigo); outline-offset: 3px; border-radius: 4px; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
   .kicker {
-    color: var(--teal); font-size: 12.5px; font-weight: 700;
-    letter-spacing: 0.09em; text-transform: uppercase; margin: 0 0 10px;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--teal); margin: 0 0 14px;
   }
-  h2 { font-size: clamp(26px, 3.4vw, 36px); letter-spacing: -0.02em; margin: 0 0 12px; font-weight: 800; }
-  .lead { color: var(--muted); max-width: 660px; margin: 0 0 38px; font-size: 16px; }
-  section { padding: 72px 0; }
-  section.alt { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .kicker::before { content: ""; width: 22px; height: 1.5px; background: var(--grad); border-radius: 2px; }
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 42px);
+    letter-spacing: -0.03em;
+    line-height: 1.12;
+    font-weight: 800;
+    margin: 0 0 16px;
+  }
+  .lead { color: var(--muted); font-size: 17px; max-width: 640px; margin: 0 0 44px; }
+  section { padding: clamp(84px, 9vw, 128px) 0; position: relative; }
 
-  /* ---- Header ---- */
+  /* ---------- Scroll progress ---------- */
+  .progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; z-index: 60; background: var(--grad); }
+
+  /* ---------- Header ---------- */
   header {
-    position: sticky; top: 0; z-index: 30;
-    backdrop-filter: blur(12px);
-    background: rgba(10, 11, 15, 0.82);
-    border-bottom: 1px solid var(--border);
-    transition: box-shadow 0.2s ease;
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(18px);
+    background: rgba(7, 8, 13, 0.75);
+    border-bottom: 1px solid transparent;
+    transition: border-color .25s ease, box-shadow .25s ease;
   }
-  header.scrolled { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); }
-  .nav { display: flex; align-items: center; justify-content: space-between; height: 62px; gap: 16px; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; color: var(--fg); }
-  .brand img { width: 26px; height: 26px; border-radius: 7px; }
-  .nav-links { display: flex; align-items: center; gap: 20px; font-size: 14px; }
-  .nav-links a { color: var(--muted); }
-  .nav-links a:hover { color: var(--fg); text-decoration: none; }
+  header.scrolled { border-color: var(--border); box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 20px; }
+  .brand { display: flex; align-items: center; gap: 11px; font-family: var(--font-display); font-weight: 800; font-size: 18px; letter-spacing: -0.02em; }
+  .brand img { width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 2px 12px rgba(110,123,255,.4); }
+  .nav-links { display: flex; align-items: center; gap: 26px; font-size: 14.5px; font-weight: 500; color: var(--muted); }
+  .nav-links a { position: relative; transition: color .15s ease; }
+  .nav-links a:hover { color: var(--fg); }
   .nav-links a.active { color: var(--fg); font-weight: 600; }
-  .nav-cta {
-    background: linear-gradient(135deg, var(--indigo), var(--indigo-strong));
-    color: #fff; font-weight: 700; font-size: 13.5px;
-    padding: 8px 16px; border-radius: 9px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  .nav-links a.active::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -8px; height: 2px; border-radius: 2px; background: var(--grad);
   }
-  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(110, 123, 255, 0.4); text-decoration: none; }
-  @media (max-width: 720px) { .nav-links { display: none; } }
+  .nav-cta {
+    background: var(--grad);
+    color: #0a0b14; font-weight: 700; font-size: 14px;
+    padding: 9px 20px; border-radius: 10px;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(110,123,255,.45); }
+  .nav-burger { display: none; background: none; border: 1px solid var(--border); color: var(--fg); width: 42px; height: 42px; border-radius: 10px; font-size: 20px; cursor: pointer; }
+  @media (max-width: 860px) {
+    .nav-burger { display: block; }
+    .nav-links {
+      position: absolute; top: 72px; left: 0; right: 0;
+      flex-direction: column; align-items: flex-start; gap: 4px;
+      background: rgba(9, 10, 17, 0.98); border-bottom: 1px solid var(--border);
+      padding: 14px 24px 20px;
+      display: none;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a { padding: 11px 0; font-size: 16px; width: 100%; }
+    .nav-links a.active::after { display: none; }
+    .nav-cta { margin-left: auto; }
+  }
 
-  /* ---- Hero ---- */
+  /* ---------- Hero ---------- */
   .hero {
     position: relative;
-    padding: 92px 0 80px;
+    padding: clamp(84px, 11vw, 148px) 0 clamp(60px, 7vw, 100px);
     text-align: center;
     overflow: hidden;
   }
-  .hero::before {
-    content: "";
-    position: absolute; inset: 0;
-    background:
-      radial-gradient(640px 320px at 18% 0%, rgba(110, 123, 255, 0.2), transparent 62%),
-      radial-gradient(640px 320px at 82% 0%, rgba(63, 224, 200, 0.13), transparent 62%);
-    pointer-events: none;
+  .hero-bg { position: absolute; inset: 0; pointer-events: none; }
+  .hero-bg .blob {
+    position: absolute; border-radius: 50%; filter: blur(110px); opacity: .55;
+    animation: drift 22s ease-in-out infinite alternate;
+  }
+  .hero-bg .blob.b1 { width: 620px; height: 620px; left: -180px; top: -220px; background: radial-gradient(circle, rgba(110,123,255,.5), transparent 65%); }
+  .hero-bg .blob.b2 { width: 540px; height: 540px; right: -160px; top: -140px; background: radial-gradient(circle, rgba(63,224,200,.34), transparent 65%); animation-delay: -8s; }
+  .hero-bg .blob.b3 { width: 480px; height: 480px; left: 32%; bottom: -300px; background: radial-gradient(circle, rgba(167,139,250,.3), transparent 65%); animation-delay: -14s; }
+  @keyframes drift {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(60px, 40px) scale(1.12); }
+  }
+  .hero-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 20%, #000 30%, transparent 75%);
   }
   .hero .wrap { position: relative; }
-  .hero-logo { width: 84px; height: 84px; margin: 0 auto 20px; display: block; border-radius: 22px; box-shadow: var(--shadow); }
-  .hero h1 {
-    font-size: clamp(34px, 5.2vw, 58px);
-    line-height: 1.06;
-    letter-spacing: -0.03em;
-    margin: 0 0 18px;
-    font-weight: 800;
+  .hero-pill {
+    display: inline-flex; align-items: center; gap: 9px;
+    border: 1px solid var(--border); border-radius: 999px;
+    background: var(--surface); padding: 7px 16px;
+    font-size: 13px; color: var(--muted); font-weight: 500;
+    margin-bottom: 28px;
   }
-  .hero-badges span { display: inline-flex; align-items: center; gap: 7px; }
-  .hero h1 span {
-    background: linear-gradient(90deg, var(--indigo), var(--teal));
+  .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(62,207,142,.6); animation: pulse 2.2s infinite; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(62,207,142,.5); }
+    70% { box-shadow: 0 0 0 9px rgba(62,207,142,0); }
+    100% { box-shadow: 0 0 0 0 rgba(62,207,142,0); }
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1.04;
+    margin: 0 0 24px;
+  }
+  .hero h1 .grad {
+    background: var(--grad);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
   .hero .sub {
     color: var(--muted);
-    font-size: clamp(16px, 2vw, 19px);
-    max-width: 660px;
-    margin: 0 auto 34px;
+    font-size: clamp(16px, 1.9vw, 19px);
+    max-width: 640px;
+    margin: 0 auto 38px;
   }
   .hero-btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
   .btn-primary {
     display: inline-flex; align-items: center; gap: 10px;
-    background: linear-gradient(135deg, var(--indigo), var(--indigo-strong));
-    color: #fff; font-weight: 700; font-size: 16px;
-    padding: 14px 28px; border-radius: 12px;
-    box-shadow: 0 8px 28px rgba(110, 123, 255, 0.35);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    background: var(--grad);
+    color: #0a0b14; font-weight: 800; font-size: 16px;
+    padding: 15px 30px; border-radius: 13px;
+    position: relative; overflow: hidden;
+    transition: transform .18s ease, box-shadow .18s ease;
   }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(110, 123, 255, 0.5); text-decoration: none; }
+  .btn-primary::after {
+    content: ""; position: absolute; top: 0; left: -80%; width: 55%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
+    transform: skewX(-20deg);
+    transition: left .6s ease;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 38px rgba(110,123,255,.5); }
+  .btn-primary:hover::after { left: 130%; }
   .btn-ghost {
     display: inline-flex; align-items: center; gap: 8px;
-    color: var(--fg); font-weight: 600; font-size: 15px;
-    padding: 14px 22px; border-radius: 12px;
+    color: var(--fg); font-weight: 600; font-size: 15.5px;
+    padding: 15px 24px; border-radius: 13px;
     border: 1px solid var(--border-strong);
-    background: rgba(255, 255, 255, 0.03);
-    transition: border-color 0.15s ease, background 0.15s ease;
-  }
-  .btn-ghost:hover { border-color: var(--indigo); background: var(--indigo-soft); text-decoration: none; }
-  .hero-note { margin-top: 16px; color: var(--muted); font-size: 13.5px; }
-  .hero-note b { color: var(--fg); }
-  .hero-badges {
-    display: flex; justify-content: center; gap: 22px; margin-top: 34px;
-    font-size: 13px; color: var(--muted); flex-wrap: wrap;
-  }
-  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-  .dot.green { background: var(--green); box-shadow: 0 0 8px var(--green); }
-
-  /* ---- Steps ---- */
-  .steps-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-  @media (max-width: 900px) { .steps-row { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 520px) { .steps-row { grid-template-columns: 1fr; } }
-  .step {
-    background: var(--raised);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 22px;
-    position: relative;
-  }
-  .step .num {
-    position: absolute; top: 16px; right: 18px;
-    font-size: 34px; font-weight: 800; color: rgba(255, 255, 255, 0.06);
-    line-height: 1;
-  }
-  .step h3 { font-size: 15.5px; margin: 0 0 6px; }
-  .step p { font-size: 13.5px; color: var(--muted); margin: 0; }
-
-  /* ---- Screenshots ---- */
-  .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 6px; }
-  @media (max-width: 760px) { .shots { grid-template-columns: 1fr; } }
-  .shot {
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    overflow: hidden;
     background: var(--surface);
-    box-shadow: var(--shadow);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    transition: border-color .18s ease, background .18s ease, transform .18s ease;
   }
-  .shot:hover { transform: translateY(-4px); border-color: var(--border-strong); }
-  .shot img { width: 100%; display: block; }
-  .shot .cap { padding: 11px 14px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--border); }
-
-  /* ---- Features ---- */
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
-  .card {
-    background: var(--raised);
+  .btn-ghost:hover { border-color: var(--indigo); background: var(--grad-soft); transform: translateY(-2px); }
+  .hero-note { margin-top: 18px; color: var(--dim); font-size: 14px; }
+  .hero-note b { color: var(--muted); font-weight: 600; }
+  .hero-stats {
+    display: flex; justify-content: center; gap: 0;
+    margin: clamp(40px, 6vw, 64px) auto 0;
+    max-width: 880px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 22px;
-    transition: transform 0.15s ease, border-color 0.15s ease;
+    background: var(--surface);
+    backdrop-filter: blur(8px);
+    overflow: hidden;
   }
-  .card:hover { transform: translateY(-3px); border-color: var(--border-strong); }
-  .card .ic {
-    width: 40px; height: 40px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 19px; margin-bottom: 14px;
-    background: var(--indigo-soft); border: 1px solid rgba(110, 123, 255, 0.25);
-  }
-  .card.teal .ic { background: var(--teal-soft); border-color: rgba(63, 224, 200, 0.25); }
-  .card h3 { font-size: 16px; margin: 0 0 6px; }
-  .card p { font-size: 13.5px; color: var(--muted); margin: 0; }
+  .stat { flex: 1; padding: 22px 12px; border-left: 1px solid var(--border); }
+  .stat:first-child { border-left: none; }
+  .stat .v { font-family: var(--font-display); font-size: clamp(20px, 2.6vw, 28px); font-weight: 800; letter-spacing: -0.02em; }
+  .stat .v span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stat .l { font-size: 12.5px; color: var(--dim); margin-top: 2px; }
+  @media (max-width: 640px) { .hero-stats { flex-wrap: wrap; } .stat { flex: 1 1 50%; border-top: 1px solid var(--border); } .stat:nth-child(-n+2) { border-top: none; } .stat:nth-child(odd) { border-left: none; } }
 
-  /* ---- AI ---- */
-  .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+  /* ---------- Live demo ---------- */
+  .demo-section { background: radial-gradient(900px 500px at 50% 0%, rgba(110,123,255,.09), transparent 65%), var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .demo-head { text-align: center; }
+  .demo-head .lead { margin-left: auto; margin-right: auto; }
+  .demo-wrap { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 26px; align-items: stretch; }
+  @media (max-width: 920px) { .demo-wrap { grid-template-columns: 1fr; } }
+  .browser-frame {
+    border: 1px solid var(--border-strong); border-radius: 14px; overflow: hidden;
+    background: #0d0f18;
+    box-shadow: var(--shadow);
+  }
+  .browser-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px;
+    background: rgba(255,255,255,.04);
+    border-bottom: 1px solid var(--border);
+  }
+  .b-dot { width: 11px; height: 11px; border-radius: 50%; }
+  .b-dot.r { background: #ff5f57; } .b-dot.y { background: #febc2e; } .b-dot.g { background: #28c840; }
+  .b-url {
+    flex: 1; display: flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,.06); border: 1px solid var(--border);
+    border-radius: 8px; padding: 5px 12px;
+    font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+  }
+  .b-url svg { flex-shrink: 0; }
+  .b-live { font-size: 11px; font-weight: 700; color: var(--teal); letter-spacing: .05em; }
+  .mock-site {
+    position: relative; background: #f6f7fb; color: #10141f;
+    padding: 30px 34px 34px;
+    cursor: crosshair;
+    min-height: 420px;
+    transition: opacity .3s ease;
+  }
+  .mock-site::after {
+    content: "Hover anything to inspect it"; position: absolute; bottom: 12px; right: 16px;
+    font-size: 11px; color: #9aa3b5; background: rgba(255,255,255,.9);
+    border: 1px solid #e4e7f0; border-radius: 999px; padding: 4px 10px;
+    font-family: var(--font-mono); letter-spacing: .03em;
+    pointer-events: none;
+  }
+  .mock-nav { display: flex; align-items: center; gap: 18px; }
+  .mock-logo { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, #6e7bff, #a78bfa); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 13px; }
+  .mock-nav .m-links { display: flex; gap: 16px; flex: 1; }
+  .mock-nav .m-link { font-size: 12.5px; font-weight: 500; color: #5b6472; }
+  .mock-btn-sm { font-size: 12px; font-weight: 700; background: #10141f; color: #fff; border-radius: 8px; padding: 7px 14px; }
+  .mock-hero { margin-top: 34px; }
+  .mock-site button { font-family: inherit; text-align: inherit; }
+  .m-title { display: block; background: none; border: none; font-family: var(--font-display); font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.12; margin: 0 0 10px; color: inherit; padding: 0; cursor: inherit; }
+  .m-sub { display: block; background: none; border: none; font-size: 13.5px; color: #5b6472; max-width: 380px; margin: 0 0 18px; padding: 0; cursor: inherit; }
+  .mock-cta { display: inline-block; font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(120deg, #6e7bff, #8b7bff); border-radius: 10px; padding: 11px 20px; box-shadow: 0 8px 24px rgba(110,123,255,.35); border: none; cursor: inherit; }
+  .mock-badge { display: inline-block; margin-left: 12px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #0d9488; background: rgba(63,224,200,.14); border-radius: 999px; padding: 6px 12px; border: none; cursor: inherit; }
+  .mock-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 30px; }
+  @media (max-width: 520px) { .mock-cards { grid-template-columns: 1fr; } .mock-site { padding: 22px 20px 40px; } }
+  .mock-card { background: #fff; border: 1px solid #e7eaf2; border-radius: 14px; padding: 18px; box-shadow: 0 6px 20px rgba(16,20,31,.06); text-align: left; cursor: inherit; }
+  .mock-card .dot { display: block; width: 26px; height: 26px; border-radius: 8px; margin-bottom: 12px; }
+  .mock-card.d1 .dot { background: #6e7bff; } .mock-card.d2 .dot { background: #3fe0c8; } .mock-card.d3 .dot { background: #a78bfa; }
+  .mock-card h4 { font-size: 13.5px; font-weight: 700; margin-bottom: 5px; }
+  .mock-card p { font-size: 11.5px; color: #8b93a3; margin: 0; }
+  /* highlight + inspect panel */
+  .inspect-zone { position: relative; }
+  .inspect-zone .i-item { position: relative; transition: outline-color .15s ease, background .15s ease; }
+  .inspect-zone .i-item.is-hover {
+    outline: 2px dashed #6e7bff; outline-offset: 3px; border-radius: 4px;
+    background: rgba(110,123,255,.06);
+  }
+  .inspect-zone .i-item.is-pin { outline: 2px solid #6e7bff; outline-offset: 3px; background: rgba(110,123,255,.08); }
+  .inspector {
+    display: flex; flex-direction: column;
+    border: 1px solid var(--border-strong); border-radius: 14px;
+    background: #0c0e16;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    min-height: 420px;
+  }
+  .insp-head { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+  .insp-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+  .insp-title .lock { color: var(--dim); }
+  .insp-head .pulse { width: 7px; height: 7px; }
+  .insp-tabs { display: flex; gap: 2px; padding: 8px 12px 0; border-bottom: 1px solid var(--border); }
+  .insp-tab { font-size: 12px; font-weight: 600; color: var(--dim); padding: 8px 12px; border-radius: 8px 8px 0 0; cursor: pointer; }
+  .insp-tab.on { color: var(--fg); background: rgba(255,255,255,.05); box-shadow: inset 0 -2px 0 var(--indigo); }
+  .insp-path { display: flex; align-items: center; gap: 6px; padding: 10px 16px; font-family: var(--font-mono); font-size: 11.5px; color: var(--teal); border-bottom: 1px solid var(--border); background: rgba(255,255,255,.02); }
+  .insp-path .crumb { color: var(--dim); }
+  .insp-body { flex: 1; padding: 10px 0; overflow-y: auto; }
+  .insp-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 16px; font-size: 12.5px; }
+  .insp-row .k { color: var(--dim); font-weight: 500; flex-shrink: 0; }
+  .insp-row .val { font-family: var(--font-mono); font-size: 11.5px; color: var(--fg); text-align: right; word-break: break-word; display: flex; align-items: center; gap: 7px; }
+  .swatch { width: 12px; height: 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,.25); flex-shrink: 0; }
+  .insp-foot { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--dim); }
+  .insp-foot .conf { color: var(--teal); font-weight: 700; }
+  .insp-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--dim); text-align: center; padding: 30px; }
+  .insp-empty .big { font-size: 30px; opacity: .6; }
+  .insp-empty p { font-size: 12.5px; max-width: 210px; }
+
+  /* ---------- Steps ---------- */
+  .steps-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .steps-row { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .steps-row { grid-template-columns: 1fr; } }
+  .step {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 26px 22px 22px; position: relative; overflow: hidden;
+    transition: transform .2s ease, border-color .2s ease;
+  }
+  .step:hover { transform: translateY(-4px); border-color: var(--border-strong); }
+  .step .num {
+    font-family: var(--font-display); font-size: 54px; font-weight: 800; line-height: 1;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+    opacity: .9; display: block; margin-bottom: 16px;
+  }
+  .step h3 { font-size: 16px; font-weight: 700; margin-bottom: 7px; }
+  .step p { font-size: 13.5px; color: var(--muted); margin: 0; }
+  .step .tagline { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); margin-bottom: 10px; }
+
+  /* ---------- Features ---------- */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 920px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  .glow-card {
+    position: relative;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 26px 24px;
+    overflow: hidden;
+    transition: transform .2s ease, border-color .2s ease;
+  }
+  .glow-card::before {
+    content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .3s ease;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(110,123,255,.14), transparent 45%);
+    pointer-events: none;
+  }
+  .glow-card:hover { transform: translateY(-4px); border-color: var(--border-strong); }
+  .glow-card:hover::before { opacity: 1; }
+  .glow-card .ic {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--grad-soft); border: 1px solid rgba(110,123,255,.3);
+    margin-bottom: 18px; color: var(--indigo);
+  }
+  .glow-card .ic svg { width: 22px; height: 22px; }
+  .glow-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 7px; }
+  .glow-card p { font-size: 13.5px; color: var(--muted); margin: 0; }
+
+  /* ---------- Screenshots ---------- */
+  .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 800px) { .shots { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; } }
+  .shot {
+    border-radius: 14px; border: 1px solid var(--border); overflow: hidden;
+    background: var(--bg-2); box-shadow: var(--shadow);
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .shot:hover { transform: translateY(-6px); border-color: var(--indigo); box-shadow: var(--shadow-glow); }
+  .shot img { width: 100%; }
+  .shot .cap { padding: 13px 16px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .shot .cap b { color: var(--fg); }
+  .shot-tag { margin-left: auto; font-size: 10.5px; font-weight: 700; color: var(--teal); letter-spacing: .06em; text-transform: uppercase; }
+
+  /* ---------- AI ---------- */
+  .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
   @media (max-width: 760px) { .ai-grid { grid-template-columns: 1fr; } }
   .ai-card {
-    background: var(--raised);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px 26px;
+    position: relative; overflow: hidden;
+    transition: transform .2s ease, border-color .2s ease;
   }
   .ai-card .tag {
-    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 3px 10px; border-radius: 999px; margin-bottom: 12px;
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 999px; margin-bottom: 14px;
   }
-  .ai-card .tag.cloud { background: var(--indigo-soft); color: #b9c0ff; border: 1px solid rgba(110, 123, 255, 0.35); }
-  .ai-card .tag.local { background: var(--teal-soft); color: #7fe9d6; border: 1px solid rgba(63, 224, 200, 0.35); }
-  .ai-card h3 { margin: 0 0 8px; font-size: 17px; }
-  .ai-card p { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+  .ai-card:hover { transform: translateY(-4px); border-color: var(--border-strong); }
+  .ai-card .tag.cloud { background: rgba(110,123,255,.14); color: #b9c0ff; border: 1px solid rgba(110,123,255,.4); }
+  .ai-card .tag.local { background: rgba(63,224,200,.12); color: #7fe9d6; border: 1px solid rgba(63,224,200,.4); }
+  .ai-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .ai-card p { color: var(--muted); font-size: 14px; margin-bottom: 14px; }
   .ai-card ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13.5px; }
   .ai-card li { margin-bottom: 6px; }
-  .ai-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 22px; margin: 0 0 22px; padding: 0; list-style: none; }
-  @media (max-width: 620px) { .ai-list { grid-template-columns: 1fr; } }
-  .ai-list li { display: flex; gap: 9px; align-items: flex-start; font-size: 14px; color: var(--muted); }
-  .ai-list .tick { color: var(--teal); font-weight: 800; }
-
-  /* ---- Download ---- */
-  #download { scroll-margin-top: 74px; }
-  .browser-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 26px; }
-  @media (max-width: 900px) { .browser-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 480px) { .browser-grid { grid-template-columns: 1fr; } }
-  .browser {
-    background: var(--raised);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    text-align: center;
-    position: relative;
-    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  .ai-card code, .faq code, .steps code {
+    font-family: var(--font-mono); font-size: 12px;
+    background: rgba(255,255,255,.07); border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 6px; color: #cfe0ff;
   }
-  .browser:hover { transform: translateY(-3px); border-color: var(--border-strong); }
-  .browser.detected { border-color: var(--indigo); box-shadow: 0 0 0 1px var(--indigo), 0 12px 32px rgba(110, 123, 255, 0.18); }
-  .browser .logo { font-size: 34px; line-height: 1; margin-bottom: 10px; }
-  .browser h4 { margin: 0 0 3px; font-size: 15px; }
-  .browser .ver { font-size: 12px; color: var(--muted); margin-bottom: 13px; }
+  .ai-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 24px; margin: 0 0 24px; padding: 0; list-style: none; }
+  @media (max-width: 620px) { .ai-list { grid-template-columns: 1fr; } }
+  .ai-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--muted); }
+  .ai-list .tick {
+    width: 19px; height: 19px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+    background: rgba(63,224,200,.15); color: var(--teal);
+    display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;
+  }
+  .consent-note {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--grad-soft); border: 1px solid rgba(110,123,255,.35);
+    border-radius: var(--radius-sm); padding: 16px 18px;
+    font-size: 14px; color: #c7ccf5;
+  }
+  .consent-note .shield { font-size: 20px; flex-shrink: 0; }
+
+  /* ---------- Download ---------- */
+  #download { background: radial-gradient(900px 420px at 50% 100%, rgba(167,139,250,.08), transparent 60%), var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .browser-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  @media (max-width: 980px) { .browser-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 460px) { .browser-grid { grid-template-columns: 1fr; } }
+  .browser {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px 18px; text-align: center; position: relative;
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .browser:hover { transform: translateY(-4px); border-color: var(--border-strong); }
+  .browser.detected { border-color: var(--indigo); box-shadow: 0 0 0 1px var(--indigo), 0 16px 40px rgba(110,123,255,.2); }
+  .browser .logo {
+    width: 46px; height: 46px; margin: 0 auto 12px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .browser h4 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .browser .ver { font-size: 12px; color: var(--dim); margin-bottom: 15px; }
   .browser .badge {
-    position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
-    background: var(--indigo); color: #fff; font-size: 10.5px; font-weight: 700;
-    padding: 3px 10px; border-radius: 999px; letter-spacing: 0.04em; text-transform: uppercase;
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    background: var(--grad); color: #0a0b14; font-size: 10.5px; font-weight: 800;
+    padding: 3px 11px; border-radius: 999px; letter-spacing: .04em; text-transform: uppercase;
     display: none; white-space: nowrap;
   }
   .browser.detected .badge { display: block; }
   .btn-dl {
-    display: inline-block; width: 100%;
-    padding: 10px 14px; border-radius: var(--radius-sm);
-    background: var(--indigo-soft); border: 1px solid rgba(110, 123, 255, 0.35);
-    color: #b9c0ff; font-weight: 700; font-size: 14px;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+    display: inline-block; width: 100%; cursor: pointer;
+    padding: 11px 14px; border-radius: var(--radius-sm);
+    background: rgba(110,123,255,.12); border: 1px solid rgba(110,123,255,.4);
+    color: #b9c0ff; font-weight: 700; font-size: 14px; font-family: inherit;
+    transition: background .18s ease, color .18s ease, transform .18s ease, opacity .18s ease;
   }
-  .btn-dl:hover { background: var(--indigo); color: #fff; transform: translateY(-1px); text-decoration: none; }
-  .btn-dl.teal { background: var(--teal-soft); border-color: rgba(63, 224, 200, 0.35); color: #7fe9d6; }
+  .btn-dl:hover { background: var(--indigo); color: #fff; transform: translateY(-1px); }
+  .btn-dl.teal { background: rgba(63,224,200,.1); border-color: rgba(63,224,200,.4); color: #7fe9d6; }
   .btn-dl.teal:hover { background: var(--teal); color: #07110f; }
-  .btn-dl.busy { opacity: 0.55; pointer-events: none; }
-  .browser .soon { font-size: 12.5px; color: var(--muted); padding: 11px 4px; }
-  .store-note {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--indigo-soft);
-    border: 1px dashed rgba(110, 123, 255, 0.4);
-    border-radius: var(--radius-sm);
-    padding: 14px 18px;
-    font-size: 14px; color: #c7ccf5;
+  .btn-dl.busy { opacity: .5; pointer-events: none; }
+  .btn-dl.soon { background: rgba(255,200,87,.08); border-color: rgba(255,200,87,.35); color: #ffd98a; }
+  .btn-dl.soon:hover { background: rgba(255,200,87,.18); color: #ffe3b3; }
+  .browser .soon-note { font-size: 12px; color: var(--dim); padding: 11px 4px; }
+  .note-box {
+    display: flex; align-items: flex-start; gap: 13px;
+    background: var(--surface); border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-sm); padding: 15px 18px;
+    font-size: 14px; color: var(--muted);
   }
+  .note-box b { color: var(--fg); }
+  .note-box .ic { font-size: 18px; flex-shrink: 0; }
 
-  /* ---- Install / setup guide ---- */
-  #install { scroll-margin-top: 74px; }
-  .pipeline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+  /* ---------- Install guide ---------- */
+  .pipeline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
   .pipe-step {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--raised); border: 1px solid var(--border);
-    border-radius: 999px; padding: 8px 16px; font-size: 13.5px; font-weight: 600;
+    display: flex; align-items: center; gap: 9px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 999px; padding: 9px 18px; font-size: 13.5px; font-weight: 600;
   }
   .pipe-step .n {
-    width: 20px; height: 20px; border-radius: 50%;
-    background: var(--indigo-soft); color: #b9c0ff;
+    width: 21px; height: 21px; border-radius: 50%;
+    background: var(--grad); color: #0a0b14;
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 800;
   }
-  .pipe-arrow { color: var(--muted); font-size: 15px; }
+  .pipe-arrow { color: var(--dim); font-size: 15px; }
   details {
-    background: var(--raised);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin-bottom: 12px;
-    overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 12px; overflow: hidden;
+    transition: border-color .2s ease;
   }
+  details[open] { border-color: var(--border-strong); }
   summary {
-    cursor: pointer;
-    padding: 16px 20px;
+    cursor: pointer; padding: 17px 20px;
     font-weight: 700; font-size: 15px;
-    list-style: none;
-    display: flex; align-items: center; gap: 10px;
+    list-style: none; display: flex; align-items: center; gap: 12px;
   }
   summary::-webkit-details-marker { display: none; }
-  summary::before { content: "▸"; color: var(--indigo); transition: transform 0.15s ease; }
-  details[open] summary::before { transform: rotate(90deg); }
-  .steps { padding: 0 20px 18px; }
+  summary .chev { color: var(--dim); transition: transform .2s ease; font-size: 12px; }
+  details[open] summary .chev { transform: rotate(90deg); color: var(--indigo); }
+  summary .b-ic { font-size: 18px; }
+  .steps { padding: 0 20px 20px; }
   .steps ol { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
-  .steps li { margin-bottom: 8px; }
-  .steps code {
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid var(--border);
-    padding: 1px 6px; border-radius: 6px;
-    font-size: 12.5px; color: #cfe0ff;
-  }
+  .steps li { margin-bottom: 9px; }
+  .steps b { color: var(--fg); }
   .warn {
-    background: rgba(255, 190, 90, 0.08);
-    border: 1px solid rgba(255, 190, 90, 0.25);
-    color: #ffd9a0;
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-size: 13px;
-    margin-top: 12px;
+    background: rgba(255,200,87,.07); border: 1px solid rgba(255,200,87,.28);
+    color: #ffd98a; border-radius: 10px; padding: 12px 14px;
+    font-size: 13px; margin-top: 14px; line-height: 1.55;
   }
 
-  /* ---- Requirements ---- */
+  /* ---------- Requirements ---------- */
+  .table-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); }
-  th { color: var(--muted); font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.05em; }
+  th, td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  th { color: var(--dim); font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em; background: var(--surface); }
   td:first-child { font-weight: 600; }
-  .ok { color: var(--teal); font-weight: 600; }
-  .no { color: #ff8b8b; font-weight: 600; }
-  .wip { color: #ffd9a0; font-weight: 600; }
+  td:nth-child(2) { color: var(--muted); }
+  .ok { color: var(--teal); font-weight: 700; }
+  .no { color: var(--red); font-weight: 700; }
+  .wip { color: var(--amber); font-weight: 700; }
 
-  /* ---- FAQ ---- */
+  /* ---------- FAQ ---------- */
   .faq details summary { font-weight: 600; font-size: 15px; }
-  .faq .steps { color: var(--muted); font-size: 14px; }
+  .faq .steps { color: var(--muted); font-size: 14px; line-height: 1.65; }
   .faq .steps p { margin: 0 0 8px; }
   .faq .steps b { color: var(--fg); }
 
-  /* ---- Final CTA ---- */
-  .cta-band { position: relative; text-align: center; padding: 80px 0; overflow: hidden; }
+  /* ---------- CTA band ---------- */
+  .cta-band { position: relative; text-align: center; overflow: hidden; }
   .cta-band::before {
-    content: "";
-    position: absolute; inset: 0;
-    background: radial-gradient(500px 260px at 50% 100%, rgba(110, 123, 255, 0.22), transparent 65%);
-    pointer-events: none;
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(620px 320px at 50% 120%, rgba(110,123,255,.3), transparent 70%);
   }
   .cta-band .wrap { position: relative; }
   .cta-band h2 { margin-bottom: 14px; }
-  .cta-band p { color: var(--muted); max-width: 560px; margin: 0 auto 28px; font-size: 16px; }
+  .cta-band p { color: var(--muted); max-width: 560px; margin: 0 auto 30px; font-size: 16.5px; }
 
-  /* ---- Footer ---- */
-  footer { border-top: 1px solid var(--border); padding: 30px 0 42px; color: var(--muted); font-size: 13px; }
-  .footer-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .footer-row a { color: var(--muted); margin-left: 16px; }
-  .footer-row a:hover { color: var(--fg); }
+  /* ---------- Footer ---------- */
+  footer { border-top: 1px solid var(--border); padding: 36px 0 44px; color: var(--dim); font-size: 13px; background: var(--bg-2); }
+  .footer-row { display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+  .footer-links a { color: var(--muted); transition: color .15s ease; }
+  .footer-links a:hover { color: var(--fg); }
+  .footer-links .soon { opacity: .55; cursor: default; }
 
-  /* ---- Download animation overlay ---- */
+  /* ---------- Download overlay ---------- */
   .dl-overlay {
     position: fixed; inset: 0; z-index: 100;
-    background: rgba(10, 11, 15, 0.78);
-    backdrop-filter: blur(6px);
+    background: rgba(5, 6, 10, 0.82);
+    backdrop-filter: blur(10px);
     display: flex; align-items: center; justify-content: center;
     opacity: 0; pointer-events: none;
-    transition: opacity 0.25s ease;
+    transition: opacity .28s ease;
   }
   .dl-overlay.show { opacity: 1; pointer-events: auto; }
   .dl-card {
-    width: min(340px, calc(100vw - 48px));
-    background: var(--raised);
-    border: 1px solid var(--border-strong);
-    border-radius: 18px;
-    padding: 34px 30px 28px;
-    text-align: center;
-    box-shadow: var(--shadow);
-    transform: scale(0.95);
-    transition: transform 0.25s ease;
+    width: min(360px, calc(100vw - 48px));
+    background: linear-gradient(180deg, #11141f, #0c0e16);
+    border: 1px solid var(--border-strong); border-radius: 20px;
+    padding: 40px 32px 32px; text-align: center;
+    box-shadow: var(--shadow); position: relative; overflow: hidden;
+    transform: scale(.94); transition: transform .28s cubic-bezier(.2,.9,.3,1.2);
   }
   .dl-overlay.show .dl-card { transform: scale(1); }
+  .dl-card::before {
+    content: ""; position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 220px; background: radial-gradient(ellipse, rgba(110,123,255,.3), transparent 70%);
+    pointer-events: none;
+  }
+  .dl-logo-wrap { position: relative; width: 66px; height: 66px; margin: 0 auto 18px; }
   .dl-logo {
-    width: 58px; height: 58px; margin: 0 auto 16px; display: block;
-    border-radius: 16px;
-    animation: dlFloat 1.5s ease-in-out infinite;
+    width: 66px; height: 66px; border-radius: 18px; position: relative; z-index: 2;
+    animation: dlFloat 1.6s ease-in-out infinite;
   }
-  @keyframes dlFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+  .dl-ring {
+    position: absolute; inset: -10px; border-radius: 24px; z-index: 1;
+    border: 2px solid transparent;
+    background: var(--grad) border-box;
+    -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: dlSpin 2.4s linear infinite;
+    opacity: .6;
   }
-  .dl-title { font-weight: 800; font-size: 17px; margin: 0 0 4px; }
-  .dl-status { font-size: 13.5px; color: var(--muted); min-height: 20px; margin: 0 0 16px; }
-  .dl-track {
-    height: 8px; border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    overflow: hidden;
+  @keyframes dlSpin { to { transform: rotate(360deg); } }
+  @keyframes dlFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .dl-title { font-family: var(--font-display); font-weight: 800; font-size: 19px; margin-bottom: 5px; }
+  .dl-status { font-size: 13.5px; color: var(--muted); min-height: 21px; margin-bottom: 18px; }
+  .dl-track { height: 8px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .dl-fill { height: 100%; width: 0%; border-radius: 999px; background: var(--grad); transition: width .12s linear; position: relative; }
+  .dl-fill::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
+    animation: sheen 1.1s linear infinite;
   }
-  .dl-fill {
-    height: 100%; width: 0%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, var(--indigo), var(--teal));
-    transition: width 0.12s linear;
-  }
+  @keyframes sheen { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
   .dl-done { display: none; font-size: 15px; font-weight: 800; color: var(--teal); margin: 0; }
-  .dl-overlay.done .dl-status,
-  .dl-overlay.done .dl-track,
-  .dl-overlay.done .dl-logo { display: none; }
+  .dl-overlay.done .dl-status, .dl-overlay.done .dl-track, .dl-overlay.done .dl-logo-wrap { display: none; }
   .dl-overlay.done .dl-done { display: block; }
+
+  /* ---------- Reveal ---------- */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .reveal[data-delay="1"] { transition-delay: .08s; }
+  .reveal[data-delay="2"] { transition-delay: .16s; }
+  .reveal[data-delay="3"] { transition-delay: .24s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-bg .blob, .pulse, .dl-logo, .dl-ring, .dl-fill::after, .btn-primary::after {
+      animation: none;
+    }
+    .dl-overlay, .dl-card, .dl-fill, .btn-primary, .btn-ghost, .hero-bg .blob {
+      transition: none;
+    }
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+  }
 </style>
 </head>
 <body>
+
+<div class="progress" id="progressBar"></div>
 
 <header id="siteHeader">
   <div class="wrap nav">
     <a class="brand" href="#top"><img src="../public/icon/128.png" alt="Vizquo logo">Vizquo</a>
     <nav class="nav-links" id="navLinks">
+      <a href="#demo">Live demo</a>
       <a href="#how">How it works</a>
       <a href="#features">Features</a>
       <a href="#ai">AI</a>
       <a href="#download">Download</a>
-      <a href="#install">Setup guide</a>
+      <a href="#install">Setup</a>
       <a href="#faq">FAQ</a>
       <a href="https://github.com/WebDclassified/vizquo" target="_blank" rel="noopener">GitHub ↗</a>
     </nav>
+    <button class="nav-burger" id="navBurger" type="button" aria-label="Toggle menu" aria-expanded="false">☰</button>
     <a class="nav-cta" href="#download">Get Vizquo</a>
   </div>
 </header>
 
-<!-- HERO -->
+<!-- ============ HERO ============ -->
 <section class="hero" id="top">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="hero-grid"></div>
+  </div>
   <div class="wrap">
-    <img class="hero-logo" src="../public/icon/128.png" alt="Vizquo">
-    <h1>Inspect any webpage.<br>Extract its <span>design system</span>.</h1>
-    <p class="sub">
-      Vizquo is a free, private browser extension that reveals the visual DNA of
-      any page — colors, typography, spacing, components, and assets — every
-      value traced back to its source and labeled with honest confidence.
+    <span class="hero-pill reveal"><span class="pulse"></span> v0.10.1 · Free &amp; open source · Works in 7 browsers</span>
+    <h1 class="reveal" data-delay="1">Inspect any webpage.<br>Extract its <span class="grad">design system</span>.</h1>
+    <p class="sub reveal" data-delay="2">
+      Vizquo is the design-intelligence layer for your browser. It reads the live
+      DOM and CSS of any page — then hands you the colors, typography, spacing,
+      components, and assets, every value traced to its source.
     </p>
-    <div class="hero-btns">
+    <div class="hero-btns reveal" data-delay="3">
       <a class="btn-primary" id="heroCta" href="#download">⬇ Download for free</a>
-      <a class="btn-ghost" href="#how">See how it works ↓</a>
+      <a class="btn-ghost" href="#demo">Try the live demo ↓</a>
     </div>
-    <p class="hero-note" id="heroNote">Detecting your browser…</p>
-    <div class="hero-badges">
-      <span><span class="dot green"></span> 100% local &amp; free</span>
-      <span>🔒 Zero network requests by default</span>
-      <span>🧠 Optional AI — your key or no key</span>
-      <span>v0.10.1</span>
+    <p class="hero-note reveal" data-delay="3" id="heroNote">Detecting your browser…</p>
+    <div class="hero-stats reveal" data-delay="3">
+      <div class="stat"><div class="v"><span>0</span></div><div class="l">Network requests by default</div></div>
+      <div class="stat"><div class="v"><span>100%</span></div><div class="l">Local — your data stays in your browser</div></div>
+      <div class="stat"><div class="v"><span>MIT</span></div><div class="l">Free forever, open source</div></div>
+      <div class="stat"><div class="v"><span>7</span></div><div class="l">Desktop browsers supported</div></div>
     </div>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section class="alt" id="how">
+<!-- ============ LIVE DEMO ============ -->
+<section class="demo-section" id="demo">
+  <div class="wrap">
+    <div class="demo-head">
+      <p class="kicker">Live demo</p>
+      <h2 class="reveal">This is a real Vizquo inspection — try it</h2>
+      <p class="lead reveal" data-delay="1">Hover any element of the mock page on the left. The inspector on the right extracts its design tokens live — exactly what the real extension does on any website.</p>
+    </div>
+    <div class="demo-wrap">
+      <div class="browser-frame reveal">
+        <div class="browser-bar">
+          <span class="b-dot r"></span><span class="b-dot y"></span><span class="b-dot g"></span>
+          <div class="b-url">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" role="img" aria-label="Secure connection"><title>Secure connection</title><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            acme.co
+          </div>
+          <span class="b-live">● LIVE</span>
+        </div>
+        <div class="mock-site inspect-zone" id="mockSite">
+          <div class="mock-nav">
+            <div class="mock-logo">A</div>
+            <div class="m-links"><span class="m-link">Product</span><span class="m-link">Pricing</span><span class="m-link">Docs</span></div>
+            <span class="mock-btn-sm">Sign in</span>
+          </div>
+          <div class="mock-hero">
+            <button class="i-item m-title" type="button" data-i="hero-title" aria-label="Inspect heading">Build products people love</button>
+            <button class="i-item m-sub" type="button" data-i="hero-sub" aria-label="Inspect paragraph">The fastest way to ship delightful software — loved by 12,000+ teams.</button>
+            <div>
+              <button class="mock-cta i-item" type="button" data-i="cta-btn" aria-label="Inspect button">Get started</button>
+              <button class="mock-badge i-item" type="button" data-i="badge" aria-label="Inspect badge">New · v3</button>
+            </div>
+          </div>
+          <div class="mock-cards">
+            <button class="mock-card d1 i-item" type="button" data-i="card" aria-label="Inspect card"><span class="dot"></span><h4>Analytics</h4><p>Real-time insights</p></button>
+            <button class="mock-card d2 i-item" type="button" data-i="card" aria-label="Inspect card"><span class="dot"></span><h4>Automation</h4><p>Workflows that scale</p></button>
+            <button class="mock-card d3 i-item" type="button" data-i="card" aria-label="Inspect card"><span class="dot"></span><h4>Security</h4><p>Enterprise-grade</p></button>
+          </div>
+        </div>
+      </div>
+      <div class="inspector reveal" data-delay="1" id="inspector" aria-live="polite">
+        <div class="insp-head">
+          <span class="insp-title"><span class="lock">🔒</span> Inspector</span>
+          <span class="pulse"></span>
+        </div>
+        <div class="insp-tabs">
+          <span class="insp-tab on">Computed</span>
+          <span class="insp-tab">Sources</span>
+          <span class="insp-tab">Box</span>
+        </div>
+        <div class="insp-path" id="inspPath">—</div>
+        <div class="insp-body" id="inspRows"></div>
+        <div class="insp-foot">
+          <span id="inspSrc">Vizquo · element inspector</span>
+          <span class="conf" id="inspConf"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section id="how">
   <div class="wrap">
     <p class="kicker">How it works</p>
-    <h2>From install to insight in 4 steps</h2>
-    <p class="lead">No account, no sign-up, no learning curve — the panel guides you the whole way.</p>
+    <h2 class="reveal">From install to insight in 4 steps</h2>
+    <p class="lead reveal" data-delay="1">No account. No sign-up. No learning curve — the panel guides you the whole way.</p>
     <div class="steps-row">
-      <div class="step">
-        <span class="num">1</span>
-        <h3>Install</h3>
-        <p>Download the package for your browser and load it once (about a minute — the setup guide below walks you through it).</p>
-      </div>
-      <div class="step">
-        <span class="num">2</span>
-        <h3>Grant access</h3>
-        <p>Click "Grant access to this tab" on any page. Access is per-site and on demand — never installed globally.</p>
-      </div>
-      <div class="step">
-        <span class="num">3</span>
-        <h3>Scan</h3>
-        <p>Hit "Scan page". Vizquo analyzes the live DOM and CSS, then extracts colors, type, spacing, components, and assets.</p>
-      </div>
-      <div class="step">
-        <span class="num">4</span>
-        <h3>Inspect &amp; rebuild</h3>
-        <p>Dive into any element, grab code (React, Tailwind…), export tokens, screenshot, and save everything to your library.</p>
-      </div>
+      <div class="step reveal"><span class="tagline">Step 01</span><span class="num">1</span><h3>Install</h3><p>Download the package for your browser and load it in about a minute — the setup guide below walks you through it.</p></div>
+      <div class="step reveal" data-delay="1"><span class="tagline">Step 02</span><span class="num">2</span><h3>Grant access</h3><p>Click "Grant access to this tab" on any page. Access is per-site and on demand — never installed globally.</p></div>
+      <div class="step reveal" data-delay="2"><span class="tagline">Step 03</span><span class="num">3</span><h3>Scan</h3><p>Hit "Scan page". Vizquo analyzes the live DOM and CSS, then extracts colors, type, spacing, components, and assets.</p></div>
+      <div class="step reveal" data-delay="3"><span class="tagline">Step 04</span><span class="num">4</span><h3>Inspect &amp; rebuild</h3><p>Dive into any element, grab code (React, Tailwind…), export tokens, screenshot, and save everything to your library.</p></div>
     </div>
   </div>
 </section>
 
-<!-- SCREENSHOTS -->
-<section>
-  <div class="wrap">
-    <p class="kicker">See the real thing</p>
-    <h2>Real screenshots, real UI</h2>
-    <p class="lead">Captured from the actual extension analyzing a live page — exactly what you get.</p>
-    <div class="shots">
-      <div class="shot"><img src="../deploy-kit/screenshots/design-overview.png" alt="Vizquo Design overview after scanning a page"><div class="cap">Design DNA — colors, type, spacing, consistency score</div></div>
-      <div class="shot"><img src="../deploy-kit/screenshots/inspector.png" alt="Vizquo element inspector with computed styles"><div class="cap">Element inspector — cascade, specificity, box model</div></div>
-      <div class="shot"><img src="../deploy-kit/screenshots/assets.png" alt="Vizquo asset extractor with images and SVGs"><div class="cap">Asset extractor — images, SVGs, bulk ZIP export</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section class="alt" id="features">
+<!-- ============ FEATURES ============ -->
+<section id="features">
   <div class="wrap">
     <p class="kicker">Features</p>
-    <h2>Everything a design system, extracted</h2>
-    <p class="lead">Works on any page — static sites, React, Vue, Next.js, Web Components, and heavy DOM. No site breaks Vizquo.</p>
+    <h2 class="reveal">Everything a design system, extracted</h2>
+    <p class="lead reveal" data-delay="1">Works on any page — static sites, React, Vue, Next.js, Web Components, and heavy DOM. No site breaks Vizquo.</p>
     <div class="grid">
-      <div class="card"><div class="ic">🎨</div><h3>Design DNA</h3><p>Automatic color roles, typographic hierarchy, spacing &amp; radius scales, and a consistency score with click-to-highlight.</p></div>
-      <div class="card teal"><div class="ic">🔬</div><h3>Element inspector</h3><p>Computed styles, CSS cascade &amp; specificity, variable chains, box-model diagram, DOM tree — in Designer or Engineer mode.</p></div>
-      <div class="card"><div class="ic">🖼️</div><h3>Asset extraction</h3><p>Images, SVGs, icons, backgrounds, video posters — classified, deduped, and exportable as a ZIP.</p></div>
-      <div class="card teal"><div class="ic">📸</div><h3>Screenshot studio</h3><p>Viewport, element, full-page, and multi-selection captures — crisp at any screen density.</p></div>
-      <div class="card"><div class="ic">⚡</div><h3>Code generation</h3><p>Turn any element into React, Vue, Svelte, HTML, or Tailwind. Export tokens to CSS, Figma, Style Dictionary, and more.</p></div>
-      <div class="card teal"><div class="ic">✅</div><h3>Audits &amp; more</h3><p>WCAG contrast with exact math, accessibility findings, tech detection, and a responsive Time Machine.</p></div>
+      <div class="glow-card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Design DNA"><title>Design DNA</title><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2a10 10 0 1 0 10 10"/></svg></div><h3>Design DNA</h3><p>Automatic color roles, typographic hierarchy, spacing &amp; radius scales, and a consistency score with click-to-highlight.</p></div>
+      <div class="glow-card reveal" data-delay="1"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Element inspector"><title>Element inspector</title><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg></div><h3>Element inspector</h3><p>Computed styles, CSS cascade &amp; specificity, variable chains, box-model diagram, DOM tree — in Designer or Engineer mode.</p></div>
+      <div class="glow-card reveal" data-delay="2"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Asset extraction"><title>Asset extraction</title><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.35-4.35a2 2 0 0 0-2.83 0L5 19"/></svg></div><h3>Asset extraction</h3><p>Images, SVGs, icons, backgrounds, video posters — classified, deduped, and exportable as a ZIP.</p></div>
+      <div class="glow-card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Screenshot studio"><title>Screenshot studio</title><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><h3>Screenshot studio</h3><p>Viewport, element, full-page, and multi-selection captures — crisp at any screen density and zoom level.</p></div>
+      <div class="glow-card reveal" data-delay="1"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Code generation"><title>Code generation</title><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><h3>Code generation</h3><p>Turn any element into React, Vue, Svelte, HTML, or Tailwind. Export tokens to CSS, Figma, Style Dictionary, and more.</p></div>
+      <div class="glow-card reveal" data-delay="2"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Audits and more"><title>Audits and more</title><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><h3>Audits &amp; more</h3><p>WCAG contrast with exact math, accessibility findings, tech detection, and a responsive Time Machine.</p></div>
     </div>
   </div>
 </section>
 
-<!-- AI -->
+<!-- ============ SCREENSHOTS ============ -->
+<section class="demo-section" style="border-bottom:none;">
+  <div class="wrap">
+    <p class="kicker">See the real thing</p>
+    <h2 class="reveal">Real screenshots, real UI</h2>
+    <p class="lead reveal" data-delay="1">Captured from the actual extension analyzing a live page — exactly what you get.</p>
+    <div class="shots">
+      <div class="shot reveal"><img src="../deploy-kit/screenshots/design-overview.png" alt="Vizquo Design overview after scanning a page"><div class="cap"><b>Design DNA</b> colors, type, spacing, consistency score<span class="shot-tag">Scan</span></div></div>
+      <div class="shot reveal" data-delay="1"><img src="../deploy-kit/screenshots/inspector.png" alt="Vizquo element inspector with computed styles"><div class="cap"><b>Inspector</b> cascade, specificity, box model<span class="shot-tag">Inspect</span></div></div>
+      <div class="shot reveal" data-delay="2"><img src="../deploy-kit/screenshots/assets.png" alt="Vizquo asset extractor with images and SVGs"><div class="cap"><b>Assets</b> images, SVGs, bulk ZIP export<span class="shot-tag">Extract</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AI ============ -->
 <section id="ai">
   <div class="wrap">
     <p class="kicker">Optional AI</p>
-    <h2>AI that explains design — on your terms</h2>
-    <p class="lead">
-      AI is <b>off by default</b> and never required. When you turn it on, you choose
-      exactly where it runs — and nothing is sent until you confirm what's going.
-    </p>
+    <h2 class="reveal">AI that explains design — on your terms</h2>
+    <p class="lead reveal" data-delay="1">AI is <b style="color:var(--fg)">off by default</b> and never required. When you turn it on, you choose exactly where it runs — and nothing is sent until you confirm what's going.</p>
     <div class="ai-grid">
-      <div class="ai-card">
-        <span class="tag cloud">Cloud · bring your own key</span>
+      <div class="ai-card reveal">
+        <span class="tag cloud">☁️ Cloud · bring your own key</span>
         <h3>OpenRouter</h3>
-        <p>
-          Free <code>:free</code> models by default. Paste your own API key in
-          Settings → AI (free to create at openrouter.ai) — or none at all if
-          you prefer local.
-        </p>
+        <p>Free <code>:free</code> models by default. Paste your own API key in Settings → AI (free to create at openrouter.ai) — or none at all if you prefer local.</p>
         <ul>
           <li>Best for: quick answers with zero setup on your machine</li>
           <li>Cost: free models by default; you control the key</li>
           <li>Your key stays in your browser — used only by the extension</li>
         </ul>
       </div>
-      <div class="ai-card">
-        <span class="tag local">Local · no key, no cloud</span>
+      <div class="ai-card reveal" data-delay="1">
+        <span class="tag local">🖥️ Local · no key, no cloud</span>
         <h3>Ollama</h3>
-        <p>
-          Runs entirely on your machine via the free <b>Ollama</b> app — the
-          strictest privacy option. Nothing ever leaves your computer.
-        </p>
+        <p>Runs entirely on your machine via the free <b style="color:var(--fg)">Ollama</b> app — the strictest privacy option. Nothing ever leaves your computer.</p>
         <ul>
           <li>Best for: maximum privacy and fully offline AI</li>
           <li>Cost: zero — no key, no account, no cloud</li>
@@ -539,94 +818,94 @@
         </ul>
       </div>
     </div>
-    <ul class="ai-list">
+    <ul class="ai-list reveal">
       <li><span class="tick">✓</span> "Why?" explanations — understand any element's look in plain language</li>
       <li><span class="tick">✓</span> Design-system summaries — a readable tour of the page's visual language</li>
       <li><span class="tick">✓</span> Diff narration — plain-English reports of how a design changed over time</li>
       <li><span class="tick">✓</span> Audit-fix priorities — AI ranks accessibility findings by impact</li>
     </ul>
-    <div class="store-note">
-      <span>🛡️</span>
-      <span>
-        <b>Consent first:</b> before the first request, Vizquo shows exactly what will be
-        sent and requires your confirmation. Payloads are bounded and redacted (text ≤ 200
-        chars, sanitized HTML snippets) — input values and data attributes are never sent.
-      </span>
+    <div class="consent-note reveal">
+      <span class="shield">🛡️</span>
+      <span><b style="color:var(--fg)">Consent first:</b> before the first request, Vizquo shows exactly what will be sent and requires your confirmation. Payloads are bounded and redacted (text ≤ 200 chars, sanitized HTML snippets) — input values and data attributes are never sent.</span>
     </div>
   </div>
 </section>
 
-<!-- DOWNLOAD -->
-<section class="alt" id="download">
+<!-- ============ DOWNLOAD ============ -->
+<section id="download">
   <div class="wrap">
     <p class="kicker">Download</p>
-    <h2>Pick your browser</h2>
-    <p class="lead">
-      Your browser is detected and highlighted below. Grab the right package and
-      follow the setup guide — about a minute, no account needed.
-    </p>
+    <h2 class="reveal">Pick your browser</h2>
+    <p class="lead reveal" data-delay="1">Your browser is detected and highlighted below. Grab the right package and follow the setup guide — about a minute, no account needed.</p>
     <div class="browser-grid">
-      <div class="browser" data-browser="chrome">
+      <div class="browser reveal" data-browser="chrome">
         <span class="badge">Your browser</span>
-        <div class="logo">🌐</div>
-        <h4>Google Chrome</h4>
-        <div class="ver">Chromium 110+ · Windows / macOS / Linux</div>
+        <div class="logo">🌐</div><h4>Google Chrome</h4>
+        <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
         <a class="btn-dl" href="downloads/vizquo-0.10.1-chrome.zip" download>⬇ Download ZIP</a>
       </div>
-      <div class="browser" data-browser="edge">
+      <div class="browser reveal" data-delay="1" data-browser="edge">
         <span class="badge">Your browser</span>
-        <div class="logo">🧭</div>
-        <h4>Microsoft Edge</h4>
-        <div class="ver">Chromium 110+ · Windows / macOS / Linux</div>
+        <div class="logo">🧭</div><h4>Microsoft Edge</h4>
+        <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
         <a class="btn-dl" href="downloads/vizquo-0.10.1-chrome.zip" download>⬇ Download ZIP</a>
       </div>
-      <div class="browser" data-browser="firefox">
+      <div class="browser reveal" data-delay="2" data-browser="firefox">
         <span class="badge">Your browser</span>
-        <div class="logo">🦊</div>
-        <h4>Firefox</h4>
-        <div class="ver">Firefox 121+ · Windows / macOS / Linux</div>
+        <div class="logo">🦊</div><h4>Firefox</h4>
+        <div class="ver">Firefox 121+ · Win / macOS / Linux</div>
         <a class="btn-dl teal" href="downloads/vizquo-0.10.1-firefox.zip" download>⬇ Download ZIP</a>
       </div>
-      <div class="browser" data-browser="chromium">
+      <div class="browser reveal" data-delay="3" data-browser="brave">
         <span class="badge">Your browser</span>
-        <div class="logo">🔷</div>
-        <h4>Brave / Opera / Vivaldi</h4>
-        <div class="ver">Any Chromium 110+ browser</div>
+        <div class="logo">🦁</div><h4>Brave</h4>
+        <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
         <a class="btn-dl" href="downloads/vizquo-0.10.1-chrome.zip" download>⬇ Download ZIP</a>
       </div>
-      <div class="browser" data-browser="safari">
+      <div class="browser reveal" data-browser="opera">
         <span class="badge">Your browser</span>
-        <div class="logo">🧭</div>
-        <h4>Safari</h4>
-        <div class="ver">macOS · iOS</div>
-        <a class="btn-dl teal" href="https://github.com/WebDclassified/vizquo/issues/new?title=Safari+support+vote" target="_blank" rel="noopener">🔔 Coming soon — vote</a>
+        <div class="logo">⭕</div><h4>Opera</h4>
+        <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
+        <a class="btn-dl" href="downloads/vizquo-0.10.1-chrome.zip" download>⬇ Download ZIP</a>
       </div>
-      <div class="browser" data-browser="mobile">
-        <div class="logo">📱</div>
-        <h4>Mobile browsers</h4>
+      <div class="browser reveal" data-delay="1" data-browser="vivaldi">
+        <span class="badge">Your browser</span>
+        <div class="logo">🔺</div><h4>Vivaldi</h4>
+        <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
+        <a class="btn-dl" href="downloads/vizquo-0.10.1-chrome.zip" download>⬇ Download ZIP</a>
+      </div>
+      <div class="browser reveal" data-delay="2" data-browser="arc">
+        <span class="badge">Your browser</span>
+        <div class="logo">🌀</div><h4>Arc</h4>
+        <div class="ver">Chromium 110+ · Win / macOS</div>
+        <a class="btn-dl" href="downloads/vizquo-0.10.1-chrome.zip" download>⬇ Download ZIP</a>
+      </div>
+      <div class="browser reveal" data-delay="3" data-browser="safari">
+        <span class="badge">Your browser</span>
+        <div class="logo">🧭</div><h4>Safari</h4>
+        <div class="ver">macOS · needs native build</div>
+        <a class="btn-dl soon" href="https://github.com/WebDclassified/vizquo/issues/new?title=Safari+support+vote" target="_blank" rel="noopener">🔔 Coming soon — vote</a>
+      </div>
+      <div class="browser reveal" data-browser="mobile">
+        <div class="logo">📱</div><h4>Mobile browsers</h4>
         <div class="ver">Android / iOS</div>
-        <div class="soon">Side-panel extensions aren't available on mobile — use a desktop browser.</div>
+        <div class="soon-note">Side-panel extensions aren't available on mobile yet — use any desktop browser.</div>
       </div>
     </div>
-    <div class="store-note">
-      <span>🏪</span>
-      <span>
-        <b>Official stores are coming.</b> Once the Chrome Web Store, Edge Add-ons, and
-        Firefox AMO listings are approved, installing becomes a one-click button. The
-        manual ZIPs below work today for every desktop browser.
-      </span>
+    <div class="note-box reveal">
+      <span class="ic">🏪</span>
+      <span><b>Official stores are coming.</b> Once the Chrome Web Store, Edge Add-ons, and Firefox AMO listings are approved, installing becomes a one-click button. The manual ZIPs below work today for every desktop browser.</span>
     </div>
   </div>
 </section>
 
-<!-- SETUP GUIDE -->
+<!-- ============ SETUP GUIDE ============ -->
 <section id="install">
   <div class="wrap">
     <p class="kicker">Setup guide</p>
-    <h2>Your browser, step by step</h2>
-    <p class="lead">After the download finishes, you're three small actions from using Vizquo.</p>
-
-    <div class="pipeline">
+    <h2 class="reveal">Your browser, step by step</h2>
+    <p class="lead reveal" data-delay="1">After the download finishes, you're three small actions from using Vizquo.</p>
+    <div class="pipeline reveal">
       <span class="pipe-step"><span class="n">1</span> Download ZIP</span>
       <span class="pipe-arrow">→</span>
       <span class="pipe-step"><span class="n">2</span> Unzip the folder</span>
@@ -634,11 +913,11 @@
       <span class="pipe-step"><span class="n">3</span> Load it in your browser</span>
     </div>
 
-    <details open>
-      <summary>Google Chrome</summary>
+    <details class="reveal" open>
+      <summary><span class="b-ic">🌐</span> Google Chrome <span class="chev">▶</span></summary>
       <div class="steps">
         <ol>
-          <li>Download the <b>Chrome ZIP</b> and <b>unzip</b> it (right-click → Extract All). You get a folder named <code>vizquo-0.10.1-chrome</code>.</li>
+          <li>Download the <b>Chrome ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>). You get a folder named <code>vizquo-0.10.1-chrome</code>.</li>
           <li>Open <code>chrome://extensions</code>.</li>
           <li>Enable <b>Developer mode</b> (toggle, top-right).</li>
           <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
@@ -648,11 +927,11 @@
       </div>
     </details>
 
-    <details>
-      <summary>Microsoft Edge</summary>
+    <details class="reveal">
+      <summary><span class="b-ic">🧭</span> Microsoft Edge <span class="chev">▶</span></summary>
       <div class="steps">
         <ol>
-          <li>Download the <b>Chrome ZIP</b> (same package works) and unzip it.</li>
+          <li>Download the <b>Chrome ZIP</b> (same package works) and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
           <li>Open <code>edge://extensions</code>.</li>
           <li>Enable <b>Developer mode</b> (left sidebar toggle).</li>
           <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
@@ -661,13 +940,12 @@
       </div>
     </details>
 
-    <details>
-      <summary>Brave / Opera / Vivaldi (other Chromium)</summary>
+    <details class="reveal">
+      <summary><span class="b-ic">🦁</span> Brave <span class="chev">▶</span></summary>
       <div class="steps">
         <ol>
-          <li>Download the <b>Chrome ZIP</b> and unzip it.</li>
-          <li>Open your browser's extensions page:
-            <code>brave://extensions</code> · <code>opera://extensions</code> · <code>vivaldi://extensions</code>.</li>
+          <li>Download the <b>Chrome ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
+          <li>Open <code>brave://extensions</code>.</li>
           <li>Enable <b>Developer mode</b>.</li>
           <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
           <li>Pin Vizquo and grant access — done.</li>
@@ -675,11 +953,24 @@
       </div>
     </details>
 
-    <details>
-      <summary>Firefox</summary>
+    <details class="reveal">
+      <summary><span class="b-ic">⭕</span> Opera / Vivaldi / Arc (other Chromium) <span class="chev">▶</span></summary>
       <div class="steps">
         <ol>
-          <li>Download the <b>Firefox ZIP</b> and unzip it.</li>
+          <li>Download the <b>Chrome ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
+          <li>Open your browser's extensions page: <code>opera://extensions</code> · <code>vivaldi://extensions</code> · <code>arc://extensions</code>.</li>
+          <li>Enable <b>Developer mode</b>.</li>
+          <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
+          <li>Pin Vizquo and grant access — done.</li>
+        </ol>
+      </div>
+    </details>
+
+    <details class="reveal">
+      <summary><span class="b-ic">🦊</span> Firefox <span class="chev">▶</span></summary>
+      <div class="steps">
+        <ol>
+          <li>Download the <b>Firefox ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
           <li>Open <code>about:debugging#/runtime/this-firefox</code> in Firefox.</li>
           <li>Click <b>Load Temporary Add-on…</b> and select the <code>manifest.json</code> inside the unzipped folder.</li>
           <li>Pin Vizquo and grant access — done.</li>
@@ -688,53 +979,57 @@
       </div>
     </details>
 
-    <details>
-      <summary>Safari (coming soon)</summary>
+    <details class="reveal">
+      <summary><span class="b-ic">🔔</span> Safari <span class="chev">▶</span></summary>
       <div class="steps">
         <p>Safari support needs a native macOS build (Apple's Xcode converter) plus the Apple Developer Program — it's on the roadmap.</p>
-        <p>👉 <a href="https://github.com/WebDclassified/vizquo/issues/new?title=Safari+support+vote" target="_blank" rel="noopener"><b>Vote for Safari support</b></a> and you'll be notified when it ships. Meanwhile, use Chrome, Edge, or Firefox on macOS — Vizquo works identically there.</p>
+        <p>👉 <a href="https://github.com/WebDclassified/vizquo/issues/new?title=Safari+support+vote" target="_blank" rel="noopener" style="color:var(--teal)"><b>Vote for Safari support</b></a> and you'll be notified when it ships. Meanwhile, use Chrome, Edge, or Firefox on macOS — Vizquo works identically there.</p>
       </div>
     </details>
   </div>
 </section>
 
-<!-- REQUIREMENTS -->
-<section class="alt" id="requirements">
+<!-- ============ REQUIREMENTS ============ -->
+<section id="requirements">
   <div class="wrap">
     <p class="kicker">Requirements</p>
-    <h2>System requirements</h2>
-    <p class="lead">Vizquo is a desktop-browser extension — it runs wherever your browser runs. Everything is local; there is no server side.</p>
-    <table>
-      <tr><th>Component</th><th>Requirement</th><th>Status</th></tr>
-      <tr><td>Chrome / Edge / Brave / Opera / Vivaldi</td><td>Chromium 110+ (Manifest V3)</td><td class="ok">✓ Supported</td></tr>
-      <tr><td>Firefox</td><td>Firefox 121+ (Manifest V3)</td><td class="ok">✓ Supported</td></tr>
-      <tr><td>Safari</td><td>macOS build (Xcode) + Apple Developer Program</td><td class="wip">◷ Coming soon</td></tr>
-      <tr><td>Operating systems</td><td>Windows 10+, macOS 12+, any Linux desktop</td><td class="ok">✓ All supported</td></tr>
-      <tr><td>Mobile (Android / iOS)</td><td>—</td><td class="no">✗ Not yet</td></tr>
-      <tr><td>Account / sign-up</td><td>None — fully local</td><td class="ok">✓ None</td></tr>
-    </table>
+    <h2 class="reveal">System requirements</h2>
+    <p class="lead reveal" data-delay="1">Vizquo is a desktop-browser extension — it runs wherever your browser runs. Everything is local; there is no server side.</p>
+    <div class="table-wrap reveal">
+      <table>
+        <tr><th>Component</th><th>Requirement</th><th>Status</th></tr>
+        <tr><td>Chrome · Edge · Brave · Opera · Vivaldi · Arc</td><td>Chromium 110+ (Manifest V3)</td><td class="ok">✓ Supported</td></tr>
+        <tr><td>Firefox</td><td>Firefox 121+ (Manifest V3)</td><td class="ok">✓ Supported</td></tr>
+        <tr><td>Safari</td><td>macOS build (Xcode) + Apple Developer Program</td><td class="wip">◷ Coming soon</td></tr>
+        <tr><td>Operating systems</td><td>Windows 10+, macOS 12+, any Linux desktop</td><td class="ok">✓ All supported</td></tr>
+        <tr><td>Mobile (Android / iOS)</td><td>—</td><td class="no">✗ Not yet</td></tr>
+        <tr><td>Account / sign-up</td><td>None — fully local</td><td class="ok">✓ None</td></tr>
+      </table>
+    </div>
   </div>
 </section>
 
-<!-- FAQ -->
-<section id="faq">
+<!-- ============ FAQ ============ -->
+<section id="faq" class="demo-section" style="border-bottom:none;">
   <div class="wrap faq">
     <p class="kicker">FAQ</p>
-    <h2>Questions, answered</h2>
-    <p class="lead">Everything users ask before installing.</p>
+    <h2 class="reveal">Questions, answered</h2>
+    <p class="lead reveal" data-delay="1">Everything users ask before installing.</p>
 
-    <details>
-      <summary>Is Vizquo really free?</summary>
+    <details class="reveal">
+      <summary>Is Vizquo really free? <span class="chev">▶</span></summary>
       <div class="steps"><p>Yes. Every feature except AI is 100% free and local — no account, no ads, no data collection. AI is optional: the cloud option uses <b>free</b> models by default (you can bring your own key), and the local option (Ollama) costs nothing at all.</p></div>
     </details>
-
-    <details>
-      <summary>Is my data private?</summary>
+    <details class="reveal">
+      <summary>Is my data private? <span class="chev">▶</span></summary>
       <div class="steps"><p>Completely local by default. Scans, screenshots, and your library live only in your browser (IndexedDB). Vizquo makes <b>zero network requests</b> until you explicitly turn on AI — the UI loads no fonts, scripts, or analytics from anywhere. Site access is granted per-site, on demand.</p></div>
     </details>
-
-    <details>
-      <summary>How do I use the AI?</summary>
+    <details class="reveal">
+      <summary>Which browsers are supported? <span class="chev">▶</span></summary>
+      <div class="steps"><p><b>Chrome, Edge, Brave, Opera, Vivaldi, and Arc</b> all use the same Chromium package. <b>Firefox</b> has its own package. <b>Safari</b> is coming soon — it requires a native macOS build and Apple's Developer Program. Mobile browsers aren't supported yet (side-panel extensions don't exist there).</p></div>
+    </details>
+    <details class="reveal">
+      <summary>How do I use the AI? <span class="chev">▶</span></summary>
       <div class="steps">
         <p>1. Open Vizquo → <b>Settings</b> → <b>AI</b> → enable it.</p>
         <p>2. Choose a provider: <b>OpenRouter</b> (paste your own free API key) or <b>Ollama</b> (local, no key — install the free Ollama app and pull a model like <code>llama3.2</code>).</p>
@@ -742,66 +1037,60 @@
         <p>4. Before the first request, Vizquo shows exactly what will be sent — confirm, and you're set.</p>
       </div>
     </details>
-
-    <details>
-      <summary>Why do I need my own AI key? Can't you bundle one?</summary>
-      <div class="steps">
-        <p>Two reasons — security and fairness. A key embedded in a public extension could be extracted by anyone who downloads it and used to spend the author's credits (it also breaks the GitHub/store security scanners). So Vizquo ships <b>keyless by construction</b>: you bring your own key (free at <code>openrouter.ai</code>), or use Ollama and need no key at all.</p>
-      </div>
+    <details class="reveal">
+      <summary>Why do I need my own AI key? Can't you bundle one? <span class="chev">▶</span></summary>
+      <div class="steps"><p>Two reasons — security and fairness. A key embedded in a public extension could be extracted by anyone who downloads it and used to spend the author's credits (it also trips GitHub and store security scanners). So Vizquo ships <b>keyless by construction</b>: you bring your own key (free at <code>openrouter.ai</code>), or use Ollama and need no key at all.</p></div>
     </details>
-
-    <details>
-      <summary>Does AI ever see my passwords or form values?</summary>
-      <div class="steps"><p>No — by construction. Payloads are bounded (text ≤ 200 characters) and redacted: input values, <code>value</code>/<code>name</code>/<code>data-*</code> attributes are stripped before anything can be sent, and the consent gate shows you the exact payload first.</p></div>
+    <details class="reveal">
+      <summary>Does AI ever see my passwords or form values? <span class="chev">▶</span></summary>
+      <div class="steps"><p>No — by construction. Payloads are bounded (text ≤ 200 characters) and redacted: input values and <code>value</code>/<code>name</code>/<code>data-*</code> attributes are stripped before anything can be sent, and the consent gate shows you the exact payload first.</p></div>
     </details>
-
-    <details>
-      <summary>What about Safari?</summary>
-      <div class="steps"><p>Safari support requires a native macOS build and the Apple Developer Program ($99/year). It's on the roadmap — <a href="https://github.com/WebDclassified/vizquo/issues/new?title=Safari+support+vote" target="_blank" rel="noopener"><b>vote for it</b></a> and we'll notify you when it ships.</p></div>
+    <details class="reveal">
+      <summary>Why is install manual right now? <span class="chev">▶</span></summary>
+      <div class="steps"><p>Browsers only allow one-click installs through their official stores, and Vizquo's store submissions are in progress. Until they're approved, the supported manual path is loading the ZIP (about 2 minutes). The page will switch to one-click buttons the moment each store approves.</p></div>
     </details>
-
-    <details>
-      <summary>Why is install manual right now?</summary>
-      <div class="steps"><p>Browsers only allow one-click installs through their official stores, and Vizquo's store submissions are in progress. Until they're approved, the supported manual path is loading the ZIP (2 minutes). The page will switch to one-click buttons the moment each store approves.</p></div>
-    </details>
-
-    <details>
-      <summary>Does it work on my phone?</summary>
+    <details class="reveal">
+      <summary>Does it work on my phone? <span class="chev">▶</span></summary>
       <div class="steps"><p>Not yet — side-panel extensions don't exist on Android/iOS. Vizquo is a desktop-browser extension (Windows, macOS, Linux).</p></div>
     </details>
-
-    <details>
-      <summary>Can I uninstall or reset it?</summary>
+    <details class="reveal">
+      <summary>Can I uninstall or reset it? <span class="chev">▶</span></summary>
       <div class="steps"><p>Anytime. Remove it from <code>chrome://extensions</code> or <code>about:addons</code>, and Settings has a "Reset everything" that wipes all local data back to a fresh install.</p></div>
     </details>
   </div>
 </section>
 
-<!-- FINAL CTA -->
-<section class="cta-band alt" id="get">
+<!-- ============ FINAL CTA ============ -->
+<section class="cta-band" id="get">
   <div class="wrap">
-    <p class="kicker">Get started</p>
-    <h2>See the design DNA of the web</h2>
-    <p>Free forever, private by default, works on every modern desktop browser.</p>
-    <a class="btn-primary" href="#download">⬇ Download Vizquo</a>
+    <p class="kicker reveal">Get started</p>
+    <h2 class="reveal">See the design DNA of the web</h2>
+    <p class="reveal" data-delay="1">Free forever, private by default, works on every modern desktop browser.</p>
+    <a class="btn-primary reveal" data-delay="2" href="#download">⬇ Download Vizquo</a>
   </div>
 </section>
 
 <footer>
   <div class="wrap footer-row">
     <span>© 2026 Vizquo · Free &amp; open source (MIT)</span>
-    <span>
+    <span class="footer-links">
       <a href="https://github.com/WebDclassified/vizquo" target="_blank" rel="noopener">Source code ↗</a>
       <a href="https://webdclassified.github.io/vizquo/deploy-kit/privacy-policy.md" target="_blank" rel="noopener">Privacy policy</a>
       <a href="https://github.com/WebDclassified/vizquo/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+      <span class="soon">Chrome Web Store · coming</span>
+      <span class="soon">Edge Add-ons · coming</span>
+      <span class="soon">Firefox AMO · coming</span>
     </span>
   </div>
 </footer>
 
 <!-- Download animation overlay -->
-<div class="dl-overlay" id="dlOverlay" role="dialog" aria-label="Preparing your download">
+<div class="dl-overlay" id="dlOverlay" role="dialog" aria-label="Preparing your download" aria-modal="true">
   <div class="dl-card">
-    <img class="dl-logo" src="../public/icon/128.png" alt="">
+    <div class="dl-logo-wrap">
+      <span class="dl-ring"></span>
+      <img class="dl-logo" src="../public/icon/128.png" alt="">
+    </div>
     <p class="dl-title">Vizquo</p>
     <p class="dl-status" id="dlStatus">Preparing your download…</p>
     <div class="dl-track"><div class="dl-fill" id="dlFill"></div></div>
@@ -810,7 +1099,7 @@
 </div>
 
 <script>
-  // ---- Browser detection ----
+  // ================= Browser + OS detection =================
   (function detect() {
     const ua = navigator.userAgent || '';
     const uad = navigator.userAgentData;
@@ -818,52 +1107,79 @@
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
     let browser = 'chromium';
     if (/Edg\//.test(ua)) browser = 'edge';
-    else if (/OPR\/|Opera/.test(ua)) browser = 'chromium';
-    else if (/Brave/.test(brands)) browser = 'chromium';
+    else if (/OPR\/|Opera/.test(ua)) browser = 'opera';
+    else if (/Vivaldi/.test(brands)) browser = 'vivaldi';
+    else if (/Arc\//.test(ua) || /Arc /.test(brands)) browser = 'arc';
     else if (/Firefox\//.test(ua) && !/Seamonkey/.test(ua)) browser = 'firefox';
     else if (/Safari\//.test(ua) && !/Chrome\//.test(ua) && !/Chromium/.test(ua)) browser = 'safari';
     else if (/Chrome\//.test(ua) || /Chromium/.test(ua)) browser = 'chrome';
+    else browser = 'chrome'; // unknown Chromium default
     if (isMobile) browser = 'mobile';
 
-    const card = document.querySelector(`.browser[data-browser="${browser}"]`);
-    const cta = document.getElementById('heroCta');
-    const note = document.getElementById('heroNote');
-    if (!card) return;
-
-    card.classList.add('detected');
-    if (browser === 'safari') {
-      cta.textContent = '🔔 Safari: coming soon';
-      cta.setAttribute('href', '#download');
-      note.innerHTML = `Safari is coming soon — <b>vote for it</b> below. Use Chrome, Edge, or Firefox on macOS today.`;
-    } else if (browser === 'mobile') {
-      cta.textContent = '⬇ Desktop only for now';
-      cta.setAttribute('href', '#requirements');
-      note.textContent = 'Mobile isn\u2019t supported yet — use a desktop Chromium browser or Firefox.';
+    // Brave exposes a promise-based API on Chromium
+    if (window.navigator.brave && typeof window.navigator.brave.isBrave === 'function') {
+      window.navigator.brave.isBrave().then((isBrave) => {
+        if (isBrave && browser === 'chrome') {
+          highlight('brave');
+        }
+      });
     } else {
-      const label = { chrome: 'Chrome', edge: 'Edge', firefox: 'Firefox', chromium: 'Brave / Opera / Vivaldi' }[browser];
-      note.innerHTML = `Detected: <b>${label}</b> — your browser is highlighted below.`;
+      highlight(browser);
+    }
+
+    function highlight(b) {
+      const card = document.querySelector(`.browser[data-browser="${b}"]`);
+      const cta = document.getElementById('heroCta');
+      const note = document.getElementById('heroNote');
+      if (!card || !cta || !note) return;
+      card.classList.add('detected');
+      if (b === 'safari') {
+        cta.textContent = '🔔 Safari: coming soon';
+        cta.setAttribute('href', '#download');
+        note.innerHTML = 'Safari is coming soon — <b>vote for it</b> below. Use Chrome, Edge, or Firefox on macOS today.';
+      } else if (b === 'mobile') {
+        cta.textContent = '⬇ Desktop only for now';
+        cta.setAttribute('href', '#requirements');
+        note.textContent = 'Mobile isn\u2019t supported yet — use a desktop Chromium browser or Firefox.';
+      } else {
+        const label = {
+          chrome: 'Chrome', edge: 'Edge', firefox: 'Firefox', brave: 'Brave',
+          opera: 'Opera', vivaldi: 'Vivaldi', arc: 'Arc'
+        }[b] || 'a Chromium browser';
+        note.innerHTML = `Detected: <b>${label}</b> — your browser is highlighted below.`;
+      }
     }
   })();
 
-  // ---- Download animation ----
+  // ================= OS hint in setup guide =================
+  (function osHint() {
+    const ua = navigator.userAgent || '';
+    let hint = 'right-click → Extract All';
+    if (/Mac/i.test(ua)) hint = 'double-click the ZIP (macOS unzips it automatically)';
+    else if (/Linux/i.test(ua)) hint = 'run: unzip vizquo-0.10.1-chrome.zip';
+    document.querySelectorAll('.unzip-hint').forEach((el) => { el.textContent = hint; });
+  })();
+
+  // ================= Download animation =================
   (function downloads() {
     const overlay = document.getElementById('dlOverlay');
     const fill = document.getElementById('dlFill');
     const status = document.getElementById('dlStatus');
     if (!overlay || !fill || !status) return;
 
-    const label = (p) =>
-      p < 30 ? 'Preparing your download…'
-      : p < 60 ? 'Packaging Vizquo…'
-      : p < 95 ? 'Finishing up…'
-      : 'Starting download…';
+    function label(p) {
+      if (p < 30) return 'Preparing your download…';
+      if (p < 60) return 'Packaging Vizquo…';
+      if (p < 95) return 'Finishing up…';
+      return 'Starting download…';
+    }
 
-    const start = (btn, href) => {
+    function start(btn, href) {
       overlay.classList.add('show');
       overlay.classList.remove('done');
       fill.style.width = '0%';
       let p = 0;
-      const tick = () => {
+      function tick() {
         p += Math.random() * 9 + 3;
         if (p >= 100) {
           fill.style.width = '100%';
@@ -884,15 +1200,15 @@
         fill.style.width = `${p}%`;
         status.textContent = label(p);
         setTimeout(tick, 90);
-      };
+      }
       tick();
-    };
+    }
 
     document.querySelectorAll('.btn-dl').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         if (btn.classList.contains('busy')) return;
         const href = btn.getAttribute('href');
-        if (!href?.startsWith('downloads/')) return; // only ZIPs animate
+        if (href?.indexOf('downloads/') !== 0) return; // only ZIPs animate
         e.preventDefault();
         btn.classList.add('busy');
         start(btn, href);
@@ -900,26 +1216,177 @@
     });
   })();
 
-  // ---- Sticky header shadow + scrollspy ----
+  // ================= Live inspect demo =================
+  (function demo() {
+    const items = document.querySelectorAll('.i-item');
+    const pathEl = document.getElementById('inspPath');
+    const rowsEl = document.getElementById('inspRows');
+    const srcEl = document.getElementById('inspSrc');
+    const confEl = document.getElementById('inspConf');
+    if (!items.length || !rowsEl) return;
+
+    const DATA = {
+      'hero-title': {
+        name: 'h3.hero-title', src: 'style.css:41',
+        conf: '97%', rows: [
+          ['Font', 'Sora · 30px · 800'],
+          ['Color', '#10141F'],
+          ['Line-height', '1.12'],
+          ['Letter-spacing', '-0.03em']
+        ]
+      },
+      'hero-sub': {
+        name: 'p.hero-sub', src: 'style.css:43',
+        conf: '96%', rows: [
+          ['Font', 'Inter · 13.5px · 400'],
+          ['Color', '#5B6472'],
+          ['Line-height', '1.6']
+        ]
+      },
+      'cta-btn': {
+        name: 'span.cta', src: 'style.css:56',
+        conf: '98%', rows: [
+          ['Background', 'linear-gradient(120deg, #6E7BFF, #8B7BFF)'],
+          ['Color', '#FFFFFF'],
+          ['Radius', '10px'],
+          ['Padding', '11px 20px'],
+          ['Shadow', '0 8px 24px rgba(110,123,255,.35)']
+        ]
+      },
+      'badge': {
+        name: 'span.badge', src: 'style.css:61',
+        conf: '95%', rows: [
+          ['Color', '#0D9488'],
+          ['Font', '11px · 700 · uppercase'],
+          ['Letter-spacing', '0.08em'],
+          ['Background', 'rgba(63,224,200,.14)']
+        ]
+      },
+      'card': {
+        name: 'div.card', src: 'style.css:66',
+        conf: '97%', rows: [
+          ['Background', '#FFFFFF'],
+          ['Radius', '14px'],
+          ['Padding', '18px'],
+          ['Border', '1px solid #E7EAF2'],
+          ['Shadow', '0 6px 20px rgba(16,20,31,.06)']
+        ]
+      }
+    };
+
+    function swatchFor(value) {
+      let color = null;
+      const m = value.match(/#[0-9A-Fa-f]{3,8}\b/);
+      if (m) color = m[0];
+      if (!color && /rgba?\(/.test(value)) {
+        const parts = value.match(/[\d.]+/g);
+        if (parts && parts.length >= 3) color = `rgb(${parts[0]},${parts[1]},${parts[2]})`;
+      }
+      if (!color) return '';
+      const style = /gradient/.test(value) ? `background:${value}` : `background:${color}`;
+      return `<span class="swatch" style="${style}" aria-hidden="true"></span>`;
+    }
+
+    function render(cfg) {
+      pathEl.textContent = cfg.name;
+      srcEl.textContent = `Traced to · ${cfg.src}`;
+      confEl.textContent = `Confidence ${cfg.conf}`;
+      let html = '';
+      cfg.rows.forEach((r) => {
+        html += `<div class="insp-row"><span class="k">${r[0]}</span><span class="val">${swatchFor(r[1])}${r[1]}</span></div>`;
+      });
+      rowsEl.innerHTML = html;
+    }
+
+    let pinned = null;
+    function setActive(el, pin) {
+      items.forEach((i) => { i.classList.remove('is-pin'); });
+      if (pinned) pinned.classList.remove('is-pin');
+      const cfg = DATA[el.getAttribute('data-i')];
+      if (!cfg) return;
+      render(cfg);
+      if (pin) {
+        pinned = el;
+        el.classList.add('is-pin');
+      }
+    }
+
+    items.forEach((el) => {
+      el.addEventListener('mouseenter', () => { if (!pinned) setActive(el, false); });
+      el.addEventListener('mouseleave', () => { if (!pinned) { pathEl.textContent = '—'; rowsEl.innerHTML = ''; srcEl.textContent = 'Vizquo · element inspector'; confEl.textContent = ''; } });
+      el.addEventListener('click', () => {
+        if (pinned === el) { pinned = null; el.classList.remove('is-pin'); return; }
+        setActive(el, true);
+      });
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+      });
+    });
+  })();
+
+  // ================= Scroll FX: header, progress, reveal, glow =================
   (function scrollFx() {
     const header = document.getElementById('siteHeader');
-    const links = [...document.querySelectorAll('#navLinks a[href^="#"]')];
+    const progress = document.getElementById('progressBar');
+    const links = Array.prototype.slice.call(document.querySelectorAll('#navLinks a[href^="#"]'));
     const sections = links
       .map((a) => document.querySelector(a.getAttribute('href')))
       .filter(Boolean);
 
-    const onScroll = () => {
+    function onScroll() {
       header.classList.toggle('scrolled', window.scrollY > 8);
+      if (progress) {
+        const h = document.documentElement;
+        const max = h.scrollHeight - h.clientHeight;
+        progress.style.width = `${max > 0 ? (window.scrollY / max) * 100 : 0}%`;
+      }
       let current = sections[0];
-      for (const s of sections) {
-        if (window.scrollY + 120 >= s.offsetTop) current = s;
-      }
-      for (const a of links) {
-        a.classList.toggle('active', a.getAttribute('href') === `#${current?.id}`);
-      }
-    };
+      sections.forEach((s) => { if (window.scrollY + 130 >= s.offsetTop) current = s; });
+      links.forEach((a) => {
+        a.classList.toggle('active', a.getAttribute('href') === `#${current ? current.id : ''}`);
+      });
+    }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+  })();
+
+  (function reveal() {
+    const els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) {
+      els.forEach((el) => { el.classList.add('in'); });
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    els.forEach((el) => { io.observe(el); });
+  })();
+
+  (function glow() {
+    const cards = document.querySelectorAll('.glow-card');
+    cards.forEach((card) => {
+      card.addEventListener('pointermove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+  })();
+
+  (function burger() {
+    const btn = document.getElementById('navBurger');
+    const nav = document.getElementById('navLinks');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', () => {
+      const open = nav.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.textContent = open ? '✕' : '☰';
+    });
+    nav.querySelectorAll('a').forEach((a) => {
+      a.addEventListener('click', () => { nav.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); btn.textContent = '☰'; });
+    });
   })();
 </script>
 </body>
