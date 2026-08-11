@@ -3,6 +3,7 @@
   "description": "Inspect anything. Understand everything. Build faster. — a design-intelligence layer for the web.",
   "private": true,
   "version": "0.10.1",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "wxt",

@@ -1,23 +1,130 @@
-# Vizquo
+<p align="center">
+  <img src="public/icon/128.png" width="96" height="96" alt="Vizquo">
+</p>
 
-**Inspect anything. Understand everything. Build faster.**
+<h1 align="center">Vizquo</h1>
 
-Vizquo is a design-intelligence layer for the web — a browser extension side
-panel that extracts a site's visual system (colors, typography, spacing,
-components, assets) with every value traced back to its source and tagged with
-its confidence. It is not a CSS inspector, not a screenshot tool, not a
-scraper, and not a chatbot with a browser action.
+<p align="center">
+  <strong>Inspect anything. Understand everything. Build faster.</strong><br>
+  A design-intelligence layer for the web — inspect a live page and extract its
+  visual system, with every value traced back to its source.
+</p>
 
-## Two modes, one data model
+<p align="center">
+  <a href="https://github.com/YOUR-USERNAME/vizquo/actions/workflows/ci.yml">
+    <img src="https://github.com/YOUR-USERNAME/vizquo/actions/workflows/ci.yml/badge.svg" alt="CI">
+  </a>
+  <img src="https://img.shields.io/badge/Chrome-MV3-4285F4" alt="Chrome MV3">
+  <img src="https://img.shields.io/badge/Firefox-MV3-FF7139" alt="Firefox MV3">
+  <img src="https://img.shields.io/badge/version-0.10.1-6E7BFF" alt="Version 0.10.1">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license">
+</p>
 
-- **Designer mode** — plain-language summaries ("Flex, horizontal,
-  space-between, gap 16px") with a *Show CSS* toggle.
-- **Engineer mode** — computed styles, cascade, specificity, source maps, DOM.
+---
 
-Both read from the same extraction engine. This is a presentation switch,
-never two separate analyzers.
+## What is Vizquo?
 
-## Stack
+Vizquo is a browser extension side panel for designers and frontend developers.
+Point it at any webpage and it extracts the site's **design DNA** — colors,
+typography, spacing, radius, components, and assets — every value labeled with
+its confidence (**Detected / Derived / Inferred**) and traced back to the CSS
+rule, stylesheet, and line that produced it.
+
+It is **not** a CSS inspector, not a screenshot tool, and not a scraper. It is
+a lens into the visual system of the web: *Inspect → Understand → Extract →
+Rebuild.*
+
+## Screenshots
+
+| Design overview | Element inspector | Assets |
+|---|---|---|
+| ![Design overview](deploy-kit/screenshots/design-overview.png) | ![Element inspector](deploy-kit/screenshots/inspector.png) | ![Assets](deploy-kit/screenshots/assets.png) |
+
+## Features
+
+- **Element inspector** — computed styles, CSS cascade & specificity, variable
+  chains, box-model diagram, DOM tree, and plain-language Designer summaries
+  with a *Show CSS* toggle (Designer ⇄ Engineer modes).
+- **Design DNA** — automatic color roles, typographic hierarchy, spacing /
+  radius / shadow scales, CSS variables, and a design-consistency score (0–100)
+  with click-to-highlight on the real page.
+- **Asset extraction** — images, SVGs, icons, backgrounds, video posters and
+  more, deduped and classified; an SVG inspector with SVG → React conversion;
+  one-click bulk ZIP export.
+- **Screenshot studio** — viewport, element, full-page and multi-selection
+  captures.
+- **Code generation** — turn any element into **React, Vue, Svelte, HTML, or
+  Tailwind** code; export design tokens to **CSS, SCSS, Tailwind, JSON, TS,
+  Figma Tokens, and Style Dictionary**.
+- **Audits** — WCAG contrast with exact luminance math, performance, and
+  accessibility findings, anchored to their elements.
+- **Responsive Time Machine** — see the layout at any viewport width via
+  real iframe emulation.
+- **Library** — scan history, per-page version timeline with diff summaries,
+  collections, notes, comparison, and printable reports.
+- **Command palette** (Ctrl/⌘K) and omnibox commands (`viz scan`, `viz
+  inspect`, …) for keyboard-first workflows.
+- **Optional AI** — "Why?" element explanations and design-system summaries via
+  free OpenRouter models or a fully-local Ollama. Off by default, consent-gated.
+
+## Privacy
+
+- **Local by default.** Scans, screenshots, and your library live only in your
+  browser (IndexedDB). No account, no tracking, no analytics — and **zero
+  network requests** until you choose otherwise (the UI loads no external
+  fonts, scripts, or resources).
+- **On-demand access.** Site access is granted per-site, on demand — never at
+  install. Cross-origin iframes and closed Shadow DOM are honestly labeled,
+  never bypassed.
+- **AI is opt-in and bounded.** Disabled by default; shows exactly what it will
+  send before the first request; payloads are redacted (no input values, no
+  data attributes). You can use a local model that never leaves your machine.
+
+See [`PRIVACY.md`](PRIVACY.md) and [`SECURITY.md`](SECURITY.md) for details.
+
+## Install
+
+> Store listings are in progress — links appear here when live.
+
+**Chrome / Edge** — install from the Chrome Web Store / Edge Add-ons, or load
+the unpacked build:
+
+```sh
+npm install
+npm run build        # production build → .output/chrome-mv3
+```
+
+1. Open `chrome://extensions` (or `edge://extensions`) → enable **Developer mode**.
+2. **Load unpacked** → select `.output/chrome-mv3`.
+3. Pin Vizquo, open the side panel, and grant access to a tab when prompted —
+   that is how it connects: always on demand, never by default.
+
+**Firefox** — `npm run build:firefox:mv3`, then load `.output/firefox-mv3` via
+`about:debugging#/runtime/this-firefox` (temporary add-on).
+
+## Development
+
+```sh
+npm install
+npm run dev            # Chrome dev build with HMR
+npm run dev:firefox    # Firefox dev build
+npm run compile        # strict tsc
+npm run lint           # Biome
+npm run test           # vitest unit suite
+npm run test:e2e       # Playwright E2E (needs `npm run build` first)
+npm run zip            # store-ready ZIP → .output/
+```
+
+Validation gate before shipping: `compile → lint → test → build → test:e2e`.
+
+Store assets (promo tiles + real panel screenshots) are generated by scripts:
+
+```sh
+node scripts/generate-promo-tile.mjs    # → deploy-kit/promo/
+node scripts/capture-screenshots.mjs    # → deploy-kit/screenshots/ (add CAPTURE_WIDTH=420 for side-panel shots)
+```
+
+## Tech stack
 
 | Concern | Pick |
 |---|---|
@@ -27,105 +134,23 @@ never two separate analyzers.
 | Styling | **UnoCSS** + CSS custom properties |
 | Local persistence | **Dexie / IndexedDB** behind a repository interface |
 | Messaging | **@webext-core/messaging** (typed RPC) |
-| Worker offloading | **Comlink** (Phase 3) |
-| CSS parsing | **css-tree** (Phase 2) |
-| Color science | **culori** (Phase 3) |
-| ZIP export | **fflate** (Phase 4) |
-| AI | **OpenRouter** (free `:free` models) + **Ollama** (fully local) behind an `AIProvider` adapter (Phases 7 & 9) |
-| Tests | **Vitest** + **Playwright** (E2E smoke) |
-| Lint / format | **Biome** |
-
-Everything is MIT/Apache-licensed and runs locally — no backend, no account,
-no cost. The AI layer is strictly additive and optional; see [AI — free by
-default](#ai--free-by-default) below.
-
-## Build phases (Section 9 of the spec)
-
-| Phase | What ships | Status |
-|---|---|---|
-| 1 | Foundation: WXT skeleton, typed messaging, repository + IndexedDB adapter, L3 cache, design system, theming, command palette, settings, shortcuts + cheatsheet, onboarding tour | ✅ Done |
-| 2 | Element inspector (six tabs), CSS source intelligence (cascade, specificity, variable chains), smart measurement + box-model overlay, DOM tree, L1 cache, toolbar badge, context menu | ✅ Done |
-| 3 | Scan engine, Page overview, Design DNA (color roles, type hierarchy, scales), token systems, find instances/similar, multi-select, L2 worker memoization | ✅ Done |
-| 4 | Asset extractor, SVG inspector, bulk ZIP export | ✅ Done |
-| 5 | Accessibility/performance audits, consistency, technology detection, responsive Time Machine | ✅ Done |
-| 6 | Screenshot studio, live editing, export center, code generation, token export | ✅ Done |
-| 7 | Contextual AI (privacy-gated), "Why?" intelligence, BYOK OpenRouter | ✅ Done |
-| 8 | Components/playground, history/collections/notes, comparison/reports, detachable window, omnibox, diagnostics | ✅ Done |
-| 9 | Release readiness: version + icons + keyless builds, CI, Figma Tokens/Style Dictionary export, library backup/restore, live-edit persistence, AI diff narration + fix prioritization, local Ollama provider, code-split panels, storage awareness, a11y E2E guard | ✅ Done |
-
-Each phase is gated by a Definition of Done — verified by running the build,
-not assumed. See `DECISIONS.md` for the running log of architectural choices.
-
-## Getting started
-
-```sh
-npm install
-npm run dev        # start WXT dev server
-npm run compile    # tsc --noEmit
-npm run lint       # biome check
-npm run test        # vitest run
-npm run build       # wxt build (extension ready in .output)
-npm run test:e2e    # Playwright smoke test against the built extension
-```
-
-Load the unpacked extension from `.output/chrome-mv3` in
-`chrome://extensions` (Developer mode). Grant site access to a tab when
-prompted — that is how Vizquo connects, always on demand, never by default.
-
-## AI — free by default
-
-AI features ("Why?" element explanations, design-system summaries, compare
-diff narration, audit-fix prioritization) are **off by default** and every
-other Vizquo feature works without them. Nothing is uploaded, tracked, or
-sold — all analysis runs locally, and the AI layer is the only thing that can
-talk to a network at all.
-
-### Two providers, one adapter
-
-| | OpenRouter | Ollama (local) |
-|---|---|---|
-| Where it runs | Cloud (your key) | Your machine (no key) |
-| Cost | Free `:free` models by default | Zero — no cloud at all |
-| Setup | Paste a key in Settings (or none, in dev) | Install Ollama, `ollama pull llama3.2` |
-| Privacy | Bounded, redacted prompts to the model you chose | Nothing leaves the machine |
-| Default | ✅ (nothing to install) | Opt-in from Settings |
-
-- **OpenRouter** is the default: `openrouter/free` auto-selects the best
-  available free model, and every listed model is free. Bring your own key
-  (Settings → AI) to unlock paid models.
-- **Ollama** runs inference locally via `http://localhost:11434` — the
-  strictest privacy posture Vizquo offers. Settings lets you pick the
-  provider, set the base URL and model, and grants the `localhost` permission
-  on demand.
-
-### Why production builds are keyless
-
-Dev builds inline the author's own OpenRouter key so the full AI flow works
-out of the box during development. Production builds (`wxt build`, including
-the Web Store ZIP) ship **keyless by construction** — `import.meta.env.DEV`
-strips the constant from every distributable bundle, so a key can never be
-extracted from a published extension and used by someone else. Users paste
-their own key in Settings (which always overrides the bundled default), or
-use Ollama and skip keys entirely.
-
-### Privacy posture
-
-- The API key lives **only** in the background worker — never in the content
-  script, the page, or the panel's renderer state (the UI sees a `hasKey`
-  boolean).
-- Prompts are bounded and redacted at the builder (`ai/prompts.ts`): text
-  ≤ 200 chars, HTML snippets ≤ 160 chars with `value`/`name`/`data-*`
-  attributes stripped, no input values by construction.
-- Before the first request, a consent gate shows the exact payload summary
-  — what you approve is byte-for-byte what is sent.
+| Worker offloading | **Comlink** |
+| CSS parsing | **css-tree** · Color science **culori** · ZIP export **fflate** |
+| AI | **OpenRouter** (free `:free` models) + **Ollama** (fully local) |
+| Tests | **Vitest** + **Playwright** · Lint/format **Biome** |
 
 ## Documentation
 
-- `ARCHITECTURE.md` — folder layout, stores, caching tiers, storage abstraction
-- `PERMISSIONS.md` — every manifest permission and why
-- `SECURITY.md` — how page content is treated as untrusted input
-- `PRIVACY.md` — what leaves the browser (nothing, except opt-in AI)
-- `DATA_MODEL.md` — the normalized entity types
-- `TESTING.md` — test matrix and how to run it
-- `DECISIONS.md` — running log of non-obvious choices
-- `CHANGELOG.md` — release notes (powers the "What's new" panel)
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — folder layout, stores, caching tiers
+- [`PERMISSIONS.md`](PERMISSIONS.md) — every manifest permission and why
+- [`SECURITY.md`](SECURITY.md) — page content treated as untrusted input
+- [`PRIVACY.md`](PRIVACY.md) — what leaves the browser (nothing, except opt-in AI)
+- [`DATA_MODEL.md`](DATA_MODEL.md) — the normalized entity types
+- [`TESTING.md`](TESTING.md) — test matrix and how to run it
+- [`CHANGELOG.md`](CHANGELOG.md) — release notes (also powers the in-app
+  "What's new" dialog)
+- [`DECISIONS.md`](DECISIONS.md) — running log of non-obvious choices
+
+## License
+
+[MIT](LICENSE)
