@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.10.2 — Grant-access fix
+
+- **Fixed: "Grant access to this tab" never connected the inspector on
+  Chrome.** The permission request ran *after* an awaited round-trip to the
+  background service worker, which consumed the user gesture Chrome requires
+  for `permissions.request` — the browser silently refused and the panel
+  stayed on "Not connected" with no way forward. The request now fires
+  synchronously inside the click, using the tab URL the panel already knows.
+  When the URL isn't cached, Chrome 133+ uses the modern toolbar
+  host-access chip (`permissions.addHostAccessRequest`, no URL needed), with
+  a `permissions.onAdded` watch that reloads the tab the moment the user
+  clicks Allow; older browsers fall back to a single direct `tabs.query`.
+- **The panel now watches tab switches** (silent re-checks), so "Grant
+  access" always targets the tab you're actually looking at — no stale
+  cross-tab grants.
+- **Better grant UX**: every outcome is explained (granted / chip-signaled /
+  denied / unsupported page), including the recovery path when access was
+  declined before (browser extension settings → Site access). After a
+  successful grant the panel re-checks a few times, so slow pages connect
+  without a manual re-click.
+- Removed the now-unused GET_ACTIVE_TAB message from the typed bus.
+
 ## 0.10.1 — Release hardening
 
 - **Fixed: analysis scans could hang forever on real pages.** The analysis

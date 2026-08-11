@@ -1,5 +1,5 @@
 import { RefreshCw, ShieldCheck, Wifi, WifiOff } from 'lucide-solid';
-import { onMount } from 'solid-js';
+import { createSignal, onMount, Show } from 'solid-js';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
 import { Panel } from '../../components/Panel';
@@ -20,6 +20,8 @@ function ConnectionSkeleton() {
 }
 
 export function ConnectionCard() {
+  const [granting, setGranting] = createSignal(false);
+
   onMount(() => {
     if (ui.connection.status === 'idle') void runConnectionCheck();
   });
@@ -38,14 +40,33 @@ export function ConnectionCard() {
   }
 
   async function onGrantAccess() {
-    const granted = await grantSiteAccess();
-    if (!granted) {
-      notify({
-        title: 'Site access not granted',
-        description:
-          'Vizquo needs access to this page to inspect it. You can grant it from the browser prompt.',
-        tone: 'warning',
-      });
+    setGranting(true);
+    try {
+      const result = await grantSiteAccess();
+      if (result.status === 'granted') {
+        notify({
+          title: 'Access granted',
+          description: 'Reloading the page to connect the inspector…',
+          tone: 'success',
+        });
+      } else if (result.status === 'signaled') {
+        notify({
+          title: 'Check the toolbar prompt',
+          description:
+            'Your browser is asking to allow Vizquo on this site — click Allow, then the page reloads automatically.',
+          tone: 'neutral',
+        });
+      } else {
+        notify({
+          title: 'Site access not granted',
+          description:
+            result.reason ??
+            'Vizquo needs access to this page to inspect it. Grant it from the browser prompt.',
+          tone: 'warning',
+        });
+      }
+    } finally {
+      setGranting(false);
     }
   }
 
@@ -101,11 +122,15 @@ export function ConnectionCard() {
                     nothing is sent anywhere; everything runs locally.
                   </Show>
                 </p>
-                <div>
-                  <Button size="sm" variant="primary" onClick={onGrantAccess}>
+                <div class="flex flex-col gap-1.5">
+                  <Button size="sm" variant="primary" onClick={onGrantAccess} disabled={granting()}>
                     <ShieldCheck class="size-3.5" />
-                    Grant access to this tab
+                    {granting() ? 'Requesting access…' : 'Grant access to this tab'}
                   </Button>
+                  <p class="text-[11px] leading-relaxed text-[var(--vq-fg-subtle)]">
+                    Your browser will ask to allow Vizquo on this site — click <b>Allow</b>. Nothing
+                    is sent anywhere; everything runs locally.
+                  </p>
                 </div>
               </div>
             }

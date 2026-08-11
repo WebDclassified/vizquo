@@ -16,7 +16,7 @@
   </a>
   <img src="https://img.shields.io/badge/Chrome-MV3-4285F4" alt="Chrome MV3">
   <img src="https://img.shields.io/badge/Firefox-MV3-FF7139" alt="Firefox MV3">
-  <img src="https://img.shields.io/badge/version-0.10.1-6E7BFF" alt="Version 0.10.1">
+  <img src="https://img.shields.io/badge/version-0.10.2-6E7BFF" alt="Version 0.10.2">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license">
 </p>
 

@@ -17,7 +17,7 @@ import {
 import { AiExplainDialog } from './ai/AiExplainDialog';
 import { CheatsheetDialog } from './CheatsheetDialog';
 import { CommandPalette } from './CommandPalette';
-import { runConnectionCheck } from './connection';
+import { runConnectionCheck, watchActiveTab } from './connection';
 import { handleScanStorageChange, scanPage, setScanTabId } from './design/scan-client';
 import { Footer } from './Footer';
 import { Header } from './Header';
@@ -141,6 +141,9 @@ function routeOmniboxCommand(command: string): void {
 
 export function App() {
   onMount(() => {
+    // Keep the cached tab fresh so "Grant access" always targets the tab the
+    // user is looking at (silent re-checks on tab switch / navigation).
+    watchActiveTab();
     void loadPersistedSettings().then(() => {
       if (ui.connection.status === 'idle') void runConnectionCheck();
     });

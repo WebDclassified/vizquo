@@ -62,8 +62,6 @@ export interface ProtocolMap {
   PING: (data: { nonce: number }) => PingResult;
   /** Content-script health check, sent by the background to a specific tab. */
   PING_TAB: (data: { nonce: number }) => ContentPingReply;
-  /** Active tab lookup, answered by the background. */
-  GET_ACTIVE_TAB: () => TabInfo;
   /** A content script's own tab id (background resolves it from the sender). */
   GET_CONTENT_TAB_ID: () => { tabId: number | null };
   /** Cancel the running scan in the content script (if any). */

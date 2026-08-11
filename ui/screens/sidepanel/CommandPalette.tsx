@@ -106,11 +106,22 @@ function buildCommands(): PaletteEntry[] {
       hint: 'permission requested on demand, never by default',
       action: () => {
         void (async () => {
-          const granted = await grantSiteAccess();
-          notify({
-            title: granted ? 'Access granted — reconnecting' : 'Access not granted',
-            tone: granted ? 'success' : 'warning',
-          });
+          const result = await grantSiteAccess();
+          if (result.status === 'granted') {
+            notify({ title: 'Access granted — reconnecting', tone: 'success' });
+          } else if (result.status === 'signaled') {
+            notify({
+              title: 'Check the toolbar prompt',
+              description: 'Click Allow on the page to finish granting access.',
+              tone: 'neutral',
+            });
+          } else {
+            notify({
+              title: 'Access not granted',
+              description: result.reason ?? 'Vizquo could not request access to this page.',
+              tone: 'warning',
+            });
+          }
         })();
       },
     },

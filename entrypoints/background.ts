@@ -196,11 +196,6 @@ export default defineBackground(() => {
     }
   });
 
-  onMessage('GET_ACTIVE_TAB', async () => {
-    const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
-    return { id: tab?.id, url: tab?.url, title: tab?.title };
-  });
-
   // Content scripts cannot read chrome.tabs — the background resolves the
   // sender's tab id for them (used to tab-stamp storage payloads).
   onMessage('GET_CONTENT_TAB_ID', ({ sender }) => ({
