@@ -72,6 +72,7 @@
     margin: 18px 0 16px;
     font-weight: 800;
   }
+  .hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
   .hero h1 span { color: var(--indigo); }
   .hero .sub {
     color: var(--muted);
@@ -91,7 +92,6 @@
   .hero-note { margin-top: 14px; color: var(--muted); font-size: 13.5px; }
   .hero-note b { color: var(--fg); }
   .hero-meta { display: flex; justify-content: center; gap: 26px; margin-top: 30px; font-size: 13.5px; color: var(--muted); }
-  .hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
   .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
   .dot.green { background: #3ecf8e; box-shadow: 0 0 8px #3ecf8e; }
 
@@ -458,7 +458,7 @@
       // Scroll-hint in the hero CTA.
       if (browser === 'safari' || browser === 'mobile') {
         cta.setAttribute('href', '#download');
-        note.innerHTML = '<b>' + (browser === 'safari' ? 'Safari' : 'Mobile') + '</b> isn\u2019t supported yet \u2014 use a desktop Chromium browser or Firefox.';
+        note.innerHTML = `<b>${browser === 'safari' ? 'Safari' : 'Mobile'}</b> isn\u2019t supported yet \u2014 use a desktop Chromium browser or Firefox.`;
       } else {
         const label = {
           chrome: 'Chrome',
@@ -466,7 +466,7 @@
           firefox: 'Firefox',
           chromium: 'Brave / Opera / Chromium',
         }[browser];
-        note.innerHTML = 'Detected: <b>' + label + '</b> \u2014 your browser is highlighted below.';
+        note.innerHTML = `Detected: <b>${label}</b> \u2014 your browser is highlighted below.`;
       }
     } else {
       note.textContent = 'Choose your browser below.';
