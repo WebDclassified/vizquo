@@ -25,15 +25,13 @@ Vizquo is an inspection tool, not a security-bypass tool.
 
 ## API keys and the AI layer (Phase 7)
 
-- **Bundled dev key vs. keyless production.** Dev builds bundle the author's
-  own OpenRouter key in `ai/config.ts` (`AUTHOR_DEFAULT_KEY`) so AI works
-  out of the box for testing. The constant is gated on `import.meta.env.DEV`
-  — `wxt build` (every distributable bundle, including the Web Store ZIP)
-  statically replaces it with `''`, so the published extension is **keyless
-  by construction** and nobody can extract the author's key. Users paste
-  their own key in Settings, which is the recommended production posture.
-  The unit test pins the dev-bundled state so shipping with a key stays a
-  deliberate choice.
+- **Keyless everywhere.** Vizquo embeds no API key in the repository or any
+  build (`AUTHOR_DEFAULT_KEY` in `ai/config.ts` is `''` in every build). A
+  key embedded in an extension could be extracted by anyone who downloads
+  it, and GitHub secret scanning rejects pushes containing known key
+  patterns. Users paste their own key in Settings — the recommended posture
+  — or use the fully-local Ollama provider. The unit tests pin the keyless
+  state so adding a key stays a deliberate choice.
 - A user's own key always overrides the bundled default (`resolveApiKey`).
 - Keys are stored through the repository (local IndexedDB, extension-scoped)
   and are read **only** by the background worker, which performs the network

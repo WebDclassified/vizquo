@@ -1,25 +1,19 @@
 /**
  * AI configuration (Phase 7, Section 7.23).
  *
- * `AUTHOR_DEFAULT_KEY` is the extension author's own OpenRouter key, bundled
- * so AI works out of the box in dev mode. A user's own key in Settings always
- * takes precedence (`resolveApiKey`), and AI stays fully usable without a
- * bundled key when this is empty.
- *
- * Keyless production builds (release posture): the key is only inlined when
- * `import.meta.env.DEV` is true (WXT dev server). `wxt build` — every
- * distributable bundle, including the Web Store ZIP — ships with the key
- * stripped to `''`, so nobody can extract it from a published extension and
- * spend the author's credits. Users then paste their own key in Settings.
+ * Vizquo ships **fully keyless** — there is no bundled API key in the
+ * repository or in any build. (A dev-only key was removed: GitHub secret
+ * scanning blocks keys in public repositories, and keyless-by-construction is
+ * the correct release posture — a key embedded in an extension could be
+ * extracted by anyone who downloads it.) Users paste their own OpenRouter key
+ * in Settings, or use the fully-local Ollama provider with no key at all.
  */
 
 /**
- * The author's bundled development key. Vite statically replaces
- * `import.meta.env.DEV` — dev = inlined, production build = ''.
+ * Always empty in every build. Kept as a constant so `resolveApiKey` and
+ * `hasAuthorDefaultKey` keep a single source of truth.
  */
-export const AUTHOR_DEFAULT_KEY = import.meta.env.DEV
-  ? 'sk-or-v1-REVOKED'
-  : '';
+export const AUTHOR_DEFAULT_KEY = '';
 
 /** True when a bundled default key is present in this build. */
 export function hasAuthorDefaultKey(): boolean {

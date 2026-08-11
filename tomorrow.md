@@ -218,9 +218,11 @@ npm run zip              # store-ready ZIP → .output/
 
 ## 7. Key gotchas & lessons (learned the hard way)
 
-- **Production must stay keyless**: after any build, verify with
-  `grep -ro 'sk-or-[a-zA-Z0-9]\{8,\}' .output/chrome-mv3 | wc -l` → must be 0.
-  The author key only exists in `ai/config.ts` behind `import.meta.env.DEV`.
+- **Builds are keyless by construction**: `AUTHOR_DEFAULT_KEY` in
+  `ai/config.ts` is `''` in every build (a bundled dev key was removed —
+  GitHub secret scanning blocks keys in public repos). After any build,
+  verify with `grep -ro 'sk-or-[a-zA-Z0-9]\{8,\}' .output/chrome-mv3 | wc -l`
+  → must be 0. Users add their own key in Settings or use Ollama.
 - **Manifest permissions are minimal on purpose** (`storage`, `sidePanel`,
   `downloads`, `contextMenus`, `activeTab`). Store reviewers flag unused
   permissions — don't re-add `scripting`/`offscreen`; WXT injects them

@@ -35,9 +35,9 @@ HTML or DOM. Input values and data attributes are excluded by construction.
 
 The `openrouter.ai` host permission is requested on demand, only when you
 enable AI, and your API key is stored locally and used only by the background
-worker. Dev builds bundle the author's key as a default (see `SECURITY.md` —
-it is removed for public builds); your own key in Settings always overrides
-it, and you can remove it any time.
+worker. Vizquo is **fully keyless** — no key ships with the extension; the
+only key involved is the one you paste in Settings (or none at all, with the
+local Ollama provider), and you can remove it any time.
 
 Every non-AI feature works with AI fully disabled. AI is additive, never
 load-bearing.

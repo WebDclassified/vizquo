@@ -339,16 +339,15 @@ is reachable from some scope, and the project ZIP is an fflate round-trip
 tested against the real `tokens.ts` output — the same serializer the UI
 uses, not a fixture.
 
-### AI default key: dev-only, keyless production builds
-Dev builds bundle the author's OpenRouter key (`ai/config.ts`,
-`AUTHOR_DEFAULT_KEY`) so AI works out of the box for testing. A key embedded
-in a *published* extension would be extractable by anyone who downloads it,
-so production builds ship keyless: the constant is gated on
-`import.meta.env.DEV` (typed in `types/raw.d.ts`), and `wxt build` sets
-`DEV=false` — the bundle contains `''`. Users bring their own key via
-Settings (which always overrides the bundled default). The unit test pins the
-dev-bundled state so shipping with a key stays a conscious choice, and the
-keyless constant keeps the published extension zero-cost for the author.
+### AI key: keyless by construction
+Vizquo embeds **no API key** in the repository or any build
+(`AUTHOR_DEFAULT_KEY` is `''` everywhere). A dev key was bundled initially so
+AI worked out of the box in dev, but it was removed: a key embedded in a
+*published* extension would be extractable by anyone who downloads it, and
+GitHub secret scanning rejects pushes that contain known key patterns. Users
+bring their own key via Settings (free `:free` models are the default) or use
+the fully-local Ollama provider. Unit tests pin the keyless state so adding a
+key stays a deliberate choice.
 
 ### AI prompts are bounded and redacted at the builder, not at the gate
 The privacy gate is a UX layer; the real guarantee is that `ai/prompts.ts`

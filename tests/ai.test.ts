@@ -473,29 +473,31 @@ describe('ai config', () => {
     expect(DEFAULT_AI_MODEL).toBe('openrouter/free');
   });
 
-  it('bundles a key only when AUTHOR_DEFAULT_KEY is set (release = keyless)', () => {
-    // The author asked to bundle their key so AI works out of the box. The
-    // constant lives in ai/config.ts with a REMOVE-BEFORE-PUBLISHING note;
-    // this assertion is release-tolerant: it passes both with a bundled dev
-    // key AND after the key is cleared for the Web Store build.
-    expect(hasAuthorDefaultKey()).toBe(AUTHOR_DEFAULT_KEY.length > 0);
-    if (AUTHOR_DEFAULT_KEY) {
-      expect(AUTHOR_DEFAULT_KEY.startsWith('sk-or-v1-')).toBe(true);
-    }
+  it('is keyless by construction — no bundled key anywhere', () => {
+    // Release posture: no key is embedded in the repository or any build
+    // (a bundled dev key was removed — GitHub secret scanning blocks keys in
+    // public repos, and keyless is the correct ship state). AI works via the
+    // user's own key in Settings or the fully-local Ollama provider.
+    expect(AUTHOR_DEFAULT_KEY).toBe('');
+    expect(hasAuthorDefaultKey()).toBe(false);
   });
 
-  it('a stored user key overrides the bundled default', () => {
+  it('a stored user key always wins', () => {
     expect(resolveApiKey('sk-or-user-key')).toBe('sk-or-user-key');
   });
 
-  it('falls back to the bundled default when no user key is stored', () => {
-    expect(resolveApiKey(null)).toBe(AUTHOR_DEFAULT_KEY);
-    expect(resolveApiKey('   ')).toBe(AUTHOR_DEFAULT_KEY);
+  it('resolves to null when nothing is stored and none is bundled', () => {
+    // Keyless build: no fallback key exists — honest "no key" state until
+    // the user adds one in Settings.
+    const fallback = hasAuthorDefaultKey() ? AUTHOR_DEFAULT_KEY : null;
+    expect(resolveApiKey(null)).toBe(fallback);
+    expect(resolveApiKey('   ')).toBe(fallback);
   });
 
   it('returns the fallback when the stored value is empty/undefined', () => {
-    expect(resolveApiKey(undefined)).toBe(AUTHOR_DEFAULT_KEY);
-    expect(resolveApiKey('')).toBe(AUTHOR_DEFAULT_KEY);
+    const fallback = hasAuthorDefaultKey() ? AUTHOR_DEFAULT_KEY : null;
+    expect(resolveApiKey(undefined)).toBe(fallback);
+    expect(resolveApiKey('')).toBe(fallback);
   });
 });
 
