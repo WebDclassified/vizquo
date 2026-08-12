@@ -68,15 +68,35 @@ function startServer() {
 async function runEngine(browserType, url) {
   const problems = [];
   const browser = await browserType.launch();
+  const isFontHost = (url) => {
+    try {
+      return /fonts\.(googleapis|gstatic)\.com/.test(new URL(url).host);
+    } catch {
+      return false;
+    }
+  };
+  // Console errors alone can't attribute generic "Failed to load resource"
+  // messages (WebKit logs transient Google Fonts 404s with no URL). Real
+  // resource failures are caught deterministically by the response handler
+  // below, so generic load errors are ignored here.
   const isRealError = (m) => {
     if (m.type() !== 'error') return false;
-    // Google Fonts is fetched at runtime; a transient download failure logs a
-    // console error but the page falls back to system fonts gracefully.
-    return !/downloadable font|font-family|woff2?/.test(m.text());
+    const text = m.text();
+    if (/downloadable font|font-family|woff2?/.test(text)) return false;
+    if (/Failed to load resource/.test(text)) return false;
+    return true;
+  };
+  const watchNetwork = (page) => {
+    page.on('response', (res) => {
+      if (res.status() >= 400 && !isFontHost(res.url())) {
+        problems.push(`HTTP ${res.status()} for ${new URL(res.url()).pathname}`);
+      }
+    });
   };
   try {
     // ---- Desktop ----
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    watchNetwork(page);
     page.on('console', (m) => {
       if (isRealError(m)) problems.push(`console.error: ${m.text()}`);
     });
@@ -150,6 +170,7 @@ async function runEngine(browserType, url) {
 
     // ---- Mobile ----
     const mob = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    watchNetwork(mob);
     mob.on('console', (m) => {
       if (isRealError(m)) problems.push(`mobile console.error: ${m.text()}`);
     });
