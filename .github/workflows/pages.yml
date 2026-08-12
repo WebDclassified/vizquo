@@ -1,0 +1,61 @@
+name: Pages
+
+# Deploys the site to GitHub Pages only when the published content actually
+# changes (landing, store kit incl. the privacy policy, public icons, README,
+# or this workflow). Pushes that only touch extension code skip the deploy.
+#
+# ⚠️ One-time setup: switch Pages to Actions-based deployment once —
+#    Settings → Pages → Source → "GitHub Actions" → Save.
+#    Until then the deploy step below is tolerate-on-error and the existing
+#    branch-based deploy keeps serving the site.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'landing/**'
+      - 'deploy-kit/**'
+      - 'public/**'
+      - 'README.md'
+      - 'LICENSE'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+# Cancel a still-running deploy when a newer content push arrives.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build site artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+        # Fails only while Pages is still configured to "Deploy from a branch"
+        # (Settings → Pages → Source → "GitHub Actions"). Kept soft so the
+        # interim runs don't turn CI red before that one-time switch.
+        continue-on-error: true

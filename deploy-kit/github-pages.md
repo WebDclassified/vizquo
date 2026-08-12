@@ -57,6 +57,20 @@ The policy text mirrors `PRIVACY.md` in the repo. When you update the policy,
 commit + push — Pages redeploys automatically and the URL never changes (which
 is exactly what the stores want: a stable policy URL).
 
+## Deploy behavior (and the optimized option)
+
+With "Deploy from a branch" (main / root) **every push to main redeploys the
+site** — including extension-only changes. That's fine for a small repo, but
+the repo also ships an optimized path (`.github/workflows/pages.yml`):
+
+1. Settings → Pages → **Source → GitHub Actions** → Save (one time).
+2. The `Pages` workflow takes over from there: it deploys only when
+   `landing/`, `deploy-kit/`, `public/`, `README.md`, or `LICENSE` change,
+   cancels superseded deploys, and can be triggered manually (Actions →
+   **Pages** → Run workflow). Until you flip the source, that workflow's
+   deploy step is soft-fail (green) and the branch-based deploy keeps
+   serving the site — so switching is risk-free and reversible.
+
 ## Alternative hosts (also free)
 
 - **GitHub Gist** — paste `deploy-kit/privacy-policy.md` into a secret gist;

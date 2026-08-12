@@ -69,7 +69,10 @@ Version: 0.10.7 · Build ZIPs: `.output/vizquo-0.10.7-chrome.zip` (Chrome + Edge
 
 All assets are produced by two scripts in this repo (no design tools needed):
 
-- `node scripts/generate-promo-tile.mjs` → `deploy-kit/promo/`
+- `node scripts/generate-promo-tile.mjs` (or `npm run promo`) →
+  `deploy-kit/promo/` — the 440×280 tile, 1400×560 marquee, and the
+  1200×630 OG/social card, all matching the premium landing redesign
+  (aurora gradient, Space Grotesk wordmark)
 - `node scripts/capture-screenshots.mjs` (run after `npm run build`) →
   `deploy-kit/screenshots/` — captures the REAL panel connected to a styled
   sample site, with a real Design DNA scan (a `CAPTURE_WIDTH=420` run adds
@@ -80,6 +83,7 @@ All assets are produced by two scripts in this repo (no design tools needed):
 | Extension icon | `icon/128.png` (in the ZIP) | already in the package |
 | Small promo tile (440×280) | `deploy-kit/promo/promo-440x280.png` | required |
 | Marquee (1400×560, optional) | `deploy-kit/promo/marquee-1400x560.png` | featured placement |
+| Social / OG card (1200×630) | `deploy-kit/promo/og-1200x630.png` | landing link previews + socials |
 | Screenshot — Design overview | `deploy-kit/screenshots/design-overview.png` | 1280×800, post-scan |
 | Screenshot — Inspector | `deploy-kit/screenshots/inspector.png` | locked element |
 | Screenshot — Assets | `deploy-kit/screenshots/assets.png` | extracted assets |
