@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.10.8 — Runtime error fixes, cache robustness, premium landing
+
+- **Fixed: "Cannot create item with duplicate id vizquo-inspect" on
+  background restarts.** The "Inspect with Vizquo" context menu is now
+  rebuilt cleanly (remove-all, then create) each time the service worker
+  wakes, so the duplicate-id error no longer appears in the console.
+- **Fixed: "Could not establish connection. Receiving end does not exist."**
+  The inspect-mode badge sync is now a best-effort message that can never
+  throw an unhandled error while the background is asleep or restarting.
+- **Fixed: cache eviction could mis-evict the newest scan.** The recency
+  stamp is now monotonic, so a just-scanned page can't be wrongly evicted
+  when the system clock jumps (for example, time sync).
+- **Premium landing + store assets.** The site got a full redesign — aurora
+  hero with a live product showcase, framework marquee, animated stats, and
+  an AI chat mock — and the store promo tiles plus social card were
+  regenerated to match. Download ZIPs ship straight from the site.
+- **Cross-browser verification in CI.** Every push now runs the landing and
+  the extension through Chromium, Firefox, and WebKit plus live real-site
+  probes, so browser-specific regressions are caught before they ship.
+
 ## 0.10.7 — Release automation, AI-diff coverage, shared fixtures
 
 - **One-command store release.** The entire release flow — version bump,

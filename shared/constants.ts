@@ -3,7 +3,7 @@
  */
 
 export const APP_NAME = 'Vizquo';
-export const APP_VERSION = '0.10.7';
+export const APP_VERSION = '0.10.8';
 
 /** Bump when the Inspection shape changes — invalidates all cached entries. */
 export const INSPECTION_SCHEMA_VERSION = 4;
