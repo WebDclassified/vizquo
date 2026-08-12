@@ -92,6 +92,11 @@ All assets are produced by two scripts in this repo (no design tools needed):
 | Screenshot — Settings | `deploy-kit/screenshots/settings.png` | settings + diagnostics |
 | Screenshot — Command palette | `deploy-kit/screenshots/command-palette.png` | Ctrl/⌘K |
 
+**CWS sizes:** every screenshot ships at both accepted sizes — 1280×800
+(`deploy-kit/screenshots/`) and 640×400 (`deploy-kit/screenshots/cws/`,
+RGB without alpha, produced by `npm run screenshots:cws`). Upload either
+set; both are exact 16:10 with no cropping.
+
 Screenshot pick: upload 5 of the 1280×800 shots (Chrome Web Store limit). The
 `@420` variants show the authentic narrow side-panel layout for your website
 or socials. Resize to 640×400 only if a store asks — the 1280×800 files are

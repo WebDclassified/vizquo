@@ -22,6 +22,7 @@
     "release": "node scripts/release-store.mjs",
     "promo": "node scripts/generate-promo-tile.mjs",
     "screenshots": "node scripts/capture-screenshots.mjs",
+    "screenshots:cws": "node scripts/resize-screenshots.mjs",
     "check:landing": "node scripts/check-landing-browsers.mjs"
   },
   "dependencies": {

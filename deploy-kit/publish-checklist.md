@@ -76,7 +76,9 @@ all three stores.
 2. Run the one-command release pipeline:
    `npm run release -- <old> <new>` (add `--screenshots` to also regenerate
    the promo tile + store screenshots; `--dry-run` previews the full plan
-   without changing anything). It bumps every release file, restores the
+   without changing anything). After screenshots regenerate, run
+   `npm run screenshots:cws` to produce the exact 640×400 Chrome Web Store
+   variants into `deploy-kit/screenshots/cws/`. It bumps every release file, restores the
    renamed old CHANGELOG heading, runs compile/lint/unit, builds Chrome +
    Firefox, produces the three store ZIPs, runs the keyless scan (must be
    **0**), and assembles `.output/release/vizquo-<new>/` with the ZIPs,
