@@ -25,7 +25,7 @@ WXT (web-extension toolkit, v0.21) · SolidJS · UnoCSS · TypeScript (strict) �
 Dexie/IndexedDB · Comlink worker · Vitest + Playwright · Biome
 
 ### Current version
-- `package.json` version: **0.10.6** ✅ (in sync with CHANGELOG).
+- `package.json` version: **0.10.7** ✅ (in sync with CHANGELOG).
 
 ---
 
@@ -43,7 +43,7 @@ Last full validation (all passed):
 | E2E (Playwright, 13 tests) | `npm run test:e2e` | ✅ 12 pass, 1 honest skip (grant-dependent capture success) |
 | Live probe (core + advanced) | `node scripts/probe-extension*.mjs` | ✅ 7/7 + 7/7 (capture SKIPs without host access) |
 | Live probe (real sites) | `node scripts/probe-real-sites.mjs` | ✅ 19/19 — example.com, Wikipedia, MDN, HN |
-| Store ZIP | `npm run zip` | ✅ `vizquo-0.10.6-chrome.zip` |
+| Store ZIP | `npm run zip` | ✅ `vizquo-0.10.7-chrome.zip` |
 
 Manifest permissions (minimal, all used): `storage`, `sidePanel`, `downloads`,
 `contextMenus`, `activeTab`. No unused `scripting`/`offscreen` (WXT auto-adds
@@ -262,7 +262,7 @@ that used to pass.
 
 ---
 
-## 8. Files changed today (0.10.6 — probes in CI, real-site QA, handoff UX) — in case you need to review or revert
+## 8. Files changed today (0.10.7 — probes in CI, real-site QA, handoff UX) — in case you need to review or revert
 
 | File | What |
 |---|---|
@@ -283,7 +283,7 @@ that used to pass.
 | `tests/e2e/handoff.spec.ts` | NEW — handoff selects + flashes + toasts; vanished-element warning |
 | `tests/e2e/capture.spec.ts` | NEW — deterministic error path + conditional success path (honest skip) |
 | `tests/e2e/hostile.spec.ts` | manual "Check" click removed — the auto-connect retry chain made it obsolete (and it broke once connected) |
-| `CHANGELOG.md` | 0.10.6 entry |
+| `CHANGELOG.md` | 0.10.7 entry |
 
 ## 9. Files changed today (0.10.5 — context-menu fix) — in case you need to review or revert
 
@@ -332,7 +332,7 @@ Probe notes: screenshots fail in automation because the panel is driven as a tab
 1. **Human QA on the screenshot studio with a real toolbar click** (the one
    flow automation can't fully drive — `activeTab` needs a real user gesture)
    and the **Ruler** on a connected page.
-2. Re-run `npm run zip` after the 0.10.6 bump (artifact should be current).
+2. Re-run `npm run zip` after the 0.10.7 bump (artifact should be current).
 3. Pick one from §6B (the AI timeline narration is the most "Vizquo" and
    cheapest).
 4. Then the store submissions (§6A) — they're account actions, not code.

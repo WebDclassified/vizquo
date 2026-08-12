@@ -138,7 +138,7 @@ jobs:
         run: |
           SCREENSHOTS_FLAG=""
           if [ "${{ inputs.screenshots }}" = "true" ]; then SCREENSHOTS_FLAG="--screenshots"; fi
-          npm run release -- ${{ inputs.old_version }} ${{ inputs.new_version }} $SCREENSHOTS_FLAG
+          npm run release -- "${{ inputs.old_version }}" "${{ inputs.new_version }}" $SCREENSHOTS_FLAG
       - name: QA the released build (live probes)
         run: |
           xvfb-run -a node scripts/probe-extension.mjs

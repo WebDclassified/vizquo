@@ -37,6 +37,11 @@ import {
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  changelogHasVersion,
+  insertChangelogPlaceholder,
+  restoreRenamedChangelogHeading,
+} from './changelog-helper.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -87,10 +92,6 @@ function capture(cmd) {
   return execSync(cmd, { cwd: ROOT, encoding: 'utf8' }).trim();
 }
 
-function escapeRe(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 /* ------------------------------------------------------------------------ */
 /* Help / usage                                                             */
 /* ------------------------------------------------------------------------ */
@@ -116,6 +117,9 @@ Flags:
 
 if (!oldV || !newV) fail('usage: node scripts/release-store.mjs <old> <new> [flags]');
 if (oldV === newV) fail(`old and new versions are identical ('${oldV}') — nothing to release`);
+if (!/^\d+\.\d+\.\d+$/.test(newV)) {
+  fail(`'${newV}' is not a plausible semver — expected x.y.z (e.g. 0.10.7)`);
+}
 
 /* ------------------------------------------------------------------------ */
 /* 1. Preflight                                                             */
@@ -180,21 +184,13 @@ if (dryRun) {
 step('Version bump');
 
 const changelogPath = join(ROOT, 'CHANGELOG.md');
-// Headings may carry a title ("## 0.10.7 — Release notes"), so match the
-// version prefix followed by a space or end-of-line. Non-global for the
-// boolean check (a global regex would carry state across .test() calls).
-const newHeadingRe = new RegExp(`^## ${escapeRe(newV)}(\\s|$)`, 'm');
 
 // Ensure a fresh top entry exists BEFORE the bump, so the bump's rename of
 // the old heading can be told apart from it afterwards.
 let changelog = readFileSync(changelogPath, 'utf8');
-if (!newHeadingRe.test(changelog)) {
-  const nl = changelog.indexOf('\n');
-  const insertAt = nl === -1 ? changelog.length : nl + 1;
-  changelog =
-    changelog.slice(0, insertAt) +
-    `\n## ${newV}\n\n_Template: summarize this release._\n` +
-    changelog.slice(insertAt);
+if (!changelogHasVersion(changelog, newV)) {
+  const result = insertChangelogPlaceholder(changelog, newV);
+  changelog = result.raw;
   writeFileSync(changelogPath, changelog);
   warn(`added placeholder "## ${newV}" to CHANGELOG.md — fill it in before publishing`);
 }
@@ -204,16 +200,12 @@ run(`node scripts/bump-version.mjs ${oldV} ${newV}`);
 
 // The bump renames the old "## ${oldV} — …" heading (title included) to
 // "## ${newV} — …". Restore the LAST new-version heading's prefix back to
-// the old version, keeping its title intact.
+// the old version, keeping its title intact (body-text references are only
+// warned about, not rewritten).
 changelog = readFileSync(changelogPath, 'utf8');
-const lines = changelog.split('\n');
-const renamedIdx = lines
-  .map((line, i) => (newHeadingRe.test(line) ? i : -1))
-  .filter((i) => i !== -1);
-if (renamedIdx.length > 1) {
-  const target = renamedIdx[renamedIdx.length - 1];
-  lines[target] = lines[target].replace(`## ${newV}`, `## ${oldV}`);
-  changelog = lines.join('\n');
+const restored = restoreRenamedChangelogHeading(changelog, oldV, newV);
+if (restored !== changelog) {
+  changelog = restored;
   writeFileSync(changelogPath, changelog);
   ok(`restored the renamed "## ${oldV}" CHANGELOG heading`);
 }

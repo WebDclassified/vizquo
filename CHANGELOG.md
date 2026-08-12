@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.10.7 — Release automation, AI-diff coverage, shared fixtures
+
+- **One-command store release.** The entire release flow — version bump,
+  compile/lint/unit, Chrome + Firefox (MV3) builds, the three store ZIPs, the
+  keyless scan, and the assembled release package — is now a single command:
+  `npm run release -- <old> <new>` (with a `--dry-run` preview that changes
+  nothing). A manual CI job runs the same pipeline in GitHub Actions and
+  uploads the finished package as a downloadable artifact.
+- **Timeline AI diff is now regression-tested.** The "Narrate the diff"
+  prompt (between any two stored scans of a page) is covered by unit tests
+  asserting it sends only one-sided values, caps at 6 rows per section,
+  never sends HTML/DOM, and reports identical scans honestly.
+- **Deduped test fixtures.** The five copies of the full-Inspection builder
+  scattered across test files now share a single `makeInspection` fixture,
+  so the inspection shape can't drift between suites.
+
 ## 0.10.6 — Probes in CI, real-site QA, handoff UX
 
 - **Live probes now run in CI.** A new `probe` job in the GitHub Actions
