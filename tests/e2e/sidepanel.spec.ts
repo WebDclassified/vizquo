@@ -367,7 +367,12 @@ test('Phase 6: Create panel renders studio, live editing, and export center', as
   await expect(listbox.getByText('Generate React', { exact: true })).toBeVisible();
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
+  // Confirm the palette fully closed before reopening it — typing into a
+  // half-closed combobox on a loaded runner used to race the second query.
+  const dialog = page.getByRole('dialog', { name: 'Command palette' });
+  await expect(dialog).toHaveCount(0);
   await page.keyboard.press('Control+k');
+  await expect(dialog).toBeVisible();
   await page.keyboard.type('design tokens');
   await expect(listbox.getByText('Export design tokens', { exact: true })).toBeVisible();
   await page.keyboard.press('Escape');

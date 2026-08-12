@@ -68,11 +68,17 @@ function startServer() {
 async function runEngine(browserType, url) {
   const problems = [];
   const browser = await browserType.launch();
+  const isRealError = (m) => {
+    if (m.type() !== 'error') return false;
+    // Google Fonts is fetched at runtime; a transient download failure logs a
+    // console error but the page falls back to system fonts gracefully.
+    return !/downloadable font|font-family|woff2?/.test(m.text());
+  };
   try {
     // ---- Desktop ----
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     page.on('console', (m) => {
-      if (m.type() === 'error') problems.push(`console.error: ${m.text()}`);
+      if (isRealError(m)) problems.push(`console.error: ${m.text()}`);
     });
     page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
     await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
@@ -84,9 +90,21 @@ async function runEngine(browserType, url) {
     );
     if (overflow > 0) problems.push(`desktop horizontal overflow ${overflow}px`);
 
-    // Counters animate to targets.
+    // Counters animate to targets. WebKit's headless IntersectionObserver is
+    // lazy, so poll with scroll-into-view retries instead of a fixed sleep.
     await page.evaluate(() => window.scrollTo(0, 700));
-    await page.waitForTimeout(2400);
+    await page
+      .waitForFunction(
+        () => {
+          const c100 = document.querySelector('.stat .counter[data-count="100"]');
+          const c7 = document.querySelector('.stat .counter[data-count="7"]');
+          const done = c100?.textContent.trim() === '100%' && c7?.textContent.trim() === '7';
+          if (!done) c100?.scrollIntoView({ block: 'center' });
+          return done;
+        },
+        { timeout: 15000 },
+      )
+      .catch(() => {});
     const c100 = (await page.locator('.stat .counter[data-count="100"]').textContent())?.trim();
     const c7 = (await page.locator('.stat .counter[data-count="7"]').textContent())?.trim();
     if (c100 !== '100%') problems.push(`counter[100] = ${c100}`);
@@ -133,7 +151,7 @@ async function runEngine(browserType, url) {
     // ---- Mobile ----
     const mob = await browser.newPage({ viewport: { width: 390, height: 844 } });
     mob.on('console', (m) => {
-      if (m.type() === 'error') problems.push(`mobile console.error: ${m.text()}`);
+      if (isRealError(m)) problems.push(`mobile console.error: ${m.text()}`);
     });
     mob.on('pageerror', (e) => problems.push(`mobile pageerror: ${e.message}`));
     await mob.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
