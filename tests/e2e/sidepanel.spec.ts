@@ -67,8 +67,11 @@ test('side panel renders, themes switch, palette opens, no console errors', asyn
   // 'Theme: dark' also matches the header theme quick-toggle button.)
   await page.keyboard.press('Control+k');
   await expect(page.getByText('Command palette', { exact: true })).toBeVisible();
-  const listbox = page.getByRole('dialog', { name: 'Command palette' }).getByRole('listbox');
-  await page.keyboard.type('theme');
+  const dialog = page.getByRole('dialog', { name: 'Command palette' });
+  const listbox = dialog.getByRole('listbox');
+  // fill() focuses the combobox and sets the value deterministically — blind
+  // keyboard typing races Kobalte's focus restoration on slow CI runners.
+  await dialog.getByRole('combobox').fill('theme');
   await expect(listbox.getByText('Theme: dark', { exact: true })).toBeVisible();
   // First Escape closes the combobox listbox, second closes the dialog.
   await page.keyboard.press('Escape');
@@ -77,7 +80,7 @@ test('side panel renders, themes switch, palette opens, no console errors', asyn
 
   // Phase 2: inspector commands are reachable from the palette.
   await page.keyboard.press('Control+k');
-  await page.keyboard.type('inspect');
+  await dialog.getByRole('combobox').fill('inspect');
   await expect(listbox.getByText('Toggle inspect mode', { exact: true })).toBeVisible();
   await expect(listbox.getByText('Show DOM tree', { exact: true })).toBeVisible();
   await page.keyboard.press('Escape');
@@ -124,8 +127,9 @@ test('Phase 3: Design panel renders with its scan hero and palette commands', as
 
   // Phase 3 commands resolve from the palette.
   await page.keyboard.press('Control+k');
-  await page.keyboard.type('primary color');
-  const listbox = page.getByRole('dialog', { name: 'Command palette' }).getByRole('listbox');
+  const dialog = page.getByRole('dialog', { name: 'Command palette' });
+  const listbox = dialog.getByRole('listbox');
+  await dialog.getByRole('combobox').fill('primary color');
   await expect(listbox.getByText('Find primary color', { exact: true })).toBeVisible();
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
@@ -162,8 +166,9 @@ test('Phase 4: Assets panel renders with its scan hero, filters, and palette com
 
   // Phase 4 commands resolve from the palette.
   await page.keyboard.press('Control+k');
-  await page.keyboard.type('export assets');
-  const listbox = page.getByRole('dialog', { name: 'Command palette' }).getByRole('listbox');
+  const dialog = page.getByRole('dialog', { name: 'Command palette' });
+  const listbox = dialog.getByRole('listbox');
+  await dialog.getByRole('combobox').fill('export assets');
   await expect(listbox.getByText('Export assets as ZIP', { exact: true })).toBeVisible();
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
@@ -201,8 +206,9 @@ test('Phase 5: Analyze panel renders audits, technology stack, and palette comma
 
   // Phase 5 commands resolve from the palette.
   await page.keyboard.press('Control+k');
-  await page.keyboard.type('accessibility');
-  const listbox = page.getByRole('dialog', { name: 'Command palette' }).getByRole('listbox');
+  const dialog = page.getByRole('dialog', { name: 'Command palette' });
+  const listbox = dialog.getByRole('listbox');
+  await dialog.getByRole('combobox').fill('accessibility');
   await expect(listbox.getByText('Analyze accessibility', { exact: true })).toBeVisible();
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
@@ -293,7 +299,7 @@ test('Phase 9: accessibility regression — dialogs, labels, and focus are expos
   const dialog = page.getByRole('dialog', { name: 'Command palette' });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('combobox')).toBeVisible();
-  await page.keyboard.type('settings');
+  await dialog.getByRole('combobox').fill('settings');
   const listbox = dialog.getByRole('listbox');
   await expect(listbox).toBeVisible();
   await expect(listbox.getByText('Settings', { exact: true })).toBeVisible();
@@ -362,18 +368,19 @@ test('Phase 6: Create panel renders studio, live editing, and export center', as
 
   // Phase 6 commands resolve from the palette.
   await page.keyboard.press('Control+k');
-  await page.keyboard.type('generate react');
-  const listbox = page.getByRole('dialog', { name: 'Command palette' }).getByRole('listbox');
+  const dialog = page.getByRole('dialog', { name: 'Command palette' });
+  const listbox = dialog.getByRole('listbox');
+  // fill() focuses the combobox and sets the value deterministically — blind
+  // keyboard typing raced Kobalte's focus restoration on the second open on
+  // slow CI runners, so the 'Export design tokens' query never registered.
+  await dialog.getByRole('combobox').fill('generate react');
   await expect(listbox.getByText('Generate React', { exact: true })).toBeVisible();
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
-  // Confirm the palette fully closed before reopening it — typing into a
-  // half-closed combobox on a loaded runner used to race the second query.
-  const dialog = page.getByRole('dialog', { name: 'Command palette' });
   await expect(dialog).toHaveCount(0);
   await page.keyboard.press('Control+k');
   await expect(dialog).toBeVisible();
-  await page.keyboard.type('design tokens');
+  await dialog.getByRole('combobox').fill('design tokens');
   await expect(listbox.getByText('Export design tokens', { exact: true })).toBeVisible();
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
