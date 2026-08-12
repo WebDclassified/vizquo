@@ -975,7 +975,7 @@
     transition: transform .8s var(--ease-out), opacity .5s ease;
     transition-delay: calc(var(--i, 0) * 42ms);
   }
-  .reveal.in .wm-inner, .reveal-scale.in .wm-inner { transform: none; opacity: 1; }
+  .reveal.in .wm-inner { transform: none; opacity: 1; }
 
   /* Directional reveals — 2-column layouts enter from their own side.
      Only sideways on wide screens: on mobile the full-width columns must not
@@ -984,7 +984,10 @@
   .reveal-r { opacity: 0; transform: translateX(44px); transition: opacity .8s var(--ease-out), transform .8s var(--ease-out); }
   .reveal-l.in, .reveal-r.in { opacity: 1; transform: none; }
   .reveal-l.settled, .reveal-r.settled { transition: opacity .3s ease; }
-  @media (max-width: 920px) {
+  /* Sideways only where the wrap has margin to spare (≥1080px): below that
+     the full-width columns would push past the viewport while waiting to
+     reveal, causing horizontal overflow on tablets. */
+  @media (max-width: 1079px) {
     .reveal-l, .reveal-r { transform: translateY(28px); }
   }
 
