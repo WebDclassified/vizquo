@@ -120,11 +120,14 @@ export class IndexedDbRepository implements VizquoRepository {
 
   async putCacheEntry(entry: CacheEntry): Promise<void> {
     const now = Date.now();
+    // Monotonic recency: a wall clock can step backward (NTP sync), which
+    // would make a just-written entry look older and break LRU eviction.
+    const newest = await this.db.cache.orderBy('lastAccessedAt').last();
     const stamped: CacheEntry = {
       ...entry,
       schemaVersion: INSPECTION_SCHEMA_VERSION,
       createdAt: entry.createdAt || now,
-      lastAccessedAt: now,
+      lastAccessedAt: Math.max(now, (newest?.lastAccessedAt ?? 0) + 1),
     };
     await this.db.cache.put(stamped);
     await this.evictToBudget();

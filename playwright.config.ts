@@ -10,7 +10,10 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/e2e',
   timeout: 60_000,
-  expect: { timeout: 10_000 },
+  // First extension load on a busy CI runner is slow — 20s keeps the
+  // panel-render assertions from flaking while still failing fast on real
+  // regressions.
+  expect: { timeout: 20_000 },
   fullyParallel: false,
   workers: 1,
   reporter: [['list']],

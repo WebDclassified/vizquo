@@ -47,10 +47,13 @@ export default defineContentScript({
     onMessage('SET_INSPECT_MODE', ({ data }) => {
       if (data.enabled && !enabled()) {
         controller.enable();
-        void sendMessage('INSPECT_STATE_CHANGED', { enabled: true });
+        // Best-effort badge sync — the background may be asleep or restarting
+        // ("Receiving end does not exist"), and it catches up on demand via
+        // GET_INSPECT_STATE. Never let that reject unhandled.
+        void sendMessage('INSPECT_STATE_CHANGED', { enabled: true }).catch(() => {});
       } else if (!data.enabled && enabled()) {
         controller.disable();
-        void sendMessage('INSPECT_STATE_CHANGED', { enabled: false });
+        void sendMessage('INSPECT_STATE_CHANGED', { enabled: false }).catch(() => {});
       }
       return { enabled: enabled() };
     });

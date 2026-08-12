@@ -37,15 +37,23 @@ export default defineBackground(() => {
   }
 
   // --- Context menu: "Inspect with Vizquo" (Section 7.26) -----------------
-  try {
-    browser.contextMenus.create({
-      id: CONTEXT_MENU_ID,
-      title: 'Inspect with Vizquo',
-      contexts: ['all'],
-    });
-  } catch {
-    // Menu already exists (background restarted) — nothing to do.
-  }
+  // contextMenus.create reports duplicate-id failures through
+  // runtime.lastError, not a thrown error — the service worker restarts
+  // often, so re-creating the same id used to log
+  // "Cannot create item with duplicate id vizquo-inspect". Clear first,
+  // then create: idempotent on every restart.
+  void (async () => {
+    try {
+      await browser.contextMenus.removeAll();
+      await browser.contextMenus.create({
+        id: CONTEXT_MENU_ID,
+        title: 'Inspect with Vizquo',
+        contexts: ['all'],
+      });
+    } catch {
+      // Menus unavailable in this context — harmless.
+    }
+  })();
 
   browser.contextMenus.onClicked.addListener((info, tab) => {
     void (async () => {
