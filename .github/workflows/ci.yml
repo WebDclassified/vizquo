@@ -67,6 +67,25 @@ jobs:
           name: chrome-mv3
           path: .output/chrome-mv3
 
+  landing:
+    name: Landing (Chromium · Firefox · WebKit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+      # Loads landing/index.html in all three engines and verifies zero console
+      # errors, no overflow (desktop + mobile), counters, live demo, download
+      # overlay, burger menu, reduced-motion visibility, and that every
+      # Download ZIP link resolves 200.
+      - name: Cross-browser landing smoke test
+        run: npm run check:landing
+
   e2e:
     name: E2E (Playwright, Chrome)
     runs-on: ubuntu-latest
