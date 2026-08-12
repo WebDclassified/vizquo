@@ -79,10 +79,20 @@ all three stores.
    Firefox, produces the three store ZIPs, runs the keyless scan (must be
    **0**), and assembles `.output/release/vizquo-<new>/` with the ZIPs,
    listing kit, and a `RELEASE.md` upload summary.
-3. Commit the bump + changelog, tag `v<new>`, and push.
-4. Upload the new ZIPs to each store item (same ID preserved via the PEM
+3. Sync the landing page to the new version (the version is hardcoded there,
+   so `bump-version.mjs` does NOT touch it):
+   - Copy the new ZIPs into `landing/downloads/`
+     (`cp .output/release/vizquo-<new>/*-chrome.zip .output/release/vizquo-<new>/*-firefox.zip landing/downloads/`)
+     and remove the previous version's ZIPs from that folder.
+   - Update the `downloads/vizquo-<new>-*.zip` hrefs in `landing/index.html`
+     (6 download buttons) and the footer `v<new>` badge.
+   - Run `npm run promo` to regenerate the promo tiles + OG card to match.
+   - Run `npm run check:landing` to verify the page in Chromium, Firefox,
+     and WebKit — including that every Download link resolves 200.
+4. Commit the bump + changelog + landing sync, tag `v<new>`, and push.
+5. Upload the new ZIPs to each store item (same ID preserved via the PEM
    key): Edge → Firefox AMO → Chrome Web Store (see paths above).
-5. Optional final smoke pass after upload:
+6. Optional final smoke pass after upload:
    `node scripts/probe-extension.mjs`,
    `node scripts/probe-extension-advanced.mjs`,
    `node scripts/probe-real-sites.mjs`.

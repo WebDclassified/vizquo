@@ -19,7 +19,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "release": "node scripts/release-store.mjs"
+    "release": "node scripts/release-store.mjs",
+    "promo": "node scripts/generate-promo-tile.mjs",
+    "check:landing": "node scripts/check-landing-browsers.mjs"
   },
   "dependencies": {
     "@kobalte/core": "^0.13.12",
