@@ -1,5 +1,8 @@
 # Host the privacy policy on GitHub Pages (free, ~10 minutes)
 
+> Created by Prabhat Teotia
+
+
 All three stores need a live privacy-policy URL. GitHub Pages hosts this repo
 for free — the policy lives at a permanent URL you paste into every store.
 

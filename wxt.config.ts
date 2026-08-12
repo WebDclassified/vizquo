@@ -16,6 +16,10 @@ export default defineConfig({
     name: 'Vizquo',
     short_name: 'Vizquo',
     description: 'Inspect anything. Understand everything. Build faster.',
+    // Creator credit — surfaced in chrome://extensions and store listings.
+    // WXT's manifest author type is the `{ email }` object shape; Chrome
+    // serializes the string form, so cast only for the type checker.
+    author: 'Prabhat Teotia' as unknown as { email: string },
     // The minimum working set — the content script is declared statically
     // below (no runtime injection API needed) and screenshot compositing runs
     // on the panel's own canvas, so scripting/offscreen stay out. activeTab is

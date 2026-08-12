@@ -1,5 +1,8 @@
 # Permissions
 
+> Created by Prabhat Teotia
+
+
 Every manifest permission, with a one-line justification. Vizquo requests the
 minimum it needs at install and site access only on demand — never a blanket
 grant.

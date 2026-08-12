@@ -1,4 +1,4 @@
-import { APP_VERSION } from '../../../shared/constants';
+import { APP_AUTHOR, APP_VERSION } from '../../../shared/constants';
 import { setActivePanel, ui } from '../../stores/ui-store';
 
 const STATUS_META = {
@@ -26,7 +26,9 @@ export function Footer() {
         {meta().label}
         {ui.connection.latencyMs != null && ` · ${ui.connection.latencyMs}ms`}
       </button>
-      <span class="vq-nums">v{APP_VERSION}</span>
+      <span class="vq-nums" title={`Vizquo v${APP_VERSION} · created by ${APP_AUTHOR}`}>
+        v{APP_VERSION}
+      </span>
     </footer>
   );
 }

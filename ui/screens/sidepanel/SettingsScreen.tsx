@@ -21,6 +21,7 @@ import {
   AI_CUSTOM_MODEL,
   AI_MODELS,
   AI_PROVIDERS,
+  APP_AUTHOR,
   APP_NAME,
   APP_VERSION,
   INSPECTION_SCHEMA_VERSION,
@@ -875,6 +876,10 @@ export function SettingsScreen() {
       <Panel title={`About ${APP_NAME}`}>
         <div class="flex flex-col gap-1.5">
           <div class="flex items-center justify-between px-2 py-1">
+            <span class="text-[12px] text-[var(--vq-fg-muted)]">Created by</span>
+            <span class="text-[12px] font-medium text-[var(--vq-fg)]">{APP_AUTHOR}</span>
+          </div>
+          <div class="flex items-center justify-between px-2 py-1">
             <span class="text-[12px] text-[var(--vq-fg-muted)]">Version</span>
             <Badge tone="neutral" class="vq-nums">
               v{APP_VERSION}
@@ -887,8 +892,8 @@ export function SettingsScreen() {
             </Badge>
           </div>
           <p class="px-2 pt-1 text-[11px] leading-relaxed text-[var(--vq-fg-subtle)]">
-            {APP_NAME} is a design-intelligence layer for the web. All analysis runs locally;
-            nothing is uploaded, tracked, or sold.
+            {APP_NAME} is a design-intelligence layer for the web, created by {APP_AUTHOR}. All
+            analysis runs locally; nothing is uploaded, tracked, or sold.
           </p>
         </div>
       </Panel>

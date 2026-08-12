@@ -20,6 +20,10 @@
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license">
 </p>
 
+<p align="center">
+  <strong>Created by Prabhat Teotia</strong>
+</p>
+
 ---
 
 ## What is Vizquo?
@@ -154,3 +158,8 @@ node scripts/capture-screenshots.mjs    # → deploy-kit/screenshots/ (add CAPTU
 ## License
 
 [MIT](LICENSE)
+
+## Credits
+
+Created and maintained by **Prabhat Teotia** — designed, engineered, and
+shipped as a labor of love for the open web. <3

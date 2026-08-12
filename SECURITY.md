@@ -1,5 +1,8 @@
 # Security
 
+> Created by Prabhat Teotia
+
+
 Vizquo is an inspection tool, not a security-bypass tool.
 
 ## Page content is untrusted input

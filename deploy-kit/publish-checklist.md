@@ -4,6 +4,8 @@ Everything below is **$0** except the Chrome Web Store, which charges a one-time
 **$5** developer fee (Google's rule — there is no free tier). Edge + Firefox
 reach most users for free.
 
+**Publisher name for every store: Prabhat Teotia** (see `store-listing.md` §0).
+
 ---
 
 ## ✅ Zero-cost path A — Microsoft Edge Add-ons (free, ~15 min)

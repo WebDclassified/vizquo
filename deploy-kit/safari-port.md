@@ -1,5 +1,8 @@
 # Vizquo for Safari — port guide
 
+> Created by Prabhat Teotia
+
+
 Safari support is real work and **cannot be done on Windows** — it needs a Mac
 with Xcode. This guide is the honest, complete path.
 

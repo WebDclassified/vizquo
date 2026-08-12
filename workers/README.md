@@ -1,5 +1,8 @@
 # workers/
 
+> Created by Prabhat Teotia
+
+
 Comlink-wrapped Web Worker entrypoints (Section 2). Heavy compute never blocks
 the content-script or panel thread:
 

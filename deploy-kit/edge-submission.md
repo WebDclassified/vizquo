@@ -1,5 +1,8 @@
 # Vizquo — Microsoft Edge Add-ons Submission Kit
 
+> Created by Prabhat Teotia
+
+
 **Everything you need to submit Vizquo to the Microsoft Edge Add-ons store — copy-paste ready.**
 
 - Store: **Edge Add-ons** (free, no developer fee)

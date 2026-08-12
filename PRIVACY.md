@@ -1,5 +1,8 @@
 # Privacy
 
+> Created by Prabhat Teotia
+
+
 Vizquo is local by default. Nothing you inspect is uploaded, tracked, or sold.
 
 ## What stays in the browser

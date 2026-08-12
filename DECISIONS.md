@@ -1,5 +1,8 @@
 # Decisions
 
+> Created by Prabhat Teotia
+
+
 A running log of non-obvious architectural choices and the smallest reasonable
 assumptions made while building. The master spec says: when a requirement is
 ambiguous, make the smallest reasonable assumption, state it here, and keep

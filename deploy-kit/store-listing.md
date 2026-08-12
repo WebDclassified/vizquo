@@ -5,6 +5,14 @@ Version: 0.10.8 · Build ZIPs: `.output/vizquo-0.10.8-chrome.zip` (Chrome + Edge
 
 ---
 
+## 0. Developer / publisher name
+
+**Prabhat Teotia** — enter this exact name as the developer/publisher in every
+store (Chrome Web Store, Edge Add-ons, Firefox AMO) so the credit is visible
+on the listing.
+
+---
+
 ## 1. Extension name
 
 **Vizquo** (short name: **Vizquo**)

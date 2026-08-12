@@ -112,6 +112,7 @@ const MARQUEE = `
         )
         .join('')}
     </div>
+    <div style="margin-top:20px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;color:rgba(255,255,255,.4);">v${APP_VERSION} · by Prabhat Teotia</div>
   </div>
   <div class="accent-line" style="height:5px;"></div>
 </div>`;
@@ -179,7 +180,7 @@ const OG_CARD = `
         .join('')}
       <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:14px;border-top:1px solid rgba(255,255,255,.07);font-size:12px;color:rgba(255,255,255,.5);">
         <span style="background:rgba(63,224,200,.12);color:#3fe0c8;border:1px solid rgba(63,224,200,.35);border-radius:99px;padding:4px 11px;font-weight:700;font-size:11px;">✓ Cohesive</span>
-        <span style="margin-left:auto;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(255,255,255,.4);">v${APP_VERSION} · local-first</span>
+        <span style="margin-left:auto;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(255,255,255,.4);">v${APP_VERSION} · by Prabhat Teotia · local-first</span>
       </div>
     </div>
   </div>

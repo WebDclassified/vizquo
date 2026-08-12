@@ -4,6 +4,8 @@
 
 export const APP_NAME = 'Vizquo';
 export const APP_VERSION = '0.10.8';
+/** Creator / author credit — shown in the About panel, store listings, and docs. */
+export const APP_AUTHOR = 'Prabhat Teotia';
 
 /** Bump when the Inspection shape changes — invalidates all cached entries. */
 export const INSPECTION_SCHEMA_VERSION = 4;

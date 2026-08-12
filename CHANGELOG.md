@@ -1,5 +1,8 @@
 # Changelog
 
+> Created by Prabhat Teotia
+
+
 ## 0.10.8 — Runtime error fixes, cache robustness, premium landing
 
 - **Fixed: "Cannot create item with duplicate id vizquo-inspect" on

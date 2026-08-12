@@ -1,5 +1,8 @@
 # Data model
 
+> Created by Prabhat Teotia
+
+
 Normalized entity types live in `shared/types.ts` and are the single source of
 truth for every engine module and feature panel. Entity names follow the
 master spec (Section 3) and must not silently diverge.

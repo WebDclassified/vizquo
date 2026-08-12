@@ -1,5 +1,8 @@
 # engine/
 
+> Created by Prabhat Teotia
+
+
 The extraction engine (master spec Section 2). Lands in phases 2–3.
 
 - `scan/` — DOM walk, incremental analysis, MutationObserver management (Phase 2–3)
