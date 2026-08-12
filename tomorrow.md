@@ -25,7 +25,7 @@ WXT (web-extension toolkit, v0.21) · SolidJS · UnoCSS · TypeScript (strict) �
 Dexie/IndexedDB · Comlink worker · Vitest + Playwright · Biome
 
 ### Current version
-- `package.json` version: **0.10.4** ✅ (in sync with CHANGELOG).
+- `package.json` version: **0.10.6** ✅ (in sync with CHANGELOG).
 
 ---
 
@@ -37,11 +37,13 @@ Last full validation (all passed):
 |---|---|---|
 | Type check | `npm run compile` | ✅ clean |
 | Lint | `npm run lint` | ✅ zero warnings |
-| Unit tests | `npm run test` | ✅ **315/315** |
-| Production build (Chrome MV3) | `npm run build` | ✅ keyless, 1.24 MB |
+| Unit tests | `npm run test` | ✅ **375/375** |
+| Production build (Chrome MV3) | `npm run build` | ✅ keyless, 1.26 MB |
 | Firefox AMO-ready build | `npm run build:firefox:mv3` | ✅ |
-| E2E (Playwright, 7 tests) | `npm run test:e2e` | ✅ 7/7, zero console errors |
-| Store ZIP | `npm run zip` | ✅ `vizquo-0.10.4-chrome.zip` (~411 kB, 42 files) |
+| E2E (Playwright, 13 tests) | `npm run test:e2e` | ✅ 12 pass, 1 honest skip (grant-dependent capture success) |
+| Live probe (core + advanced) | `node scripts/probe-extension*.mjs` | ✅ 7/7 + 7/7 (capture SKIPs without host access) |
+| Live probe (real sites) | `node scripts/probe-real-sites.mjs` | ✅ 19/19 — example.com, Wikipedia, MDN, HN |
+| Store ZIP | `npm run zip` | ✅ `vizquo-0.10.6-chrome.zip` |
 
 Manifest permissions (minimal, all used): `storage`, `sidePanel`, `downloads`,
 `contextMenus`, `activeTab`. No unused `scripting`/`offscreen` (WXT auto-adds
@@ -180,11 +182,22 @@ npm run zip              # store-ready ZIP → .output/
    policy URL** (publish `PRIVACY.md` to a page/gist).
 2. **Firefox AMO**: submit `.output/firefox-mv3` (same listing needs:
    description + screenshots).
-3. **Manual QA pass on 3–4 real sites**: grant access → reload → inspect /
-   scan / assets / screenshots flows can't be automated (E2E runs the panel
-   only). Also manually exercise the new **Ruler** (behind a connected page)
-   and **Timeline/PNG/print** with real data.
-4. **Bump `package.json` version** — ✅ done (0.10.0).
+3. **Manual QA on real sites is now automated** (`scripts/probe-real-sites.mjs`
+   runs connect → inspect-lock → right-click → scan on example.com,
+   Wikipedia, MDN, HN). Still worth a human pass on the **screenshot studio
+   with a real toolbar click** (grants `activeTab`, which automation can't)
+   and the **Ruler** with a connected page.
+
+### A4. Triage: the CI probe job failed
+
+The `probe` job runs the real-sites probe against live pages, so a failure is
+usually the *site* changing markup, not the extension — treat it as a probe
+maintenance task first: re-run locally with `node
+scripts/probe-real-sites.mjs`, and if the failing check is a target-picker or
+click-landing issue (not a connect/scan/console-error regression), fix the
+probe's selector/point and re-push. Only investigate extension code when the
+probe reports a connect failure, a scan failure, or console errors on a site
+that used to pass.
 
 ### B. Suggested features not yet built (all free, all reuse existing machinery)
 - **AI "Explain the difference" between two timeline versions** — the Compare
@@ -230,9 +243,14 @@ npm run zip              # store-ready ZIP → .output/
 - **Firefox needs MV3 + gecko ID + `data_collection_permissions: { required:
   ['none'] }`** — already configured; use `npm run build:firefox:mv3`, never
   the default MV2 build, for AMO submissions.
-- **E2E cannot grant site access** — the extension is tested as a panel page;
-  host-page flows (scan/inspect/capture) are unit-tested + manual QA. Don't
-  write E2E assertions against UI that only renders after a scan.
+- **Content scripts inject without a host grant** (static manifest `matches`
+  on http/https) — a fresh profile auto-connects on real sites. The native
+  permission prompt is still needed for `captureVisibleTab`; automation can't
+  always complete it, so grant-dependent checks SKIP honestly (probes + the
+  capture E2E) and `activeTab` (toolbar/context-menu invocation) covers real
+  users. Also: **the Inspect switch name is ambiguous** — the connection
+  card has "Inspect mode" AND the toolbar has "Inspect"; use `exact: true`
+  when targeting one.
 - **Format before validating**: `npx biome check --write .` then `npm run
   lint` — Biome formatting differences fail the lint gate.
 - **Solid patterns**: use `For` (not `.map`) for lists, `createSignal` for
@@ -244,7 +262,44 @@ npm run zip              # store-ready ZIP → .output/
 
 ---
 
-## 8. Files changed today (Phase 10) — in case you need to review or revert
+## 8. Files changed today (0.10.6 — probes in CI, real-site QA, handoff UX) — in case you need to review or revert
+
+| File | What |
+|---|---|
+| `ui/screens/sidepanel/connection.ts` | **injection-race fix** (bounded silent retries when a reachable page's content script hasn't injected yet) + **tab-switch sync** (inspector store mirrors the content script's inspect state; old tab's selection/DOM dropped when the connected tab changes) |
+| `engine/inspect/controller.ts` | `selectRef(ref, { flash })` — scroll-into-view + 1.8 s attention pulse on right-click handoff |
+| `engine/inspect/overlay.ts` | `.vq-flash`/`.vq-flash-chip` layer (own z-layer, reduced-motion aware) |
+| `shared/messages.ts` | `SELECT_ELEMENT` gains optional `flash` |
+| `entrypoints/content.ts` | passes `flash` through to the controller |
+| `ui/.../inspector/inspector-client.ts` | `selectElement(ref, { flash })` |
+| `ui/.../sidepanel/App.tsx` | handoff toasts (selected / vanished-element warning); guards the storage-removal echo that duplicated toasts |
+| `scripts/probe-lib.mjs` | NEW — shared probe harness (launch/open/onboarding/connect/errors/reporter; CI-safe `--no-sandbox`) |
+| `scripts/probe-extension.mjs` + `probe-extension-advanced.mjs` | refactored onto the harness (same 7/7 + 7/7) |
+| `scripts/probe-real-sites.mjs` | NEW — deterministic 4-site QA (19/19); layout-agnostic click targeting |
+| `.github/workflows/ci.yml` | NEW `probe` job (xvfb) running all three probes on every push |
+| `tests/connection.test.ts` | +3: retry chain (success + bounded give-up), tab-switch store sync |
+| `tests/controller-lifecycle.test.ts` | +1: flash + scroll-into-view on `selectRef({ flash })` |
+| `tests/create-client.test.ts` | NEW — 8 capture-flow tests (viewport guard/success, fullpage stitching, cap, scroll restore) |
+| `tests/e2e/handoff.spec.ts` | NEW — handoff selects + flashes + toasts; vanished-element warning |
+| `tests/e2e/capture.spec.ts` | NEW — deterministic error path + conditional success path (honest skip) |
+| `tests/e2e/hostile.spec.ts` | manual "Check" click removed — the auto-connect retry chain made it obsolete (and it broke once connected) |
+| `CHANGELOG.md` | 0.10.6 entry |
+
+## 9. Files changed today (0.10.5 — context-menu fix) — in case you need to review or revert
+
+| File | What |
+|---|---|
+| `engine/inspect/controller.ts` | contextmenu listener now registered in the constructor — the "Inspect with Vizquo" right-click handoff works with inspect mode OFF (it previously returned `null` and the panel opened with nothing selected) |
+| `tests/controller-lifecycle.test.ts` | updated listener counts + 2 regression tests for the context-target fix |
+| `scripts/probe-extension.mjs` | NEW — live probe: loads the built extension in real Chrome, connects (grant→reload), scans, audits console errors |
+| `scripts/probe-extension-advanced.mjs` | NEW — right-click handoff, screenshot, time machine, detach window, export center |
+| `CHANGELOG.md` | 0.10.5 entry |
+
+Probe notes: screenshots fail in automation because the panel is driven as a tab (captureVisibleTab needs the active tab + activeTab/host grant — real users get activeTab from the toolbar click). Everything else passes; context-menu + detach + scan verified live.
+
+---
+
+## 10. Files changed today (Phase 10) — in case you need to review or revert
 
 | File | What |
 |---|---|
@@ -272,12 +327,12 @@ npm run zip              # store-ready ZIP → .output/
 
 ---
 
-## 9. Recommended first tasks tomorrow
+## 11. Recommended first tasks tomorrow
 
-1. **Manual QA** on 3–4 real sites (Ruler, Timeline, PNG card, report print,
-   multi-select screenshot) — the only untested-by-automation surface.
-2. ~~Bump version → `0.10.0`~~ ✅ done; re-run `npm run zip` (artifact is
-   current).
+1. **Human QA on the screenshot studio with a real toolbar click** (the one
+   flow automation can't fully drive — `activeTab` needs a real user gesture)
+   and the **Ruler** on a connected page.
+2. Re-run `npm run zip` after the 0.10.6 bump (artifact should be current).
 3. Pick one from §6B (the AI timeline narration is the most "Vizquo" and
    cheapest).
 4. Then the store submissions (§6A) — they're account actions, not code.

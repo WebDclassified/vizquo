@@ -1,53 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { INSPECTION_SCHEMA_VERSION } from '../shared/constants';
-import type {
-  CacheEntry,
-  Collection,
-  HistoryEntry,
-  Inspection,
-  Note,
-  Screenshot,
-} from '../shared/types';
+import type { CacheEntry, Collection, HistoryEntry, Note, Screenshot } from '../shared/types';
 import { IndexedDbRepository } from '../storage/adapters/indexeddb/indexeddb-repository';
 import { VizquoDatabase } from '../storage/adapters/indexeddb/schema';
+import { makeInspection } from './helpers/inspection';
 
 let db: VizquoDatabase;
 let repo: IndexedDbRepository;
-
-function makeInspection(overrides: Partial<Inspection> = {}): Inspection {
-  return {
-    id: 'ins-1',
-    page: { url: 'https://example.com/', title: 'Example', scannedAt: 1000 },
-    createdAt: 1000,
-    tokens: { colors: [], fonts: [], spacing: [], radius: [], shadows: [] },
-    assets: [],
-    components: [],
-    findings: [],
-    // Phase 3 fields (schema v2).
-    variables: [],
-    gradients: [],
-    breakpoints: [],
-    typeStyles: [],
-    consistencyScore: 100,
-    scanDurationMs: 0,
-    truncated: false,
-    scannedElementCount: 0,
-    metrics: {
-      imageCount: 0,
-      svgCount: 0,
-      animationCount: 0,
-      transitionCount: 0,
-      breakpointCount: 0,
-    },
-    cached: false,
-    stale: false,
-    // Phase 5 fields (schema v4).
-    technologies: [],
-    containerQueries: [],
-    viewportMeta: true,
-    ...overrides,
-  };
-}
 
 function makeCacheEntry(key: string, overrides: Partial<CacheEntry> = {}): CacheEntry {
   return {

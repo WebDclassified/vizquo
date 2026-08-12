@@ -73,7 +73,7 @@ export default defineContentScript({
 
     onMessage('SELECT_ELEMENT', ({ data }) => {
       if (!enabled()) controller.enable();
-      return controller.selectRef(data.ref);
+      return controller.selectRef(data.ref, { flash: data.flash });
     });
 
     onMessage('NAVIGATE_ELEMENT', ({ data }) => ({

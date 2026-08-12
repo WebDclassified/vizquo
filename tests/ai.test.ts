@@ -7,10 +7,17 @@ import { AUTHOR_DEFAULT_KEY, hasAuthorDefaultKey, resolveApiKey } from '../ai/co
 import { aiReadiness } from '../ai/gate';
 import { OllamaProvider } from '../ai/ollama';
 import { OpenRouterProvider } from '../ai/openrouter';
-import { assetExplainRequest, elementExplainRequest, pageExplainRequest } from '../ai/prompts';
+import {
+  assetExplainRequest,
+  compareExplainRequest,
+  elementExplainRequest,
+  pageExplainRequest,
+} from '../ai/prompts';
+import { compareInspections } from '../export/compare';
 import { DEFAULT_AI_MODEL } from '../shared/constants';
-import type { Asset, Inspection } from '../shared/types';
+import type { Asset, ColorToken, Inspection } from '../shared/types';
 import { buttonInspection } from './helpers/element-fixture';
+import { makeInspection } from './helpers/inspection';
 
 const MODEL = 'deepseek/deepseek-chat:free';
 
@@ -103,10 +110,21 @@ describe('elementExplainRequest', () => {
 
 describe('pageExplainRequest', () => {
   function pageInspection(): Inspection {
-    return {
+    return makeInspection({
       id: 'i1',
       page: { url: 'https://example.com', title: 'Example', scannedAt: 0 },
       createdAt: 0,
+      scanDurationMs: 100,
+      scannedElementCount: 100,
+      components: [
+        {
+          id: 'c1',
+          type: 'button',
+          instances: [],
+          confidence: { level: 'detected' },
+          variants: {},
+        },
+      ],
       tokens: {
         colors: [
           {
@@ -124,42 +142,8 @@ describe('pageExplainRequest', () => {
             usedBy: [],
           },
         ],
-        spacing: [],
-        radius: [],
-        shadows: [],
       },
-      assets: [],
-      components: [
-        {
-          id: 'c1',
-          type: 'button',
-          instances: [],
-          confidence: { level: 'detected' },
-          variants: {},
-        },
-      ],
-      findings: [],
-      variables: [],
-      gradients: [],
-      breakpoints: [],
-      typeStyles: [],
-      consistencyScore: 88,
-      scanDurationMs: 100,
-      technologies: [],
-      containerQueries: [],
-      viewportMeta: true,
-      truncated: false,
-      scannedElementCount: 100,
-      metrics: {
-        imageCount: 0,
-        svgCount: 0,
-        animationCount: 0,
-        transitionCount: 0,
-        breakpointCount: 0,
-      },
-      cached: false,
-      stale: false,
-    };
+    });
   }
 
   it('summarizes the design system without raw HTML or DOM', () => {
@@ -188,6 +172,79 @@ describe('assetExplainRequest', () => {
     expect(req.payloadSummary).toContain('No image bytes');
     expect(req.userPrompt).toContain('800×600px');
     expect(req.userPrompt.length).toBeLessThan(600);
+  });
+});
+
+/* ------------------------------------------------------------------------ */
+/* compareExplainRequest (Phase 9, timeline AI diff)                       */
+/* ------------------------------------------------------------------------ */
+
+describe('compareExplainRequest', () => {
+  function color(hex: string): ColorToken {
+    return {
+      value: { hex, oklch: '', role: undefined },
+      confidence: { level: 'detected' },
+      usageCount: 1,
+      usedBy: [],
+    };
+  }
+
+  it('sends only one-sided values — the shared set never leaks into the diff', () => {
+    const a = makeInspection({
+      tokens: {
+        colors: [color('#111111'), color('#333333')],
+        fonts: [],
+        spacing: [],
+        radius: [],
+        shadows: [],
+      },
+    });
+    const b = makeInspection({
+      tokens: {
+        colors: [color('#111111'), color('#222222')],
+        fonts: [],
+        spacing: [],
+        radius: [],
+        shadows: [],
+      },
+    });
+    const req = compareExplainRequest(compareInspections(a, b), MODEL);
+    expect(req.context).toBe('compare');
+    expect(req.payloadSummary).toContain('values present on exactly one side');
+    expect(req.payloadSummary).toContain('No HTML, DOM, or element text is sent.');
+    expect(req.userPrompt).toContain('+ #333333'); // added on side A
+    expect(req.userPrompt).toContain('− #222222'); // removed on side B
+    expect(req.userPrompt).not.toContain('#111111'); // shared value is never sent
+  });
+
+  it('caps the diff at 6 rows per section with a +N more marker', () => {
+    const a = makeInspection({
+      tokens: {
+        colors: Array.from({ length: 8 }, (_, i) => color(`#00000${i}`)),
+        fonts: [],
+        spacing: [],
+        radius: [],
+        shadows: [],
+      },
+    });
+    const b = makeInspection({});
+    const req = compareExplainRequest(compareInspections(a, b), MODEL);
+    const shown = req.userPrompt.match(/\+ #00000/g)?.length ?? 0;
+    expect(shown).toBe(6);
+    expect(req.userPrompt).toContain('(+2 more)');
+  });
+
+  it('reports an unchanged scan honestly', () => {
+    const a = makeInspection({});
+    const req = compareExplainRequest(compareInspections(a, a), MODEL);
+    expect(req.userPrompt).toContain('Changes: none detected');
+  });
+
+  it('includes both consistency scores as the drift signal', () => {
+    const a = makeInspection({ consistencyScore: 90 });
+    const b = makeInspection({ consistencyScore: 55 });
+    const req = compareExplainRequest(compareInspections(a, b), MODEL);
+    expect(req.userPrompt).toContain('Consistency: 90/100 → 55/100');
   });
 });
 

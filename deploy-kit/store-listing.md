@@ -1,7 +1,7 @@
 # Vizquo — Store Listing Kit (copy-paste)
 
-Version: 0.10.4 · Build ZIPs: `.output/vizquo-0.10.4-chrome.zip` (Chrome + Edge),
-`.output/vizquo-0.10.4-firefox.zip` + `.output/vizquo-0.10.4-sources.zip` (Firefox AMO).
+Version: 0.10.6 · Build ZIPs: `.output/vizquo-0.10.6-chrome.zip` (Chrome + Edge),
+`.output/vizquo-0.10.6-firefox.zip` + `.output/vizquo-0.10.6-sources.zip` (Firefox AMO).
 
 ---
 

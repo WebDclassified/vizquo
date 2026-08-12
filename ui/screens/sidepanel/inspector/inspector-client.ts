@@ -85,10 +85,10 @@ export async function fetchDomTree(): Promise<void> {
   }
 }
 
-export async function selectElement(ref: ElementRef): Promise<void> {
+export async function selectElement(ref: ElementRef, opts?: { flash?: boolean }): Promise<void> {
   if (tabId == null) return;
   try {
-    await sendMessage('SELECT_ELEMENT', { ref }, tabId);
+    await sendMessage('SELECT_ELEMENT', { ref, flash: opts?.flash }, tabId);
     setStore('lockedRef', ref);
     setStore('hoveredRef', ref);
     setStore('activeTab', 'overview');

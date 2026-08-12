@@ -36,6 +36,38 @@ function scheduleRecheck(attempts = 6): void {
   }, 1200);
 }
 
+/**
+ * The content script injects at document_idle — a check that fires right
+ * after tab activation can miss it by a fraction of a second, and nothing
+ * else would ever re-check (the card then sits on "Grant access" forever
+ * even though the page is fully connected — found by real-site QA). Bounded
+ * silent retries pick the late-injecting content script up without a manual
+ * Check click. One chain at a time; stops on success or after 4 attempts.
+ */
+let contentRetryTimer: ReturnType<typeof setTimeout> | undefined;
+let contentRetryInFlight = false;
+
+function retryUntilContentScript(attemptsLeft = 4): void {
+  if (attemptsLeft <= 0) {
+    contentRetryTimer = undefined;
+    return;
+  }
+  contentRetryTimer = setTimeout(() => {
+    // The timer is ours to clear the moment it fires, and the check it runs
+    // is marked in-flight so it cannot start a sibling chain (each link is
+    // armed exactly once, by the previous link's .then).
+    contentRetryTimer = undefined;
+    contentRetryInFlight = true;
+    void runConnectionCheck(true).then(() => {
+      contentRetryInFlight = false;
+      const ok = ui.connection.status === 'connected' && ui.connection.contentOk === true;
+      if (!ok) retryUntilContentScript(attemptsLeft - 1);
+    });
+  }, 1500);
+}
+
+let lastConnectedTabId: number | undefined;
+
 export async function runConnectionCheck(silent = false): Promise<void> {
   if (!silent) setUi('connection', 'status', 'connecting');
   const nonce = Math.floor(Math.random() * 1_000_000);
@@ -54,6 +86,34 @@ export async function runConnectionCheck(silent = false): Promise<void> {
       error: result.content.ok ? undefined : result.content.error,
       lastCheckedAt: Date.now(),
     });
+    // Keep the inspector's own state in sync with the content script's report
+    // (real-site QA: switching tabs left the toolbar's Inspect switch visually
+    // ON — and the previous tab's selection/DOM — while the new page's content
+    // script had inspect mode OFF). The connection card already reads
+    // ui.connection.inspectModeEnabled; this mirrors it into inspector-store
+    // and drops the previous tab's tab-scoped state when the target changes.
+    if (result.content.ok) {
+      setStore('enabled', result.content.inspectModeEnabled === true);
+      if (result.tab?.id != null && result.tab.id !== lastConnectedTabId) {
+        lastConnectedTabId = result.tab.id;
+        setStore('lockedRef', null);
+        setStore('hoveredRef', null);
+        setStore('inspection', null);
+        setStore('error', null);
+        setStore('domTree', null);
+        setStore('domError', null);
+      }
+    }
+    // A page that is reachable but whose content script is still injecting
+    // (or was missed by the activation race) gets a bounded silent retry.
+    if (
+      result.tab?.id != null &&
+      !result.content.ok &&
+      !contentRetryTimer &&
+      !contentRetryInFlight
+    ) {
+      retryUntilContentScript();
+    }
   } catch {
     setUi('connection', {
       status: 'error',

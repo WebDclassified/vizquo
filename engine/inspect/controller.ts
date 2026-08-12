@@ -61,8 +61,23 @@ export class InspectController {
   private measureEnd: Point | null = null;
   /** True while a ruler line is on screen (finalized or mid-drag). */
   private measureActive = false;
+  private flashTimer: number | undefined;
+  private flashSettleTimer: number | undefined;
 
   // --- lifecycle ----------------------------------------------------------
+
+  constructor() {
+    // The context-menu target is tracked for the whole content-script
+    // lifetime — NOT gated on inspect mode. The "Inspect with Vizquo"
+    // right-click entry point (Section 7.26) is how most users start: the
+    // background asks GET_CONTEXT_TARGET the moment the menu item is clicked,
+    // which happens while inspect mode is still OFF. Registering the listener
+    // only inside enable() made that handoff return null unless the user had
+    // already toggled inspect mode on this page — the panel then opened with
+    // no element pre-selected. One registration, never removed (the content
+    // script dies with the page on unload).
+    document.addEventListener('contextmenu', this.onContextMenu, true);
+  }
 
   enable(): void {
     if (this.enabled) return;
@@ -72,7 +87,6 @@ export class InspectController {
     document.addEventListener('mousedown', this.onMouseDown, true);
     document.addEventListener('mouseup', this.onMouseUp, true);
     document.addEventListener('keydown', this.onKeyDown, true);
-    document.addEventListener('contextmenu', this.onContextMenu, true);
     window.addEventListener('scroll', this.onViewportChange, true);
     window.addEventListener('resize', this.onViewportChange);
     this.patchHistory();
@@ -91,7 +105,6 @@ export class InspectController {
     document.removeEventListener('mousedown', this.onMouseDown, true);
     document.removeEventListener('mouseup', this.onMouseUp, true);
     document.removeEventListener('keydown', this.onKeyDown, true);
-    document.removeEventListener('contextmenu', this.onContextMenu, true);
     window.removeEventListener('scroll', this.onViewportChange, true);
     window.removeEventListener('resize', this.onViewportChange);
     window.removeEventListener('popstate', this.onHistoryChange);
@@ -101,6 +114,10 @@ export class InspectController {
     this.setCursor(false);
     this.hoveredEl = null;
     this.lockedEl = null;
+    window.clearTimeout(this.flashTimer);
+    window.clearTimeout(this.flashSettleTimer);
+    this.flashTimer = undefined;
+    this.flashSettleTimer = undefined;
     this.clearMeasure();
     this.overlay.hide();
     this.overlay.destroy();
@@ -149,7 +166,9 @@ export class InspectController {
   }
 
   getContextTarget(): ElementRef | null {
-    return this.lastContextTarget ? makeRef(this.lastContextTarget) : null;
+    // A right-click target may predate an SPA navigation — never hand off a
+    // ref whose element is gone (the panel would fail to select it).
+    return this.lastContextTarget?.isConnected ? makeRef(this.lastContextTarget) : null;
   }
 
   getState() {
@@ -191,11 +210,37 @@ export class InspectController {
     this.overlay.showMeasureLine(start, end, measurePoints(start, end));
   }
 
-  selectRef(ref: ElementRef): { ok: boolean } {
+  selectRef(ref: ElementRef, opts: { flash?: boolean } = {}): { ok: boolean } {
     const el = resolveRef(ref);
     if (!el) return { ok: false };
     this.setLocked(el);
+    if (opts.flash) this.flashElement(el);
     return { ok: true };
+  }
+
+  /**
+   * Brief attention pulse on a handoff selection (right-click → "Inspect
+   * with Vizquo", Section 7.26). Scrolls the element into view so the flash
+   * is actually visible, then pulses it for ~1.8 s with a chip naming the
+   * entry point. Never touches find-instances highlights (own layer).
+   */
+  private flashElement(el: Element): void {
+    if (!el.isConnected) return;
+    el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
+    // The pulse is drawn after the smooth scroll settles — but only if the
+    // element is still there (SPA navigations move fast). Both timers are
+    // tracked so disable() can cancel them: a flash must never outlive the
+    // overlay that disable() replaces. Note: this intentionally does NOT gate
+    // on inspect mode — the handoff works with it OFF, and the pulse is how
+    // the user sees what the panel selected.
+    window.clearTimeout(this.flashSettleTimer);
+    this.flashSettleTimer = window.setTimeout(() => {
+      if (!el.isConnected) return;
+      const rect = rectOf(el);
+      this.overlay.showFlash(rect, 'Inspect with Vizquo');
+      window.clearTimeout(this.flashTimer);
+      this.flashTimer = window.setTimeout(() => this.overlay.clearFlash(), 1800);
+    }, 350);
   }
 
   // --- find instances / similar highlights (Section 7.8) -------------------

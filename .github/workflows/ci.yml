@@ -9,6 +9,24 @@ on:
     branches: ['**']
   pull_request:
     branches: ['**']
+  # Manual store release: runs the full release pipeline (bump, validate,
+  # build, zip, keyless scan, package) for the requested version and uploads
+  # the assembled .output/release/vizquo-<new>/ as a downloadable artifact.
+  workflow_dispatch:
+    inputs:
+      old_version:
+        description: 'Current version (must match shared/constants.ts)'
+        required: true
+        type: string
+      new_version:
+        description: 'Version to release'
+        required: true
+        type: string
+      screenshots:
+        description: 'Regenerate promo tile + store screenshots'
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   check:
@@ -72,3 +90,62 @@ jobs:
         with:
           name: playwright-traces
           path: test-results/
+
+  probe:
+    name: Live probes (real Chrome + real sites)
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+      - name: Build extension
+        run: npm run build
+      # The probes load the built extension in headed Chrome (under xvfb) and
+      # drive real user flows. Core + advanced probe checks that need the
+      # optional-host-permission prompt report SKIP when automation cannot
+      # complete the native prompt — never a failure. The real-sites probe is
+      # deterministic (static content scripts inject without a grant) and
+      # fails the build when any real site regresses.
+      - name: Probe core flows
+        run: xvfb-run -a node scripts/probe-extension.mjs
+      - name: Probe advanced flows
+        run: xvfb-run -a node scripts/probe-extension-advanced.mjs
+      - name: QA against real sites
+        run: xvfb-run -a node scripts/probe-real-sites.mjs
+
+  release:
+    name: Store release pipeline (manual)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+      - name: Run the release pipeline
+        run: |
+          SCREENSHOTS_FLAG=""
+          if [ "${{ inputs.screenshots }}" = "true" ]; then SCREENSHOTS_FLAG="--screenshots"; fi
+          npm run release -- ${{ inputs.old_version }} ${{ inputs.new_version }} $SCREENSHOTS_FLAG
+      - name: QA the released build (live probes)
+        run: |
+          xvfb-run -a node scripts/probe-extension.mjs
+          xvfb-run -a node scripts/probe-extension-advanced.mjs
+          node scripts/probe-real-sites.mjs
+      - name: Upload release package
+        uses: actions/upload-artifact@v4
+        with:
+          name: vizquo-${{ inputs.new_version }}-release
+          path: .output/release/

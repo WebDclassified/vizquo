@@ -15,7 +15,7 @@ free with no developer fee.
    dedicated one for publishing).
 2. Go to https://partner.microsoft.com/dashboard/microsoftedge → **Sign in** →
    accept the publisher agreement (free, no fee).
-3. **Add new** → upload `.output/vizquo-0.10.4-chrome.zip`.
+3. **Add new** → upload `.output/vizquo-0.10.6-chrome.zip`.
 4. Fill the listing using `deploy-kit/store-listing.md`:
    - Name, summary, detailed description, category: Developer Tools.
    - Upload your 440×280 promo tile and screenshots.
@@ -29,8 +29,8 @@ free with no developer fee.
 2. Go to https://addons.mozilla.org/developers/ → **Submit a new add-on** →
    choose "On your own" (self-distribution) or "Listed" (public store listing).
    **Listed** = visible to everyone.
-3. Upload `.output/vizquo-0.10.4-firefox.zip` AND
-   `.output/vizquo-0.10.4-sources.zip` (AMO requires source code for MV3).
+3. Upload `.output/vizquo-0.10.6-firefox.zip` AND
+   `.output/vizquo-0.10.6-sources.zip` (AMO requires source code for MV3).
 4. Fill the listing (same text as `deploy-kit/store-listing.md`; the manifest
    already declares `data_collection_permissions: none`).
 5. **Caveat:** Firefox was not runtime-tested in the audit — do a manual smoke
@@ -43,7 +43,7 @@ free with no developer fee.
    later). Enable **2-Step Verification** (required to publish).
 2. Go to https://chrome.google.com/webstore/devconsole → accept the Developer
    Agreement → pay the **one-time $5** registration fee.
-3. **Add new item** → upload `.output/vizquo-0.10.4-chrome.zip`.
+3. **Add new item** → upload `.output/vizquo-0.10.6-chrome.zip`.
 4. Before publishing, in the item's package area use **"Set your own extension
    ID"** and download the generated PEM upload key. **Store it in a password
    manager — never in the repo.** Losing it prevents future updates under the
@@ -69,10 +69,20 @@ all three stores.
 
 ## Release checklist (repeat for every update)
 
-1. Bump `package.json` version + `shared/constants.ts` `APP_VERSION` + a new
-   `## x.y.z` entry in `CHANGELOG.md`.
-2. `npm run compile && npm run lint && npm run test`
-3. `npm run build && npm run zip` (Chrome) and
-   `npx wxt zip -b firefox --mv3` (Firefox)
-4. Verify keyless: `grep -ro 'sk-or-[a-zA-Z0-9]\{8,\}' .output/chrome-mv3 .output/firefox-mv3 | wc -l` → **0**
-5. Upload the new ZIP to each store item (same ID preserved via the PEM key).
+1. Write the new `## x.y.z` entry at the top of `CHANGELOG.md` (the release
+   script adds a placeholder if you forget).
+2. Run the one-command release pipeline:
+   `npm run release -- <old> <new>` (add `--screenshots` to also regenerate
+   the promo tile + store screenshots; `--dry-run` previews the full plan
+   without changing anything). It bumps every release file, restores the
+   renamed old CHANGELOG heading, runs compile/lint/unit, builds Chrome +
+   Firefox, produces the three store ZIPs, runs the keyless scan (must be
+   **0**), and assembles `.output/release/vizquo-<new>/` with the ZIPs,
+   listing kit, and a `RELEASE.md` upload summary.
+3. Commit the bump + changelog, tag `v<new>`, and push.
+4. Upload the new ZIPs to each store item (same ID preserved via the PEM
+   key): Edge → Firefox AMO → Chrome Web Store (see paths above).
+5. Optional final smoke pass after upload:
+   `node scripts/probe-extension.mjs`,
+   `node scripts/probe-extension-advanced.mjs`,
+   `node scripts/probe-real-sites.mjs`.

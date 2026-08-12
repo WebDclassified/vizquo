@@ -1,50 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { compareInspections, summarizeComparison } from '../export/compare';
-import type { ColorToken, FontToken, Inspection, InspectionTokens, Token } from '../shared/types';
-
-interface InspectionOverrides extends Partial<Omit<Inspection, 'tokens'>> {
-  tokens?: Partial<InspectionTokens>;
-}
-
-function makeInspection(overrides: InspectionOverrides = {}): Inspection {
-  const { tokens: tokenOverrides, ...rest } = overrides;
-  return {
-    id: 'ins',
-    page: { url: 'https://example.com/', title: 'Example', scannedAt: 1000 },
-    createdAt: 1000,
-    assets: [],
-    components: [],
-    findings: [],
-    variables: [],
-    gradients: [],
-    breakpoints: [],
-    typeStyles: [],
-    consistencyScore: 100,
-    scanDurationMs: 0,
-    truncated: false,
-    scannedElementCount: 0,
-    metrics: {
-      imageCount: 0,
-      svgCount: 0,
-      animationCount: 0,
-      transitionCount: 0,
-      breakpointCount: 0,
-    },
-    cached: false,
-    stale: false,
-    technologies: [],
-    containerQueries: [],
-    viewportMeta: true,
-    tokens: {
-      colors: tokenOverrides?.colors ?? [],
-      fonts: tokenOverrides?.fonts ?? [],
-      spacing: tokenOverrides?.spacing ?? [],
-      radius: tokenOverrides?.radius ?? [],
-      shadows: tokenOverrides?.shadows ?? [],
-    },
-    ...rest,
-  };
-}
+import type { ColorToken, FontToken, Token } from '../shared/types';
+import { makeInspection } from './helpers/inspection';
 
 function color(hex: string): ColorToken {
   return {

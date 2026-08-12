@@ -1,5 +1,62 @@
 # Changelog
 
+## 0.10.6 — Probes in CI, real-site QA, handoff UX
+
+- **Live probes now run in CI.** A new `probe` job in the GitHub Actions
+  workflow builds the extension and drives it in real Chrome under xvfb:
+  the core-flows probe, the advanced-flows probe, and a new real-sites probe.
+  Checks that need the native host-permission prompt report SKIP (never a
+  failure) when automation can't complete it; the real-sites probe is fully
+  deterministic and **fails the build on any real-site regression**.
+- **Real-site QA found and fixed two real multi-tab bugs** (the probe scans
+  example.com, Wikipedia, MDN, and Hacker News — connect → inspect/lock →
+  right-click target → full scan → zero console errors, all green):
+  - **Stale "Not connected" card**: content scripts inject at `document_idle`,
+    so a check that ran right after tab activation could miss the content
+    script by a fraction of a second — and nothing ever re-checked, leaving
+    the card on "Grant access" forever even though the page was fully
+    connected. The connection check now runs a bounded silent retry chain
+    (4 × 1.5 s) that picks the late-injecting content script up.
+  - **Stale Inspect toggle across tabs**: switching to a tab whose content
+    script had inspect mode OFF left the toolbar's Inspect switch visually ON
+    (and the previous tab's selection/DOM in the panel) — clicking then did
+    nothing. A successful connection check now syncs the inspector store to
+    the content script's report and drops the old tab's selection when the
+    connected tab changes.
+- **Handoff UX polish** ("Inspect with Vizquo" right-click): the selected
+  element is now **scrolled into view and briefly pulsed** on the page with
+  an "Inspect with Vizquo" chip (own overlay layer — never clobbers
+  find-instances highlights, respects reduced motion), and the panel confirms
+  with a toast naming the element. When the right-clicked element is gone
+  (SPA navigation), the panel says so with a warning instead of silently
+  opening on nothing. (`SELECT_ELEMENT` carries an optional `flash` flag.)
+- **Capture flow is now tested three ways**: unit tests for the studio's
+  viewport guard/success and full-page tile stitching (including scroll
+  restoration on failure and the too-tall composite cap); an E2E test that
+  the studio shows the designed error without access; and an E2E success
+  path that runs whenever the environment can complete the host-permission
+  prompt (skipped honestly otherwise, same pattern as the hostile suite).
+- The probe scripts were refactored onto a shared harness
+  (`scripts/probe-lib.mjs`); `VQ_PROBE_SITES` narrows the real-sites probe
+  to a subset.
+
+## 0.10.5 — Context-menu handoff fix
+
+- **Fixed: "Inspect with Vizquo" (right-click) opened the panel with no
+  element selected.** The context-menu handoff asks the content script for
+  the element under the cursor (`GET_CONTEXT_TARGET`) the moment the menu
+  item is clicked — but the right-click listener was only registered while
+  inspect mode was ON, so on a freshly-opened page the handoff returned
+  `null` and the panel opened with nothing pre-selected. The right-click
+  target is now tracked for the whole content-script lifetime (registered in
+  the controller constructor, independent of inspect mode), so the primary
+  entry point always lands on the element you right-clicked. Verified live:
+  right-click → Inspect with Vizquo → panel opens with the element locked.
+- Added `scripts/probe-extension.mjs` + `scripts/probe-extension-advanced.mjs`:
+  live probes that load the **built** extension in real Chrome and drive the
+  flows E2E cannot automate — connect (grant → reload), inspect/lock, full
+  scan, time machine, detach window, and a zero-console-error audit.
+
 ## 0.10.4 — Color & spacing fixes, hardened body anchor
 
 - **Color counts were inflated by inherited text color.** The text color was

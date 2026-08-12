@@ -98,6 +98,7 @@ const OVERLAY_CSS = `
 /* Shadow-root styles can't be reached by the panel's reduced-motion CSS. */
 @media (prefers-reduced-motion: reduce) {
   .vq-hl { animation: none; }
+  .vq-flash { animation: none; }
 }
 .vq-hl-chip {
   position: fixed; pointer-events: none;
@@ -105,6 +106,29 @@ const OVERLAY_CSS = `
   background: #6e7bff; color: #0b0c10;
   padding: 2px 7px; border-radius: 3px;
   z-index: 3;
+}
+/* Handoff flash (right-click "Inspect with Vizquo") — a brief attention pulse
+   on the element that was just selected, so the user sees what the panel is
+   showing. Separate layer from find-instances highlights: it must not clobber
+   them, and it auto-clears. */
+.vq-flash {
+  position: fixed; pointer-events: none;
+  border: 2px solid #6e7bff;
+  background: rgba(110, 123, 255, 0.10);
+  box-shadow: 0 0 0 4px rgba(110, 123, 255, 0.22), 0 0 28px rgba(110, 123, 255, 0.5);
+  animation: vq-flash-pulse 0.8s ease-in-out 2;
+  z-index: 4;
+}
+@keyframes vq-flash-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(110, 123, 255, 0.2); }
+  50% { box-shadow: 0 0 0 9px rgba(110, 123, 255, 0.5); }
+}
+.vq-flash-chip {
+  position: fixed; pointer-events: none;
+  font: 600 10px/1.4 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: #6e7bff; color: #0b0c10;
+  padding: 2px 7px; border-radius: 3px;
+  z-index: 4;
 }
 /* Measure-mode ruler (Phase 10, brand system §14.2) — the click-drag tape. */
 .vq-ruler-rect {
@@ -155,6 +179,8 @@ export class InspectorOverlay {
   private readonly highlightsLayer: HTMLElement;
   private readonly highlightChip: HTMLElement;
   private readonly highlightBoxes: HTMLElement[] = [];
+  private readonly flashBox: HTMLElement;
+  private readonly flashChip: HTMLElement;
   private readonly rulerLayer: HTMLElement;
   private readonly rulerChildren: HTMLElement[] = [];
   private options: OverlayOptions = {};
@@ -208,6 +234,16 @@ export class InspectorOverlay {
     this.highlightChip.className = 'vq-hl-chip';
     this.highlightChip.hidden = true;
     this.wrap.appendChild(this.highlightChip);
+
+    this.flashBox = document.createElement('div');
+    this.flashBox.className = 'vq-flash';
+    this.flashBox.hidden = true;
+    this.wrap.appendChild(this.flashBox);
+
+    this.flashChip = document.createElement('div');
+    this.flashChip.className = 'vq-flash-chip';
+    this.flashChip.hidden = true;
+    this.wrap.appendChild(this.flashChip);
 
     this.rulerLayer = document.createElement('div');
     this.rulerLayer.className = 'vq-ruler';
@@ -295,6 +331,21 @@ export class InspectorOverlay {
     for (const box of this.highlightBoxes) box.remove();
     this.highlightBoxes.length = 0;
     this.highlightChip.hidden = true;
+  }
+
+  /** Brief attention pulse on one element (right-click handoff). */
+  showFlash(rect: Rect, label: string): void {
+    this.flashBox.hidden = false;
+    this.position(this.flashBox, rect);
+    this.flashChip.textContent = label;
+    this.flashChip.hidden = false;
+    this.flashChip.style.left = `${Math.max(4, rect.left)}px`;
+    this.flashChip.style.top = `${Math.max(4, rect.top - 22)}px`;
+  }
+
+  clearFlash(): void {
+    this.flashBox.hidden = true;
+    this.flashChip.hidden = true;
   }
 
   hideTooltip(): void {

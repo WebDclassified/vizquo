@@ -76,8 +76,9 @@ export interface ProtocolMap {
   GET_ELEMENT_INSPECTION: (data: { ref: ElementRef }) => ElementInspectionResult;
   /** Simplified DOM tree (7.17). */
   GET_DOM_TREE: (data: DomTreeRequest) => DomTreeResult;
-  /** Lock an element by ref (DOM tree click / context menu). */
-  SELECT_ELEMENT: (data: { ref: ElementRef }) => { ok: boolean };
+  /** Lock an element by ref (DOM tree click / context menu). `flash` shows
+   *  a brief attention pulse on the page (right-click handoff). */
+  SELECT_ELEMENT: (data: { ref: ElementRef; flash?: boolean }) => { ok: boolean };
   /** Move the locked selection relative to itself (keyboard nav in the panel). */
   NAVIGATE_ELEMENT: (data: { direction: NavigateDirection }) => { ref: ElementRef | null };
   /** Update overlay presentation options (measurements / click-through / box model). */

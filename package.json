@@ -2,7 +2,7 @@
   "name": "vizquo",
   "description": "Inspect anything. Understand everything. Build faster. — a design-intelligence layer for the web.",
   "private": true,
-  "version": "0.10.4",
+  "version": "0.10.6",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -18,7 +18,8 @@
     "lint:fix": "biome check --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "release": "node scripts/release-store.mjs"
   },
   "dependencies": {
     "@kobalte/core": "^0.13.12",

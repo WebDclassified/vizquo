@@ -5,7 +5,7 @@ import { SETTING_KEYS, STORAGE_KEYS, type ThemeId } from '../../../shared/consta
 import type { ElementRef } from '../../../shared/types';
 import { Button } from '../../components/Button';
 import { loadPersistedSettings, persist } from '../../stores/persisted-store';
-import { ToastViewport } from '../../stores/toast';
+import { notify, ToastViewport } from '../../stores/toast';
 import {
   closePalette,
   openCheatsheet,
@@ -233,11 +233,32 @@ export function App() {
       if (STORAGE_KEYS.pendingSelection in changes) {
         const change = changes[STORAGE_KEYS.pendingSelection];
         const raw = change?.newValue as { ref?: ElementRef | null; tabId?: number } | undefined;
-        // The context menu fired in the tab this panel is connected to.
-        const isOurs = raw?.tabId == null || raw.tabId === ui.connection.tabId;
-        if (raw?.ref && isOurs) {
-          void selectElement(raw.ref);
-          setActivePanel('inspect');
+        // The remove() below also fires onChanged (newValue undefined) — never
+        // treat the cleanup event as a handoff (it duplicated the toast).
+        if (raw != null) {
+          // The context menu fired in the tab this panel is connected to.
+          const isOurs = raw.tabId == null || raw.tabId === ui.connection.tabId;
+          if (raw.ref && isOurs) {
+            // Handoff UX: select with a flash on the page so the user sees
+            // what the panel is showing, then confirm with a toast.
+            void selectElement(raw.ref, { flash: true });
+            setActivePanel('inspect');
+            const selector = raw.ref.selector;
+            notify({
+              title: 'Element selected from the context menu',
+              description: `${selector.length > 48 ? `${selector.slice(0, 48)}…` : selector} — right-clicked with “Inspect with Vizquo”.`,
+              tone: 'neutral',
+            });
+          } else if (isOurs) {
+            // The right-clicked element vanished (SPA navigation, removal, …)
+            // — say so instead of silently opening the panel on nothing.
+            notify({
+              title: 'The element you right-clicked is gone',
+              description:
+                'It changed before the panel opened. Inspect mode is on — click any element to select it.',
+              tone: 'warning',
+            });
+          }
         }
         void browser.storage.local.remove(STORAGE_KEYS.pendingSelection);
         return;

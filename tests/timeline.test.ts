@@ -1,40 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { groupInspectionsByUrl, MAX_VERSIONS_PER_PAGE } from '../engine/timeline/timeline';
 import { compareInspections, summarizeComparison } from '../export/compare';
-import type { ColorToken, Inspection } from '../shared/types';
-
-function makeInspection(overrides: Partial<Inspection> = {}): Inspection {
-  return {
-    id: `ins-${Math.random().toString(36).slice(2)}`,
-    page: { url: 'https://example.com/', title: 'Example', scannedAt: 1700000000000 },
-    createdAt: 1700000000000,
-    tokens: { colors: [], fonts: [], spacing: [], radius: [], shadows: [] },
-    assets: [],
-    components: [],
-    findings: [],
-    variables: [],
-    gradients: [],
-    breakpoints: [],
-    typeStyles: [],
-    consistencyScore: 80,
-    scanDurationMs: 1000,
-    truncated: false,
-    scannedElementCount: 100,
-    metrics: {
-      imageCount: 0,
-      svgCount: 0,
-      animationCount: 0,
-      transitionCount: 0,
-      breakpointCount: 0,
-    },
-    cached: false,
-    stale: false,
-    technologies: [],
-    containerQueries: [],
-    viewportMeta: true,
-    ...overrides,
-  };
-}
+import type { ColorToken } from '../shared/types';
+import { makeInspection } from './helpers/inspection';
 
 function color(hex: string, role: string): ColorToken {
   return {

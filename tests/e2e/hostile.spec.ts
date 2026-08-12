@@ -206,11 +206,12 @@ test('hostile page: huge scan completes, canary never executes in the panel, net
   // The onboarding overlay would block every later click — dismiss it first.
   await dismissOnboarding(panel);
 
-  // Point the connection at the hostile tab, then grant on-demand access.
+  // Point the connection at the hostile tab. The panel re-checks on tab
+  // activation (and retries silently while the content script injects at
+  // document_idle — the injection-race fix), so no manual Check click is
+  // needed; wait for whichever terminal state appears.
   await hostile.bringToFront();
   step('hostile front');
-  await panel.getByRole('button', { name: 'Check' }).click();
-  step('checked');
   // Diagnostic watchdog: if the panel renderer hangs, capture evidence.
   const panelState = await Promise.race([
     panel

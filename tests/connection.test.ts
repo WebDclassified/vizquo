@@ -14,6 +14,10 @@ import {
   runConnectionCheck,
   watchActiveTab,
 } from '../ui/screens/sidepanel/connection';
+import {
+  store as inspectorStore,
+  setStore as setInspectorStore,
+} from '../ui/screens/sidepanel/inspector/inspector-store';
 import { setUi, ui } from '../ui/stores/ui-store';
 
 const mocks = vi.hoisted(() => ({
@@ -248,5 +252,130 @@ describe('watchActiveTab + silent re-checks', () => {
 
     expect(ui.connection.status).toBe('connected');
     expect(ui.connection.contentOk).toBe(true);
+  });
+
+  it('retries silently when the content script missed the injection race (real-site QA fix)', async () => {
+    // First PING: the content script is still injecting (document_idle) — the
+    // exact race that left the card on "Grant access" forever on real sites.
+    mocks.sendMessage
+      .mockResolvedValueOnce({
+        nonce: 1,
+        backgroundOk: true,
+        extensionVersion: '0.10.5',
+        at: Date.now(),
+        tab: { id: 7, url: 'https://example.com/', title: 'Example' },
+        content: { ok: false, error: 'Receiving end does not exist.' },
+      })
+      .mockResolvedValueOnce({
+        nonce: 2,
+        backgroundOk: true,
+        extensionVersion: '0.10.5',
+        at: Date.now(),
+        tab: { id: 7, url: 'https://example.com/', title: 'Example' },
+        content: {
+          ok: true,
+          nonce: 2,
+          url: 'https://example.com/',
+          title: 'Example',
+          inspectModeEnabled: false,
+        },
+      });
+
+    await runConnectionCheck();
+
+    expect(ui.connection.contentOk).toBe(false);
+    expect(ui.connection.status).toBe('connected');
+    // The bounded silent retry chain picks the content script up ~1.5s later.
+    await vi.advanceTimersByTimeAsync(1600);
+    expect(mocks.sendMessage).toHaveBeenCalledTimes(2);
+    expect(ui.connection.contentOk).toBe(true);
+  });
+
+  it('gives up retrying after the bounded attempts when no content script appears', async () => {
+    mocks.sendMessage.mockResolvedValue({
+      nonce: 1,
+      backgroundOk: true,
+      extensionVersion: '0.10.5',
+      at: Date.now(),
+      tab: { id: 7, url: 'https://example.com/', title: 'Example' },
+      content: { ok: false, error: 'No content script.' },
+    });
+
+    await runConnectionCheck();
+    // 4 retries × 1.5s, then the chain stops on its own.
+    await vi.advanceTimersByTimeAsync(30_000);
+
+    // 1 initial check + 4 silent retries — and no runaway loop beyond that.
+    expect(mocks.sendMessage).toHaveBeenCalledTimes(5);
+  });
+
+  it('switching tabs syncs the inspector state and drops the old tab selection (real-site QA fix)', async () => {
+    const oldRef = { selector: '.hero', xpath: '/html/body/div', domPath: [0, 1] };
+    // Simulate a previous tab session: inspect ON with an element locked.
+    setInspectorStore('enabled', true);
+    setInspectorStore('lockedRef', oldRef);
+    setInspectorStore('hoveredRef', oldRef);
+
+    // Check A: the previous tab (id 9) reports inspect ON.
+    mocks.sendMessage.mockResolvedValueOnce({
+      nonce: 1,
+      backgroundOk: true,
+      extensionVersion: '0.10.5',
+      at: Date.now(),
+      tab: { id: 9, url: 'https://old.dev/', title: 'Old' },
+      content: {
+        ok: true,
+        nonce: 1,
+        url: 'https://old.dev/',
+        title: 'Old',
+        inspectModeEnabled: true,
+      },
+    });
+    await runConnectionCheck();
+    expect(inspectorStore.enabled).toBe(true);
+
+    // Check B: the NEW tab (id 10) has a fresh content script — inspect OFF.
+    mocks.sendMessage.mockResolvedValueOnce({
+      nonce: 2,
+      backgroundOk: true,
+      extensionVersion: '0.10.5',
+      at: Date.now(),
+      tab: { id: 10, url: 'https://new.dev/', title: 'New' },
+      content: {
+        ok: true,
+        nonce: 2,
+        url: 'https://new.dev/',
+        title: 'New',
+        inspectModeEnabled: false,
+      },
+    });
+    await runConnectionCheck();
+
+    // The toolbar switch must reflect the new tab's real state…
+    expect(inspectorStore.enabled).toBe(false);
+    // …and the old tab's selection must not leak into the new tab.
+    expect(inspectorStore.lockedRef).toBeNull();
+    expect(inspectorStore.hoveredRef).toBeNull();
+
+    // Check C: re-checking the SAME tab must keep the user's selection.
+    const newRef = { selector: '.card', xpath: '/html/body/section', domPath: [1, 2] };
+    setInspectorStore('lockedRef', newRef);
+    mocks.sendMessage.mockResolvedValueOnce({
+      nonce: 3,
+      backgroundOk: true,
+      extensionVersion: '0.10.5',
+      at: Date.now(),
+      tab: { id: 10, url: 'https://new.dev/', title: 'New' },
+      content: {
+        ok: true,
+        nonce: 3,
+        url: 'https://new.dev/',
+        title: 'New',
+        inspectModeEnabled: true,
+      },
+    });
+    await runConnectionCheck();
+    expect(inspectorStore.enabled).toBe(true);
+    expect(inspectorStore.lockedRef).toEqual(newRef);
   });
 });

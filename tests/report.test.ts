@@ -1,39 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildReportHtml } from '../export/report';
-import type { Inspection } from '../shared/types';
-
-function makeInspection(overrides: Partial<Inspection> = {}): Inspection {
-  return {
-    id: 'ins-1',
-    page: { url: 'https://example.com/', title: 'Example', scannedAt: 1700000000000 },
-    createdAt: 1700000000000,
-    tokens: { colors: [], fonts: [], spacing: [], radius: [], shadows: [] },
-    assets: [],
-    components: [],
-    findings: [],
-    variables: [],
-    gradients: [],
-    breakpoints: [],
-    typeStyles: [],
-    consistencyScore: 88,
-    scanDurationMs: 1200,
-    truncated: false,
-    scannedElementCount: 412,
-    metrics: {
-      imageCount: 0,
-      svgCount: 0,
-      animationCount: 0,
-      transitionCount: 0,
-      breakpointCount: 0,
-    },
-    cached: false,
-    stale: false,
-    technologies: [],
-    containerQueries: [],
-    viewportMeta: true,
-    ...overrides,
-  };
-}
+import { makeInspection } from './helpers/inspection';
 
 describe('buildReportHtml (Phase 8, Section 7.25)', () => {
   it('produces a self-contained HTML document', () => {
