@@ -229,11 +229,11 @@ try {
   const column = await panelColumn(panel);
   step(`panel column: x=${column.x} w=${Math.round(column.width)}`);
 
-  // Connect: bring the sample tab to front, refresh the connection card, and
-  // complete the on-demand grant if the content script isn't already live.
+  // Connect: bringing the sample tab to front triggers the panel's active-tab
+  // re-check (watchActiveTab) — the connection card settles on its own, so no
+  // manual Check click is needed (the button can be swapped by a re-render
+  // mid-click). Complete the on-demand grant if the content script isn't live.
   await sample.bringToFront();
-  const checkBtn = panel.getByRole('button', { name: 'Check' });
-  if (await checkBtn.isVisible().catch(() => false)) await checkBtn.click();
   const grantBtn = panel.getByRole('button', { name: 'Grant access to this tab' });
   const inspectSwitch = panel.getByRole('switch', { name: 'Inspect' });
   const outcome = await Promise.race([
@@ -241,12 +241,19 @@ try {
     inspectSwitch.waitFor({ state: 'visible', timeout: 45_000 }).then(() => 'connected'),
   ]);
   if (outcome === 'grant') {
-    await grantBtn.click();
-    step('grant clicked — waiting for connection');
-    await inspectSwitch.waitFor({ state: 'visible', timeout: 45_000 }).catch(() => {
-      step('WARN: connection not confirmed after grant — continuing anyway');
-    });
+    // The harness auto-accepts optional host permissions, so the card can
+    // flip to connected the instant the grant lands — the button may detach
+    // mid-click. Race the click against the switch appearing instead of
+    // failing on a stale element.
+    step('grant visible — clicking (or connection may already be landing)');
+    await Promise.race([
+      grantBtn.click({ timeout: 5_000 }).catch(() => {}),
+      inspectSwitch.waitFor({ state: 'visible', timeout: 45_000 }),
+    ]);
   }
+  await inspectSwitch.waitFor({ state: 'visible', timeout: 45_000 }).catch(() => {
+    step('WARN: connection not confirmed — continuing anyway');
+  });
   step('connected');
 
   // 1. Design overview (real scan).

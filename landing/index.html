@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<noscript><style>.reveal, .reveal-scale { opacity: 1 !important; transform: none !important; }</style></noscript>
+<noscript><style>.reveal, .reveal-scale, .reveal-l, .reveal-r { opacity: 1 !important; transform: none !important; }</style></noscript>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -965,12 +965,58 @@
   .magnetic.settled { transition: transform .13s var(--ease-out), box-shadow .2s ease, border-color .18s ease, background .18s ease; }
 
   /* ============================================================
+     Word-mask reveals (premium headline animation)
+  ============================================================ */
+  .wm { display: inline-block; overflow: hidden; vertical-align: bottom; }
+  .wm-inner {
+    display: inline-block;
+    transform: translateY(120%);
+    opacity: 0;
+    transition: transform .8s var(--ease-out), opacity .5s ease;
+    transition-delay: calc(var(--i, 0) * 42ms);
+  }
+  .reveal.in .wm-inner, .reveal-scale.in .wm-inner { transform: none; opacity: 1; }
+
+  /* Directional reveals — 2-column layouts enter from their own side.
+     Only sideways on wide screens: on mobile the full-width columns must not
+     push past the viewport while waiting to reveal (overflow check). */
+  .reveal-l { opacity: 0; transform: translateX(-44px); transition: opacity .8s var(--ease-out), transform .8s var(--ease-out); }
+  .reveal-r { opacity: 0; transform: translateX(44px); transition: opacity .8s var(--ease-out), transform .8s var(--ease-out); }
+  .reveal-l.in, .reveal-r.in { opacity: 1; transform: none; }
+  .reveal-l.settled, .reveal-r.settled { transition: opacity .3s ease; }
+  @media (max-width: 920px) {
+    .reveal-l, .reveal-r { transform: translateY(28px); }
+  }
+
+  /* 3D tilt cards (feature + step) — rotation via JS-set vars, snappy. */
+  .tilt-card { transition: transform .16s ease-out, border-color .25s ease; will-change: transform; }
+
+  /* Spotlight hover for step + AI cards (matches the feature cards). */
+  .step::after, .ai-card::after {
+    content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .35s ease;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(110,123,255,.13), transparent 45%);
+    pointer-events: none;
+  }
+  .step:hover::after, .ai-card:hover::after { opacity: 1; }
+
+  /* Header shrink on scroll. */
+  .nav { transition: height .28s var(--ease-out); }
+  header.scrolled .nav { height: 62px; }
+
+  /* Back-to-top scroll ring. */
+  .back-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+  .back-ring-track { fill: none; stroke: rgba(255,255,255,.08); stroke-width: 3; }
+  .back-ring-fill { fill: none; stroke: url(#backRingGrad); stroke-width: 3; stroke-linecap: round; }
+  .back-arrow { position: relative; z-index: 1; font-size: 17px; line-height: 1; }
+
+  /* ============================================================
      Reduced motion
   ============================================================ */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; }
     html { scroll-behavior: auto; }
-    .reveal, .reveal-scale { opacity: 1; transform: none; }
+    .reveal, .reveal-scale, .reveal-l, .reveal-r { opacity: 1; transform: none; }
+    .wm-inner { transform: none !important; opacity: 1 !important; transition: none !important; }
     .aurora .orb, .float-chip, .pulse, .b-live, .dl-logo, .dl-ring, .dl-fill::after { animation: none !important; }
     #cursorGlow { display: none; }
   }
@@ -1011,7 +1057,7 @@
   <div class="hero-vignette" aria-hidden="true"></div>
   <div class="wrap">
     <span class="hero-pill reveal"><span class="dot"></span> v0.10.8 · Free &amp; open source · Works in 7 browsers</span>
-    <h1 class="reveal" data-delay="1">
+    <h1 class="reveal" data-delay="1" data-split="words">
       Inspect any webpage.<br>
       Extract its <span class="serif">design system</span><span class="grad-text">.</span>
     </h1>
@@ -1130,11 +1176,10 @@
   <div class="wrap">
     <div class="demo-head">
       <p class="kicker">Live demo</p>
-      <h2 class="reveal">This is a <span class="serif">real</span> Vizquo inspection — try it</h2>
+      <h2 class="reveal" data-split="words">This is a <span class="serif">real</span> Vizquo inspection — try it</h2>
       <p class="lead reveal" data-delay="1">Hover any element of the mock page on the left. The inspector on the right extracts its design tokens live — exactly what the real extension does on any website.</p>
-    </div>
-    <div class="demo-wrap">
-      <div class="browser-frame reveal">
+    </div>      <div class="demo-wrap">
+      <div class="browser-frame reveal-l">
         <div class="browser-bar">
           <span class="b-dot r"></span><span class="b-dot y"></span><span class="b-dot g"></span>
           <div class="b-url">
@@ -1164,7 +1209,7 @@
           </div>
         </div>
       </div>
-      <div class="inspector reveal" data-delay="1" id="inspector" aria-live="polite">
+      <div class="inspector reveal-r" data-delay="1" id="inspector" aria-live="polite">
         <div class="insp-head">
           <span class="insp-title"><span class="lock">🔒</span> Inspector</span>
           <span class="pulse"></span>
@@ -1189,13 +1234,13 @@
 <section id="how">
   <div class="wrap">
     <p class="kicker">How it works</p>
-    <h2 class="reveal">From install to insight in <span class="serif">4 steps</span></h2>
+    <h2 class="reveal" data-split="words">From install to insight in <span class="serif">4 steps</span></h2>
     <p class="lead reveal" data-delay="1">No account. No sign-up. No learning curve — the panel guides you the whole way.</p>
     <div class="steps-row">
-      <div class="step reveal"><span class="tagline">Step 01</span><span class="num">1</span><h3>Install</h3><p>Download the package for your browser and load it in about a minute — the setup guide below walks you through it.</p></div>
-      <div class="step reveal" data-delay="1"><span class="tagline">Step 02</span><span class="num">2</span><h3>Grant access</h3><p>Click "Grant access to this tab" on any page. Access is per-site and on demand — never installed globally.</p></div>
-      <div class="step reveal" data-delay="2"><span class="tagline">Step 03</span><span class="num">3</span><h3>Scan</h3><p>Hit "Scan page". Vizquo analyzes the live DOM and CSS, then extracts colors, type, spacing, components, and assets.</p></div>
-      <div class="step reveal" data-delay="3"><span class="tagline">Step 04</span><span class="num">4</span><h3>Inspect &amp; rebuild</h3><p>Dive into any element, grab code (React, Tailwind…), export tokens, screenshot, and save everything to your library.</p></div>
+      <div class="step reveal tilt-card"><span class="tagline">Step 01</span><span class="num">1</span><h3>Install</h3><p>Download the package for your browser and load it in about a minute — the setup guide below walks you through it.</p></div>
+      <div class="step reveal tilt-card" data-delay="1"><span class="tagline">Step 02</span><span class="num">2</span><h3>Grant access</h3><p>Click "Grant access to this tab" on any page. Access is per-site and on demand — never installed globally.</p></div>
+      <div class="step reveal tilt-card" data-delay="2"><span class="tagline">Step 03</span><span class="num">3</span><h3>Scan</h3><p>Hit "Scan page". Vizquo analyzes the live DOM and CSS, then extracts colors, type, spacing, components, and assets.</p></div>
+      <div class="step reveal tilt-card" data-delay="3"><span class="tagline">Step 04</span><span class="num">4</span><h3>Inspect &amp; rebuild</h3><p>Dive into any element, grab code (React, Tailwind…), export tokens, screenshot, and save everything to your library.</p></div>
     </div>
   </div>
 </section>
@@ -1204,15 +1249,15 @@
 <section id="features">
   <div class="wrap">
     <p class="kicker">Features</p>
-    <h2 class="reveal">Everything a design system, <span class="serif">extracted</span></h2>
+    <h2 class="reveal" data-split="words">Everything a design system, <span class="serif">extracted</span></h2>
     <p class="lead reveal" data-delay="1">Works on any page — static sites, React, Vue, Next.js, Web Components, and heavy DOM. No site breaks Vizquo.</p>
     <div class="grid">
-      <div class="glow-card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Design DNA"><title>Design DNA</title><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2a10 10 0 1 0 .01 0"/></svg></div><h3>Design DNA</h3><p>Automatic color roles, typographic hierarchy, spacing &amp; radius scales, and a consistency score with click-to-highlight.</p></div>
-      <div class="glow-card reveal" data-delay="1"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Element inspector"><title>Element inspector</title><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg></div><h3>Element inspector</h3><p>Computed styles, CSS cascade &amp; specificity, variable chains, box-model diagram, DOM tree — in Designer or Engineer mode.</p></div>
-      <div class="glow-card reveal" data-delay="2"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Asset extraction"><title>Asset extraction</title><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.35-4.35a2 2 0 0 0-2.83 0L5 19"/></svg></div><h3>Asset extraction</h3><p>Images, SVGs, icons, backgrounds, video posters — classified, deduped, and exportable as a ZIP.</p></div>
-      <div class="glow-card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Screenshot studio"><title>Screenshot studio</title><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><h3>Screenshot studio</h3><p>Viewport, element, full-page, and multi-selection captures — crisp at any screen density and zoom level.</p></div>
-      <div class="glow-card reveal" data-delay="1"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Code generation"><title>Code generation</title><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><h3>Code generation</h3><p>Turn any element into React, Vue, Svelte, HTML, or Tailwind. Export tokens to CSS, Figma, Style Dictionary, and more.</p></div>
-      <div class="glow-card reveal" data-delay="2"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Audits and more"><title>Audits and more</title><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><h3>Audits &amp; more</h3><p>WCAG contrast with exact math, accessibility findings, tech detection, and a responsive Time Machine.</p></div>
+      <div class="glow-card reveal tilt-card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Design DNA"><title>Design DNA</title><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2a10 10 0 1 0 .01 0"/></svg></div><h3>Design DNA</h3><p>Automatic color roles, typographic hierarchy, spacing &amp; radius scales, and a consistency score with click-to-highlight.</p></div>
+      <div class="glow-card reveal tilt-card" data-delay="1"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Element inspector"><title>Element inspector</title><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg></div><h3>Element inspector</h3><p>Computed styles, CSS cascade &amp; specificity, variable chains, box-model diagram, DOM tree — in Designer or Engineer mode.</p></div>
+      <div class="glow-card reveal tilt-card" data-delay="2"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Asset extraction"><title>Asset extraction</title><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.35-4.35a2 2 0 0 0-2.83 0L5 19"/></svg></div><h3>Asset extraction</h3><p>Images, SVGs, icons, backgrounds, video posters — classified, deduped, and exportable as a ZIP.</p></div>
+      <div class="glow-card reveal tilt-card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Screenshot studio"><title>Screenshot studio</title><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><h3>Screenshot studio</h3><p>Viewport, element, full-page, and multi-selection captures — crisp at any screen density and zoom level.</p></div>
+      <div class="glow-card reveal tilt-card" data-delay="1"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Code generation"><title>Code generation</title><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><h3>Code generation</h3><p>Turn any element into React, Vue, Svelte, HTML, or Tailwind. Export tokens to CSS, Figma, Style Dictionary, and more.</p></div>
+      <div class="glow-card reveal tilt-card" data-delay="2"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Audits and more"><title>Audits and more</title><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><h3>Audits &amp; more</h3><p>WCAG contrast with exact math, accessibility findings, tech detection, and a responsive Time Machine.</p></div>
     </div>
   </div>
 </section>
@@ -1221,7 +1266,7 @@
 <section class="demo-section" style="border-bottom:none;">
   <div class="wrap">
     <p class="kicker">See the real thing</p>
-    <h2 class="reveal">Real screenshots, <span class="serif">real UI</span></h2>
+    <h2 class="reveal" data-split="words">Real screenshots, <span class="serif">real UI</span></h2>
     <p class="lead reveal" data-delay="1">Captured from the actual extension analyzing a live page — exactly what you get.</p>
     <div class="shots">
       <div class="shot reveal"><div class="shot-img"><img src="../deploy-kit/screenshots/design-overview.png" alt="Vizquo Design overview after scanning a page"></div><div class="cap"><b>Design DNA</b> colors, type, spacing, consistency score<span class="shot-tag">Scan</span></div></div>
@@ -1235,10 +1280,9 @@
 <section id="ai">
   <div class="wrap">
     <p class="kicker">Optional AI</p>
-    <h2 class="reveal">AI that explains design — <span class="serif">on your terms</span></h2>
-    <p class="lead reveal" data-delay="1">AI is <b style="color:var(--fg)">off by default</b> and never required. When you turn it on, you choose exactly where it runs — and nothing is sent until you confirm what's going.</p>
-    <div class="ai-layout">
-      <div class="ai-grid">
+    <h2 class="reveal" data-split="words">AI that explains design — <span class="serif">on your terms</span></h2>
+    <p class="lead reveal" data-delay="1">AI is <b style="color:var(--fg)">off by default</b> and never required. When you turn it on, you choose exactly where it runs — and nothing is sent until you confirm what's going.</p>      <div class="ai-layout">
+      <div class="ai-grid reveal-l">
         <div class="ai-card reveal">
           <span class="tag cloud">☁️ Cloud · bring your own key</span>
           <h3>OpenRouter</h3>
@@ -1260,7 +1304,7 @@
           </ul>
         </div>
       </div>
-      <div class="chat-card reveal-scale" data-delay="1">
+      <div class="chat-card reveal-r" data-delay="1">
         <div class="chat-head">
           <span class="logo-mini"></span> Vizquo AI
           <span class="tag">PRIVACY GATE</span>
@@ -1317,7 +1361,7 @@
 <section id="download">
   <div class="wrap">
     <p class="kicker">Download</p>
-    <h2 class="reveal">Pick your <span class="serif">browser</span></h2>
+    <h2 class="reveal" data-split="words">Pick your <span class="serif">browser</span></h2>
     <p class="lead reveal" data-delay="1">Your browser is detected and highlighted below. Grab the right package and follow the setup guide — about a minute, no account needed.</p>
     <fieldset class="os-selector reveal">
       <legend class="os-label">You're on</legend>
@@ -1394,7 +1438,7 @@
 <section id="install">
   <div class="wrap">
     <p class="kicker">Setup guide</p>
-    <h2 class="reveal">Your browser, <span class="serif">step by step</span></h2>
+    <h2 class="reveal" data-split="words">Your browser, <span class="serif">step by step</span></h2>
     <p class="lead reveal" data-delay="1">After the download finishes, you're three small actions from using Vizquo.</p>
     <div class="pipeline reveal">
       <span class="pipe-step"><span class="n">1</span> Download ZIP</span>
@@ -1484,7 +1528,7 @@
 <section id="requirements">
   <div class="wrap">
     <p class="kicker">Requirements</p>
-    <h2 class="reveal">System <span class="serif">requirements</span></h2>
+    <h2 class="reveal" data-split="words">System <span class="serif">requirements</span></h2>
     <p class="lead reveal" data-delay="1">Vizquo is a desktop-browser extension — it runs wherever your browser runs. Everything is local; there is no server side.</p>
     <div class="table-wrap reveal">
       <table>
@@ -1506,7 +1550,7 @@
 <section id="faq" class="demo-section" style="border-bottom:none;">
   <div class="wrap faq">
     <p class="kicker">FAQ</p>
-    <h2 class="reveal">Questions, <span class="serif">answered</span></h2>
+    <h2 class="reveal" data-split="words">Questions, <span class="serif">answered</span></h2>
     <p class="lead reveal" data-delay="1">Everything users ask before installing.</p>
 
     <details class="reveal">
@@ -1560,7 +1604,7 @@
   </div>
   <div class="wrap">
     <p class="kicker reveal">Get started</p>
-    <h2 class="reveal">See the <span class="serif">design DNA</span> of the web</h2>
+    <h2 class="reveal" data-split="words">See the <span class="serif">design DNA</span> of the web</h2>
     <p class="reveal" data-delay="1">Free forever, private by default, works on every modern desktop browser.</p>
     <a class="btn-primary magnetic reveal" data-delay="2" href="#download">⬇ Download Vizquo</a>
   </div>
@@ -1611,7 +1655,19 @@
   </div>
 </div>
 
-<button id="backTop" type="button" aria-label="Back to top">↑</button>
+<button id="backTop" type="button" aria-label="Back to top">
+  <svg class="back-ring" viewBox="0 0 46 46" aria-hidden="true">
+    <defs>
+      <linearGradient id="backRingGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#6e7bff"/>
+        <stop offset="1" stop-color="#3fe0c8"/>
+      </linearGradient>
+    </defs>
+    <circle class="back-ring-track" cx="23" cy="23" r="19.5"/>
+    <circle class="back-ring-fill" id="backRingFill" cx="23" cy="23" r="19.5" stroke-dasharray="122.5" stroke-dashoffset="122.5"/>
+  </svg>
+  <span class="back-arrow" aria-hidden="true">↑</span>
+</button>
 
 <script>
   // ================= Browser + OS detection =================
@@ -1917,7 +1973,7 @@
   })();
 
   (function reveal() {
-    const els = document.querySelectorAll('.reveal, .reveal-scale');
+    const els = document.querySelectorAll('.reveal, .reveal-scale, .reveal-l, .reveal-r');
     if (!('IntersectionObserver' in window)) {
       els.forEach((el) => { el.classList.add('in'); });
       return;
@@ -1933,6 +1989,44 @@
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
     els.forEach((el) => { io.observe(el); });
+  })();
+
+  // ================= Word-mask headline reveals =================
+  // Splits [data-split="words"] headings into masked word spans that rise
+  // into place with a stagger once the parent reveal fires. Text nodes are
+  // walked (never innerHTML) so nested .serif/.grad-text spans keep their
+  // styling. Reduced-motion users see the words fully formed via CSS.
+  (function wordSplit() {
+    const roots = document.querySelectorAll('[data-split="words"]');
+    roots.forEach((root) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      const textNodes = [];
+      while (walker.nextNode()) {
+        const t = walker.currentNode;
+        if (t.textContent.trim()) textNodes.push(t);
+      }
+      let i = 0;
+      textNodes.forEach((textNode) => {
+        const frag = document.createDocumentFragment();
+        const words = textNode.textContent.split(/(\s+)/);
+        words.forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) {
+            frag.appendChild(document.createTextNode(' '));
+            return;
+          }
+          const mask = document.createElement('span');
+          mask.className = 'wm';
+          mask.style.setProperty('--i', String(i++));
+          const inner = document.createElement('span');
+          inner.className = 'wm-inner';
+          inner.textContent = part;
+          mask.appendChild(inner);
+          frag.appendChild(mask);
+        });
+        textNode.parentNode.replaceChild(frag, textNode);
+      });
+    });
   })();
 
   // ================= Animated counters =================
@@ -1965,7 +2059,7 @@
 
   // ================= Spotlight cards =================
   (function glow() {
-    const cards = document.querySelectorAll('.glow-card');
+    const cards = document.querySelectorAll('.glow-card, .step, .ai-card');
     cards.forEach((card) => {
       card.addEventListener('pointermove', (e) => {
         const r = card.getBoundingClientRect();
@@ -1994,6 +2088,30 @@
     });
     wrap.addEventListener('pointerleave', () => {
       frame.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    });
+  })();
+
+  // ================= 3D tilt cards (feature + step) =================
+  (function tiltCards() {
+    const cards = document.querySelectorAll('.tilt-card');
+    if (!cards.length) return;
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let raf = 0;
+    cards.forEach((card) => {
+      card.addEventListener('pointermove', (e) => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          const r = card.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width - 0.5;
+          const y = (e.clientY - r.top) / r.height - 0.5;
+          card.style.transform = `perspective(900px) rotateX(${y * -5}deg) rotateY(${x * 5}deg) translateY(-3px)`;
+        });
+      });
+      card.addEventListener('pointerleave', () => {
+        card.style.transform = '';
+      });
     });
   })();
 
@@ -2032,11 +2150,105 @@
     window.addEventListener('pointerleave', () => { glow.style.opacity = '0'; visible = false; });
   })();
 
+  // ================= Auto-cycling live demo =================
+  // When the demo section is in view and idle, cycle through the mock
+  // elements so the inspector looks alive without any input. User hover or
+  // click pauses the cycle; reduced-motion users get a static demo.
+  (function autoDemo() {
+    const items = Array.prototype.slice.call(document.querySelectorAll('.i-item'));
+    const zone = document.getElementById('mockSite');
+    const rowsEl = document.getElementById('inspRows');
+    if (!items.length || !zone || !rowsEl) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let timer = 0;
+    let index = 0;
+    let userDriven = false;
+    const INTERVAL = 3400;
+
+    function step() {
+      if (userDriven) return;
+      const el = items[index % items.length];
+      index += 1;
+      el.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
+    }
+
+    function start() {
+      if (timer) return;
+      step();
+      timer = window.setInterval(step, INTERVAL);
+    }
+    function stop() {
+      if (timer) { window.clearInterval(timer); timer = 0; }
+    }
+
+    zone.addEventListener('pointerenter', () => {
+      userDriven = true;
+      stop();
+    });
+    zone.addEventListener('pointerleave', () => {
+      userDriven = false;
+      start();
+    });
+    zone.addEventListener('click', () => {
+      userDriven = true;
+      stop();
+    }, true);
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) start();
+          else stop();
+        });
+      }, { threshold: 0.25 });
+      io.observe(zone);
+    } else {
+      start();
+    }
+  })();
+
+  // ================= Hero orb parallax =================
+  (function orbParallax() {
+    const hero = document.querySelector('.hero');
+    const orbs = document.querySelectorAll('.hero .aurora .orb');
+    if (!hero || !orbs.length) return;
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let raf = 0;
+    window.addEventListener('scroll', () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const rect = hero.getBoundingClientRect();
+        if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+        // Orbs already drift via CSS keyframes — add a light scroll-linked
+        // offset layered on top through the parent grid.
+        const y = window.scrollY;
+        orbs.forEach((orb, i) => {
+          const depth = [0.10, 0.16, 0.22, 0.28][i % 4];
+          orb.style.marginTop = `${y * depth}px`;
+        });
+      });
+    }, { passive: true });
+  })();
+
   // ================= Back to top =================
   (function backTop() {
     const btn = document.getElementById('backTop');
+    const ring = document.getElementById('backRingFill');
     if (!btn) return;
     btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    if (ring && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const CIRC = 2 * Math.PI * 19.5;
+      const onScroll = () => {
+        const h = document.documentElement;
+        const max = h.scrollHeight - h.clientHeight;
+        const p = max > 0 ? window.scrollY / max : 0;
+        ring.style.strokeDashoffset = String(CIRC * (1 - p));
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
   })();
 
   // ================= Burger menu =================

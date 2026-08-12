@@ -17,7 +17,7 @@ import { repository } from '../../../storage';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
 import { persist } from '../../stores/persisted-store';
-import { closeWhatsNew, openWhatsNew, ui } from '../../stores/ui-store';
+import { closeWhatsNew, openWhatsNew, startWhatsNewTour, ui } from '../../stores/ui-store';
 
 export function WhatNewDialog() {
   const entries = createMemo(() => parseChangelog(changelogRaw));
@@ -124,6 +124,19 @@ export function WhatNewDialog() {
           </div>
 
           <footer class="flex items-center justify-end gap-2 border-t border-[var(--vq-border)] bg-[var(--vq-bg-sunken)] px-4 py-2.5">
+            <Show when={unseen().length > 0}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  markSeen();
+                  startWhatsNewTour();
+                }}
+              >
+                <Sparkles class="size-3.5" />
+                Show me what changed
+              </Button>
+            </Show>
             <Button variant="primary" size="sm" onClick={markSeen}>
               Got it
             </Button>

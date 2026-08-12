@@ -30,6 +30,7 @@ import {
 import { NavTabs } from './NavTabs';
 import { OnboardingTour } from './OnboardingTour';
 import { WhatNewDialog } from './WhatNewDialog';
+import { WhatsNewTour } from './WhatsNewTour';
 
 // Phase 9: code-split the heavy feature panels. Each panel (and its engine
 // imports — scan orchestration, analysis worker, asset extraction) loads in
@@ -314,6 +315,7 @@ export function App() {
       <AiExplainDialog />
       <OnboardingTour />
       <WhatNewDialog />
+      <WhatsNewTour />
       <ToastViewport />
     </div>
   );

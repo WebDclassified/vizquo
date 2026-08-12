@@ -71,6 +71,8 @@ interface UIState {
   highContrast: boolean;
   connection: ConnectionState;
   onboarding: { visible: boolean; step: number; done: boolean };
+  /** Post-update "What's new" tour — walks the user through what changed. */
+  whatsNewTour: { visible: boolean; step: number; done: boolean };
   ai: AiUiState;
 }
 
@@ -86,6 +88,7 @@ const [ui, setUi] = createStore<UIState>({
   highContrast: DEFAULT_SETTINGS.highContrast,
   connection: { status: 'idle' },
   onboarding: { visible: false, step: 0, done: true },
+  whatsNewTour: { visible: false, step: 0, done: true },
   ai: {
     enabled: false,
     provider: 'openrouter',
@@ -108,6 +111,11 @@ export const openCheatsheet = () => setUi('cheatsheetOpen', true);
 export const closeCheatsheet = () => setUi('cheatsheetOpen', false);
 export const openWhatsNew = () => setUi('whatsNewOpen', true);
 export const closeWhatsNew = () => setUi('whatsNewOpen', false);
+/** Start the post-update highlight tour from the What's New dialog. */
+export const startWhatsNewTour = () =>
+  setUi('whatsNewTour', { visible: true, step: 0, done: false });
+export const closeWhatsNewTour = () =>
+  setUi('whatsNewTour', { visible: false, step: 0, done: true });
 export const setActivePanel = (panel: PanelId) => setUi('activePanel', panel);
 export const setTheme = (theme: ThemeId) => setUi('theme', theme);
 export const setUiMode = (mode: UiMode) => setUi('uiMode', mode);
