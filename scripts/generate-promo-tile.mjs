@@ -13,13 +13,16 @@
  *
  * Run: `node scripts/generate-promo-tile.mjs`
  */
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, '..', 'deploy-kit', 'promo');
+
+// Version badge always tracks the current release — never hardcode it here.
+const APP_VERSION = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8')).version;
 
 const FONTS = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -176,7 +179,7 @@ const OG_CARD = `
         .join('')}
       <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:14px;border-top:1px solid rgba(255,255,255,.07);font-size:12px;color:rgba(255,255,255,.5);">
         <span style="background:rgba(63,224,200,.12);color:#3fe0c8;border:1px solid rgba(63,224,200,.35);border-radius:99px;padding:4px 11px;font-weight:700;font-size:11px;">✓ Cohesive</span>
-        <span style="margin-left:auto;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(255,255,255,.4);">v0.10.7 · local-first</span>
+        <span style="margin-left:auto;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(255,255,255,.4);">v${APP_VERSION} · local-first</span>
       </div>
     </div>
   </div>
