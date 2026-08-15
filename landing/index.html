@@ -718,7 +718,7 @@
     border-radius: 6px; padding: 3px 8px; opacity: 0; transition: opacity .2s ease;
   }
   .browser.detected .badge { opacity: 1; }
-  .browser .logo { font-size: 26px; margin-bottom: 10px; }
+  .browser .logo { width: 30px; height: 30px; margin-bottom: 10px; object-fit: contain; display: block; filter: drop-shadow(0 2px 6px rgba(0,0,0,.4)); }
   .browser h4 { font-size: 15.5px; font-weight: 800; margin-bottom: 3px; }
   .browser .ver { font-size: 12px; color: var(--vz-text-muted); margin-bottom: 14px; font-family: var(--vz-font-mono); }
   .btn-dl {
@@ -1286,54 +1286,54 @@
     <div class="browser-grid">
       <div class="browser reveal" data-browser="chrome">
         <span class="badge">Your browser</span>
-        <div class="logo">🌐</div><h4>Google Chrome</h4>
+        <img class="logo" src="browsers/chrome.svg" alt="Google Chrome logo" width="30" height="30"><h4>Google Chrome</h4>
         <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
         <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="1" data-browser="edge">
         <span class="badge">Your browser</span>
-        <div class="logo">🧭</div><h4>Microsoft Edge</h4>
+        <img class="logo" src="browsers/edge.svg" alt="Microsoft Edge logo" width="30" height="30"><h4>Microsoft Edge</h4>
         <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
         <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="2" data-browser="firefox">
         <span class="badge">Your browser</span>
-        <div class="logo">🦊</div><h4>Firefox</h4>
+        <img class="logo" src="browsers/firefox.svg" alt="Firefox logo" width="30" height="30"><h4>Firefox</h4>
         <div class="ver">Firefox 121+ · Win / macOS / Linux</div>
         <a class="btn-dl teal" href="downloads/vizquo-0.10.9-firefox.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="3" data-browser="brave">
         <span class="badge">Your browser</span>
-        <div class="logo">🦁</div><h4>Brave</h4>
+        <img class="logo" src="browsers/brave.svg" alt="Brave logo" width="30" height="30"><h4>Brave</h4>
         <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
         <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-browser="opera">
         <span class="badge">Your browser</span>
-        <div class="logo">⭕</div><h4>Opera</h4>
+        <img class="logo" src="browsers/opera.svg" alt="Opera logo" width="30" height="30"><h4>Opera</h4>
         <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
         <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="1" data-browser="vivaldi">
         <span class="badge">Your browser</span>
-        <div class="logo">🔺</div><h4>Vivaldi</h4>
+        <img class="logo" src="browsers/vivaldi.svg" alt="Vivaldi logo" width="30" height="30"><h4>Vivaldi</h4>
         <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
         <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="2" data-browser="arc">
         <span class="badge">Your browser</span>
-        <div class="logo">🌀</div><h4>Arc</h4>
+        <img class="logo" src="browsers/arc.svg" alt="Arc logo" width="30" height="30"><h4>Arc</h4>
         <div class="ver">Chromium 110+ · Win / macOS</div>
         <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="3" data-browser="safari">
         <span class="badge">Your browser</span>
-        <div class="logo">🧭</div><h4>Safari</h4>
+        <img class="logo" src="browsers/safari.svg" alt="Safari logo" width="30" height="30"><h4>Safari</h4>
         <div class="ver">macOS · needs native build</div>
         <a class="btn-dl soon" href="https://github.com/WebDclassified/vizquo/issues/new?title=Safari+support+vote" target="_blank" rel="noopener">🔔 Coming soon — vote</a>
       </div>
       <div class="browser reveal" data-browser="mobile">
-        <div class="logo">📱</div><h4>Mobile browsers</h4>
+        <svg class="logo" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><line x1="10.5" y1="18.5" x2="13.5" y2="18.5"/></svg><h4>Mobile browsers</h4>
         <div class="ver">Android / iOS</div>
         <div class="soon-note" style="font-size:12px;color:var(--vz-text-muted)">Side-panel extensions aren't available on mobile yet — use any desktop browser.</div>
       </div>
