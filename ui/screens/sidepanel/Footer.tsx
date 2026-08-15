@@ -11,7 +11,7 @@ const STATUS_META = {
 export function Footer() {
   const meta = () => STATUS_META[ui.connection.status];
   return (
-    <footer class="flex h-7 shrink-0 items-center justify-between border-t border-[var(--vq-border)] px-3 text-[11px] text-[var(--vq-fg-subtle)]">
+    <footer class="vq-chrome flex h-7 shrink-0 items-center justify-between border-t border-[var(--vq-border)] px-3 text-[11px] text-[var(--vq-fg-subtle)]">
       <button
         type="button"
         onClick={() => setActivePanel('inspect')}

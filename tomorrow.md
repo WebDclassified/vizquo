@@ -36,13 +36,15 @@ Last full validation (all passed):
 | Check | Command | Result |
 |---|---|---|
 | Type check | `npm run compile` | ✅ clean |
-| Lint | `npm run lint` | ✅ zero warnings |
-| Unit tests | `npm run test` | ✅ **375/375** |
-| Production build (Chrome MV3) | `npm run build` | ✅ keyless, 1.26 MB |
+| Lint | `npm run lint` | ✅ **fully clean** (landing's pre-existing `!important`/descending-specificity warnings are now a documented rule override) |
+| Unit tests | `npm run test` | ✅ **396/396** |
+| Production build (Chrome MV3) | `npm run build` | ✅ keyless, 1.3 MB |
 | Firefox AMO-ready build | `npm run build:firefox:mv3` | ✅ |
 | E2E (Playwright, 13 tests) | `npm run test:e2e` | ✅ 12 pass, 1 honest skip (grant-dependent capture success) |
 | Live probe (core + advanced) | `node scripts/probe-extension*.mjs` | ✅ 7/7 + 7/7 (capture SKIPs without host access) |
 | Live probe (real sites) | `node scripts/probe-real-sites.mjs` | ✅ 19/19 — example.com, Wikipedia, MDN, HN |
+| Big-site verification (YouTube) | `node scripts/diag-youtube.mjs` | ✅ scan completes via main-thread fallback (~20 s) |
+| Landing smoke (3 engines) | `node scripts/check-landing-browsers.mjs` | ✅ chromium · firefox · webkit |
 | Store ZIP | `npm run zip` | ✅ `vizquo-0.10.8-chrome.zip` |
 
 Manifest permissions (minimal, all used): `storage`, `sidePanel`, `downloads`,
@@ -161,7 +163,7 @@ npm run dev:firefox      # Firefox dev
 npm run compile          # strict tsc — fast feedback
 npm run lint             # Biome
 npm run lint:fix         # Biome auto-fix
-npm run test             # unit tests (vitest, 315 tests)
+npm run test             # unit tests (vitest, 392 tests)
 npx vitest run tests/foo.test.ts   # one test file
 npm run test:e2e         # Playwright E2E (needs `npm run build` first — loads .output/chrome-mv3)
 npm run build            # production Chrome build (keyless)
@@ -210,22 +212,20 @@ that used to pass.
 - **Timeline metadata-only query** — repository method returning light rows
   instead of full inspections (see gotcha #2).
 - **Report PDF** — the print path exists; a direct `print`-triggered download
-  or PDF export would complete it.
-
-### C. Known trade-offs / technical debt (fix only when they bite)
+  or PDF export would complete it.### C. Known trade-offs / technical debt (fix only when they bite)
 1. `package.json` version lag (see A4).
-2. The **inspections table accumulates orphaned rows** — deleting history
-  entries doesn't GC their inspections. The Timeline tab *relies* on this
-  accumulation, but storage grows unboundedly; add GC only if it becomes a
-  problem.
-3. `TimelineTab` loads full inspection payloads (assets + usedBy refs) even
-  though rows render a few fields — documented in the file; revisit with a
-  metadata query if the library grows past thousands of scans.
-4. `engine/timeline/timeline.ts` imports `normalizeCacheUrl` from
-  `storage/adapters/` — acceptable reuse; a `shared/` normalizer would clean
-  the layering if you're touching that area anyway.
+2. ✅ **FIXED — inspection GC** (`storage/adapters/indexeddb/indexeddb-repository.ts`
+   `gcInspections()`): every history write keeps history-referenced inspections
+   plus the newest `MAX_VERSIONS_PER_PAGE` (25) per URL and prunes the rest —
+   storage can no longer grow unboundedly on repeated rescans.
+3. ✅ **FIXED — timeline metadata query**: `listInspectionMetas()` returns a
+   light projection (no assets/findings); `TimelineTab` renders + diffs from
+   metas and fetches the full payload only when a version is "Open"ed.
+4. ✅ **FIXED — layering**: `normalizeCacheUrl` moved to `shared/url.ts`
+   (re-exported by the cache adapter so imports keep working);
+   `engine/timeline` no longer imports from `storage/` internals.
 5. Measure mode + click-through are mutually exclusive in the panel client;
-  the controller independently guards clicks while measuring.
+   the controller independently guards clicks while measuring.
 
 ---
 
@@ -251,6 +251,24 @@ that used to pass.
   users. Also: **the Inspect switch name is ambiguous** — the connection
   card has "Inspect mode" AND the toolbar has "Inspect"; use `exact: true`
   when targeting one.
+- **Strict page CSPs block the blob analysis worker — the scan falls back to
+  the main thread now.** YouTube (and other big sites) ship a CSP whose
+  `script-src` has no `blob:`. `new Worker(blobUrl)` *succeeds* there but the
+  worker never loads: no Comlink reply ever arrives, so every scan hung until
+  the 90 s timeout ("The analysis worker did not respond"). The fix:
+  `engine/analysis/pipeline.ts` is the single pure analysis pipeline used by
+  BOTH the worker and a main-thread fallback; the orchestrator health-checks
+  a freshly-built worker (`ping()` + the worker `error` event, 2.5 s window)
+  and runs the identical pipeline synchronously when the worker is blocked.
+  Detection lives in `engine/analysis/orchestrator.ts` — if you change the
+  analysis, change the pipeline, never the worker wrapper.
+- **Big-site scans are slower than small-site scans, by design.** The DOM
+  walk now pre-filters with `el.checkVisibility()` (cheap, catches hidden
+  ancestors + `content-visibility`) before `getComputedStyle` — YouTube went
+  from ~34 s to ~20 s and samples only rendered elements (hidden subtrees are
+  noise, not tokens). The remaining cost is walking YouTube's enormous CSS
+  rule sets (`collectVariables`/`collectBreakpoints`) — bounded, cached by
+  the style cache, and streamed to the panel progressively, so it completes.
 - **Format before validating**: `npx biome check --write .` then `npm run
   lint` — Biome formatting differences fail the lint gate.
 - **Solid patterns**: use `For` (not `.map`) for lists, `createSignal` for
@@ -327,12 +345,85 @@ Probe notes: screenshots fail in automation because the panel is driven as a tab
 
 ---
 
-## 11. Recommended first tasks tomorrow
+## 11. Files changed today (CSP-proof analysis — big-site scans) — in case you need to review or revert
 
-1. **Human QA on the screenshot studio with a real toolbar click** (the one
+| File | What |
+|---|---|
+| `engine/analysis/pipeline.ts` | NEW — the pure Design DNA pipeline extracted from the worker (colors/typography/scales/structure/assets/audits + L2 memos + `ping()`); runs in the worker AND on the main thread as the fallback |
+| `workers/analysis-worker.ts` | slimmed to a Comlink wrapper over the pipeline (the RPC surface is unchanged) |
+| `engine/analysis/orchestrator.ts` | worker creation now health-checks via `ping()` + `error` event (2.5 s); CSP-blocked/blob-fetch-failed → main-thread pipeline fallback; `AnalysisRunner` type accepts sync + async runners |
+| `engine/scan/scan.ts` | walk pre-filters with `el.checkVisibility()` before `getComputedStyle` — big sites (YouTube) skip hidden/collapsed subtrees cheaply |
+| `tests/analysis-pipeline.test.ts` | NEW — full pipeline surface + L2 memoization (covers the fallback path in unit tests, not just live probes) |
+| `scripts/diag-youtube.mjs` | NEW — loads the built extension against YouTube: connect → lock → overlay → **timed scan**; reports where the flow breaks (used to find + verify this fix) |
+| `tomorrow.md` | this handoff |
+
+**How to verify live:** `npm run build` → `node scripts/diag-youtube.mjs` → the scan reports
+`ok=true` (previously `ok=false … timed out — the page may block web workers` after 90 s).
+A CSP violation + `[vizquo] analysis worker error` in the page console is **expected** — that's
+the worker attempt being blocked, which now routes to the fallback instead of hanging.
+
+## 12. Files changed today (UI redesign — refined glassmorphism, brand system v3)
+
+| File | What |
+|---|---|
+| `ui/theme.css` | **the liquid-glass material system (v4)**: ambient environment on `body` (3 visible color fields + a top-left light beam + baked-in SVG grain — all static, zero repaint cost), four token-backed materials (`--vq-mat-*-bg`, `--vq-blur-*`, `--vq-saturate`), edge-light shadow token, translucent app/surface tokens, literal glass classes (`.vq-chrome` = thin material, `.vq-float` = floating material with blur+saturate, `.vq-overlay` = dim+blur scrim), universal high-contrast blur-kill + solid-fill overrides, `vq-fade-in` entrance, z-layer map |
+| `uno.config.ts` | shortcuts inline the material recipes (UnoCSS **drops unknown classes in shortcuts** — that's why `vq-panel`/`vq-btn-secondary`/`vq-tooltip` carry their own declarations instead of a `.vq-mat-*` class). **Performance rule: blur only where visible** — tooltips (elevated material) get backdrop blur because they float over real content; panels/cards/buttons sit on the soft ambient scene, so blurring it would be invisible → they express glass through translucency + edge light alone (no backdrop-filter, no layer promotion cost) |
+| `ui/components/Badge.tsx`, `Segmented.tsx`, `Toggle.tsx` | glass pills (tinted fill + hairline), sunken segmented track with inset well + raised thumb, switch track with inner shadow + accent glow |
+| `ui/components/GuidedTour.tsx` | overlay + card are now `vq-overlay`/`vq-float` |
+| `ui/stores/toast.tsx` | toasts are `vq-float` (blurred glass) |
+| `Header.tsx` / `NavTabs.tsx` / `Footer.tsx` | glass chrome bars (`vq-chrome`), selected tab gets a rim-light |
+| `CheatsheetDialog.tsx` / `WhatNewDialog.tsx` / `AiExplainDialog.tsx` / `CommandPalette.tsx` / `AssetsPanel.tsx` | overlays → `vq-overlay` (dim + blur), contents → `vq-float` (blurred glass) |
+| `scripts/diag-ui.mjs` | NEW — verifies the glass system renders (ambient, translucent panels, chrome, blurred palette, HC fallback) and saves light/dark/palette screenshots to the OS temp dir |
+
+**Why it's fast:** backdrop blur exists only on surfaces where it is *visible* — dialogs, palette, toasts, tooltips (small, few at a time). Panels/cards/buttons/chrome are translucent + edge-lit with NO `backdrop-filter`, so dozens of them cost no blur composites; the ambient scene is static gradients + one grain tile (painted once, fixed while scrolling); all entrances are opacity-only 140 ms; high-contrast (solid fills, blur killed globally) and reduced-motion are enforced at the token level. Verified by `scripts/diag-ui.mjs` + pixel sampling: dark top-left reads a clear violet field (rgb ≈ 22,23,46) through the glass.
+
+## 13. Files changed today (landing — liquid-glass, brand system v4)
+
+| File | What |
+|---|---|
+| `landing/index.html` | **re-skinned into the extension's liquid-glass v4 system** — same palette, materials, ambient environment, radii, and motion, so the site and the side panel read as one product. No HTML structure or JS hooks changed; only the `<style>` block's tokens/recipes plus one instrumentation addition |
+
+**What changed:**
+- **Design tokens mirror the extension** — `--mat-thin/standard/elevated/float` (α 0.34/0.5/0.58/0.68), `--blur-*` (10/16/20/26), `--saturate: 1.5`, `--edge-light` (inset top + side rims), ambient fields, palette (`#08090e` bg, `#6e7bff` indigo, `#3fe0c8` teal, `#a78bfa` violet), radii 16/10, `--ease-out` cubic-bezier(.16,1,.3,1).
+- **Ambient environment on `body`** — the extension's exact scene: 4 fixed radial color fields (violet top-left, teal bottom-right, indigo top) + a soft top-left beam + baked-in grain, `background-attachment: fixed` so glass reads through at any scroll position. The old separate `body::after` grain overlay was removed (grain is baked in now).
+- **Four materials applied by role** — thin (header/nav/pill/ghost buttons/chips), standard (cards, steps, features, AI cards, browser frame, inspector, chat, hero stats, details, table, free card), elevated (floating chips, back-top, blur 20), floating (download dialog, blur 26 + saturate). Every surface carries the edge-light rim; primary buttons get an inset top sheen.
+- **Performance rule carried over from the panel** — backdrop blur only where visible: header (scrolls over content), hero pill/stats, showcase/inspector/chat (over the aurora), chips, dialog, back-top. Grid cards are translucent + edge-lit with **no backdrop-filter** (blurring the flat mid-page background would be invisible and would multiply compositing layers).
+- **Instrumentation** — the live demo inspector footer now shows cursor coordinates (`x:625 y:042`, mono + tabular-nums); mono values use tabular numerals.
+
+**Verification:** `node scripts/check-landing-browsers.mjs` → **all 3 engines pass** (hero, counters, demo rows, download overlay + Escape, burger, back-top, reduced-motion, zero console errors). Computed-style glass checks all pass (materials, blurs, edge light, fixed ambient, coordinate readout). Screenshots for eyeballing: OS temp dir `vizquo-landing/` (hero + features). Lint: zero NEW warnings vs baseline (the 20 `noImportantStyles`/`noDescendingSpecificity` warnings in this file are pre-existing).
+
+## 14. Files changed today (remaining-issues sweep — storage GC + timeline perf + lint) — in case you need to review or revert
+
+| File | What |
+|---|---|
+| `shared/url.ts` | NEW — `normalizeCacheUrl` moved out of the storage adapter (pure, shared across layers) |
+| `storage/adapters/indexeddb/cache.ts` | imports + re-exports `normalizeCacheUrl` (no behavior change) |
+| `shared/constants.ts` | `MAX_VERSIONS_PER_PAGE = 25` — single source for the timeline cap |
+| `shared/types.ts` | `InspectionMeta` — light inspection projection (id/page/createdAt/tokens/gradients/breakpoints/technologies/consistencyScore/scannedElementCount) |
+| `storage/repository.ts` | `listInspectionMetas()` on the repository contract |
+| `storage/adapters/indexeddb/indexeddb-repository.ts` | `listInspectionMetas()` projection + `gcInspections()` (runs on `saveHistory` and `deleteHistory`: keeps history-referenced + newest 25 per URL, prunes the rest) |
+| `engine/timeline/timeline.ts` | now groups `InspectionMeta[]`; imports the cap + normalizer from `shared/` |
+| `export/compare.ts` | `compareInspections` accepts the inspection summary shape it actually reads (full `Inspection` or `InspectionMeta`) |
+| `ui/.../library/library-client.ts` | `listInspectionMetas()` wrapper |
+| `ui/.../library/tabs/TimelineTab.tsx` | loads metas only; "Open" fetches the full inspection lazily (toast if the scan is gone) |
+| `ui/.../design/scan-client.ts` | imports `normalizeCacheUrl` from `shared/url` |
+| `tests/storage.test.ts` | +4: meta projection, per-URL GC cap, history-referenced keep, deleteHistory GC |
+| `biome.json` | landing joins the `ui/theme.css` rule override (intentional `!important`/descendant selectors in the hand-written token stylesheet) — `npm run lint` is now **fully clean** |
+| `landing/index.html` | biome auto-fix (`Math.pow` → `**`) — behavior-identical |
+| `ui/components/GuidedTour.tsx` | optional-chain auto-fix — behavior-identical |
+| `scripts/check-landing-browsers.mjs` | download check now verifies only local `downloads/` ZIPs (the Safari "vote" button is an external destination — checking it made the gate flaky on slow/blocked outbound networks) |
+
+**How to verify:** `npm run test` (396/396) → `npm run build` → `npm run test:e2e` (12 pass + 1 honest skip) → `node scripts/check-landing-browsers.mjs` (3 engines).
+
+## 15. Recommended first tasks tomorrow
+
+1. **Cut the 0.10.9 release** — this fix (big-site scans) is the flagship-scan
+   repair: `npm run release -- 0.10.8 0.10.9`, then review the CHANGELOG entry
+   it inserts (summarize: CSP-proof analysis, YouTube scans complete).
+2. **Human QA on the screenshot studio with a real toolbar click** (the one
    flow automation can't fully drive — `activeTab` needs a real user gesture)
    and the **Ruler** on a connected page.
-2. Re-run `npm run zip` after the 0.10.8 bump (artifact should be current).
-3. Pick one from §6B (the AI timeline narration is the most "Vizquo" and
+3. Re-run `npm run zip` after the bump (artifact should be current).
+4. Pick one from §6B (the AI timeline narration is the most "Vizquo" and
    cheapest).
-4. Then the store submissions (§6A) — they're account actions, not code.
+5. Then the store submissions (§6A) — they're account actions, not code.

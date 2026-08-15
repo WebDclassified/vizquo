@@ -1,15 +1,31 @@
 /**
- * Vizquo design tokens — brand system v2.
+ * Vizquo design tokens — brand system v4 (liquid glass).
  *
- * Near-black surfaces, hairline borders, one controlled accent (#6E7BFF),
- * system font stacks for UI + monospace for instrumentation (no third-party
- * font CDNs — opening the panel must stay network-silent), restrained radius,
- * and motion in the 120/180/280ms family. Light mode is its own palette
- * (never an inversion of dark). Everything is a CSS custom property — theming
- * is a token swap, never a component rewrite.
+ * The panel is its own document (a side panel never shows the page behind it),
+ * so the glass here is a real material system built from layered translucency
+ * + controlled backdrop blur over an ambient scene:
  *
- * `data-theme` is resolved to 'light' | 'dark' at runtime (auto follows
- * prefers-color-scheme via JS, see App.tsx) so the palette is defined once.
+ *   body (opaque base + visible color fields + light beam + grain)
+ *     └─ app frame  (translucent — the scene reads through it)
+ *         └─ thin / standard / elevated / floating glass materials
+ *
+ * Four materials (see §4 of the design brief), each a token-backed recipe:
+ *
+ *   .vq-mat-thin     — nav bars, secondary controls.   High translucency, blur 10px.
+ *   .vq-mat-standard — panels, cards, surfaces.        Stronger fill, blur 16px.
+ *   .vq-mat-elevated — tooltips, dropdowns, popovers.  Brighter, blur 20px, shadow.
+ *   .vq-mat-float    — palette, dialogs, toasts.       Max separation, blur 26px.
+ *
+ * Every material is: translucent fill + hairline border + top edge light +
+ * backdrop blur with saturation (the "refraction" — colors behind the glass
+ * get slightly more vivid). All effects degrade gracefully: engines without
+ * backdrop-filter still get translucent materials + edge light, and
+ * high-contrast mode turns every fill solid and drops the blur.
+ *
+ * Performance rules: the ambient scene is static (gradients + one grain tile,
+ * painted once); blur is confined to material surfaces with moderate radii
+ * (10–26px); nothing animates filter/backdrop-filter; reduced motion and
+ * high contrast are enforced at the token level.
  */
 
 :root {
@@ -35,7 +51,7 @@
   --vq-radius-xl: 12px;
   --vq-radius-2xl: 16px;
 
-  /* ---- Type scale (11 technical → 20 heading) ---- */
+  /* ---- Type scale (11 technical → 20 display) ---- */
   --vq-text-xs: 11px;
   --vq-text-sm: 12px;
   --vq-text-base: 14px;
@@ -47,6 +63,7 @@
 
   /* ---- Motion (fast / standard / slow — prefers-reduced-motion honored) ---- */
   --vq-ease: cubic-bezier(0.2, 0, 0, 1);
+  --vq-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --vq-duration-fast: 120ms;
   --vq-duration-base: 180ms;
   --vq-duration-slow: 280ms;
@@ -55,96 +72,172 @@
   --vq-header-height: 46px;
   --vq-nav-height: 42px;
 
-  /* ---- Shadows (borders first, shadows second) ---- */
+  /* ---- Z-index layer map (components use numbers; this is the contract) ----
+   * content 0 · chrome 10 · sticky 20 · dropdown 30 · popover 40 ·
+   * palette/overlay 150 · modal 160 · tour 140 · toast 200 · critical 210 */
+  --vq-z-chrome: 10;
+  --vq-z-float: 40;
+  --vq-z-overlay: 150;
+  --vq-z-modal: 160;
+  --vq-z-toast: 200;
+
+  /* ---- Shadows ---- */
   --vq-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.06);
   --vq-shadow-md: 0 8px 24px -8px rgb(0 0 0 / 0.18);
   --vq-shadow-lg: 0 12px 32px rgb(0 0 0 / 0.24);
+  --vq-shadow-float:
+    0 0 0 1px var(--vq-border-strong), 0 20px 48px -16px rgb(0 0 0 / 0.5),
+    0 0 40px -12px var(--vq-accent-soft);
 
   /* Accessibility override (Settings → Font scale) */
   --vq-font-scale: 1;
 
-  /* ---- Light palette (its own values, not an inverted dark) ---- */
-  --vq-bg: #f8f9fb;
-  --vq-bg-raised: #ffffff;
-  --vq-bg-elevated: #fdfdfe;
-  --vq-bg-sunken: #f1f2f5;
-  --vq-bg-hover: #eef0f3;
-  --vq-fg: #111318;
-  --vq-fg-muted: #555b66;
-  --vq-fg-subtle: #7a808b;
-  --vq-border: rgb(15 18 24 / 0.1);
-  --vq-border-strong: rgb(15 18 24 / 0.18);
+  /* ---- Light palette ---- */
+  --vq-bg-solid: #e7eaf3;
+  /* Ambient environment — visible color fields the glass sits above. */
+  --vq-ambient-1: rgb(110 123 255 / 0.2);
+  --vq-ambient-2: rgb(63 224 200 / 0.16);
+  --vq-ambient-3: rgb(150 120 255 / 0.14);
+  /* A soft light source sweeping from the top-left (the "illumination"). */
+  --vq-beam: rgb(255 255 255 / 0.85);
+  --vq-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.05 0 0 0 0 0.08 0 0 0 0 0.12 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  --vq-bg: rgb(248 249 253 / 0.5);
+  --vq-bg-raised: rgb(255 255 255 / 0.5);
+  --vq-bg-elevated: rgb(255 255 255 / 0.56);
+  --vq-bg-sunken: rgb(15 18 24 / 0.05);
+  --vq-bg-hover: rgb(15 18 24 / 0.07);
+  --vq-fg: #12141b;
+  --vq-fg-muted: #4a5161;
+  --vq-fg-subtle: #6e7687;
+  --vq-border: rgb(15 18 24 / 0.12);
+  --vq-border-strong: rgb(15 18 24 / 0.2);
+  --vq-highlight: rgb(255 255 255 / 0.9);
   --vq-accent: #5a66e6;
   --vq-accent-hover: #4c57cf;
   --vq-accent-active: #4149b8;
   --vq-accent-fg: #ffffff;
-  --vq-accent-soft: rgb(90 102 230 / 0.12);
+  --vq-accent-soft: rgb(90 102 230 / 0.14);
   --vq-accent-border: rgb(90 102 230 / 0.35);
   --vq-success: #2f9e63;
   --vq-success-fg: #1d7a49;
-  --vq-success-soft: rgb(47 158 99 / 0.12);
+  --vq-success-soft: rgb(47 158 99 / 0.14);
   --vq-warning: #b9892e;
   --vq-warning-fg: #91691a;
-  --vq-warning-soft: rgb(185 137 46 / 0.12);
+  --vq-warning-soft: rgb(185 137 46 / 0.14);
   --vq-danger: #d94857;
   --vq-danger-fg: #b32f3d;
-  --vq-danger-soft: rgb(217 72 87 / 0.1);
+  --vq-danger-soft: rgb(217 72 87 / 0.12);
   --vq-danger-hover: #c23a49;
   --vq-info: #2e7fd9;
   --vq-info-fg: #1f63b0;
-  --vq-info-soft: rgb(46 127 217 / 0.1);
+  --vq-info-soft: rgb(46 127 217 / 0.12);
   --vq-ring: #5a66e6;
-  --vq-code-bg: #eef0f3;
-  --vq-overlay: rgb(9 10 13 / 0.45);
-  --vq-grid-line: rgb(15 18 24 / 0.05);
+  --vq-code-bg: rgb(15 18 24 / 0.06);
+  --vq-overlay: rgb(30 34 44 / 0.4);
+  --vq-grid-line: rgb(15 18 24 / 0.055);
+
+  /* ---- Liquid-glass materials (light) ---- */
+  --vq-mat-thin-bg: rgb(255 255 255 / 0.32);
+  --vq-mat-standard-bg: rgb(255 255 255 / 0.48);
+  --vq-mat-elevated-bg: rgb(255 255 255 / 0.56);
+  --vq-mat-float-bg: rgb(255 255 255 / 0.66);
+  /* Blur radii per material + the refraction saturation. */
+  --vq-blur-thin: 10px;
+  --vq-blur-standard: 16px;
+  --vq-blur-elevated: 20px;
+  --vq-blur-float: 26px;
+  --vq-saturate: 1.35;
+  /* Edge light: a crisp top rim + faint side rims (the "light hitting glass"). */
+  --vq-edge-light:
+    inset 0 1px 0 rgb(255 255 255 / 0.9), inset 1px 0 0 rgb(255 255 255 / 0.25),
+    inset -1px 0 0 rgb(255 255 255 / 0.25);
 }
 
 [data-theme="dark"] {
-  /* ---- Dark palette: near-black + one accent ---- */
-  --vq-bg: #090a0d;
-  --vq-bg-raised: #101217;
-  --vq-bg-elevated: #14171d;
-  --vq-bg-sunken: #0c0e12;
-  --vq-bg-hover: #181b22;
+  --vq-bg-solid: #08090e;
+  --vq-ambient-1: rgb(122 106 255 / 0.24);
+  --vq-ambient-2: rgb(63 224 200 / 0.13);
+  --vq-ambient-3: rgb(90 102 230 / 0.18);
+  --vq-beam: rgb(255 255 255 / 0.05);
+  --vq-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  --vq-bg: rgb(10 11 16 / 0.5);
+  --vq-bg-raised: rgb(19 22 30 / 0.5);
+  --vq-bg-elevated: rgb(23 27 36 / 0.56);
+  --vq-bg-sunken: rgb(255 255 255 / 0.05);
+  --vq-bg-hover: rgb(255 255 255 / 0.08);
   --vq-fg: #f5f7fa;
   --vq-fg-muted: #b4bac5;
   --vq-fg-subtle: #747b87;
-  --vq-border: rgb(255 255 255 / 0.08);
-  --vq-border-strong: rgb(255 255 255 / 0.14);
+  --vq-border: rgb(255 255 255 / 0.1);
+  --vq-border-strong: rgb(255 255 255 / 0.18);
+  --vq-highlight: rgb(255 255 255 / 0.08);
   --vq-accent: #6e7bff;
   --vq-accent-hover: #7c86ff;
   --vq-accent-active: #5c68f2;
   --vq-accent-fg: #0b0c10;
-  --vq-accent-soft: rgb(110 123 255 / 0.14);
+  --vq-accent-soft: rgb(110 123 255 / 0.16);
   --vq-accent-border: rgb(110 123 255 / 0.4);
   --vq-success: #45d483;
   --vq-success-fg: #8ce8b4;
-  --vq-success-soft: rgb(69 212 131 / 0.14);
+  --vq-success-soft: rgb(69 212 131 / 0.16);
   --vq-warning: #e7b75b;
   --vq-warning-fg: #f2d08a;
-  --vq-warning-soft: rgb(231 183 91 / 0.14);
+  --vq-warning-soft: rgb(231 183 91 / 0.16);
   --vq-danger: #f06b73;
   --vq-danger-fg: #f79aa0;
-  --vq-danger-soft: rgb(240 107 115 / 0.14);
+  --vq-danger-soft: rgb(240 107 115 / 0.16);
   --vq-danger-hover: #e2555e;
   --vq-info: #5aa9ff;
   --vq-info-fg: #9cc9ff;
-  --vq-info-soft: rgb(90 169 255 / 0.14);
+  --vq-info-soft: rgb(90 169 255 / 0.16);
   --vq-ring: #6e7bff;
-  --vq-code-bg: #14171d;
-  --vq-overlay: rgb(0 0 0 / 0.65);
-  --vq-grid-line: rgb(255 255 255 / 0.04);
+  --vq-code-bg: rgb(255 255 255 / 0.07);
+  --vq-overlay: rgb(3 4 7 / 0.6);
+  --vq-grid-line: rgb(255 255 255 / 0.045);
   --vq-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   --vq-shadow-md: 0 8px 24px -8px rgb(0 0 0 / 0.55);
   --vq-shadow-lg: 0 12px 32px rgb(0 0 0 / 0.6);
+
+  --vq-mat-thin-bg: rgb(18 21 29 / 0.34);
+  --vq-mat-standard-bg: rgb(20 23 32 / 0.5);
+  --vq-mat-elevated-bg: rgb(25 29 40 / 0.58);
+  --vq-mat-float-bg: rgb(28 32 45 / 0.68);
+  --vq-saturate: 1.5;
+  --vq-edge-light:
+    inset 0 1px 0 rgb(255 255 255 / 0.08), inset 1px 0 0 rgb(255 255 255 / 0.025),
+    inset -1px 0 0 rgb(255 255 255 / 0.025);
 }
 
-/* ---- High-contrast variant (Settings → Accessibility) ---- */
+/* ---- High-contrast variant (Settings → Accessibility) ----
+ * Liquid glass is a translucency language; contrast mode needs solid,
+ * fully-opaque surfaces and hard borders. Every material fill is forced
+ * opaque here so readability never depends on the ambient scene. */
 [data-high-contrast="true"] {
+  --vq-bg: var(--vq-bg-solid);
+  --vq-bg-raised: #ffffff;
+  --vq-bg-elevated: #ffffff;
+  --vq-bg-sunken: #e4e6ec;
+  --vq-bg-hover: #e4e6ec;
   --vq-border: var(--vq-fg-muted);
   --vq-border-strong: var(--vq-fg);
   --vq-fg-muted: var(--vq-fg);
   --vq-fg-subtle: var(--vq-fg-muted);
+  --vq-mat-thin-bg: var(--vq-bg-solid);
+  --vq-mat-standard-bg: #ffffff;
+  --vq-mat-elevated-bg: #ffffff;
+  --vq-mat-float-bg: #ffffff;
+  --vq-overlay: rgb(0 0 0 / 0.6);
+  --vq-shadow-float: 0 0 0 1px var(--vq-fg-muted), 0 8px 24px rgb(0 0 0 / 0.35);
+}
+/* High contrast: glass is a translucency language — blur is removed outright
+   (this also covers blur emitted by the inline shortcut recipes). */
+[data-high-contrast="true"] *,
+[data-high-contrast="true"] *::before,
+[data-high-contrast="true"] *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 /* ---- Reduced motion (OS-level, always honored) ---- */
@@ -187,7 +280,22 @@ body {
   font-size: calc(var(--vq-text-base) * var(--vq-font-scale));
   line-height: var(--vq-leading-normal);
   color: var(--vq-fg);
-  background: var(--vq-bg);
+  /* The ambient environment: opaque base + visible color fields + a light
+     beam + grain. Static — painted once, fixed while content scrolls. */
+  background-color: var(--vq-bg-solid);
+  background-image:
+    radial-gradient(620px 440px at 6% -8%, var(--vq-ambient-1), transparent 70%),
+    radial-gradient(520px 400px at 104% 106%, var(--vq-ambient-2), transparent 70%),
+    radial-gradient(360px 300px at 78% -12%, var(--vq-ambient-3), transparent 72%),
+    radial-gradient(420px 300px at 14% 0%, var(--vq-beam), transparent 78%), var(--vq-noise);
+  background-size:
+    620px 440px,
+    520px 400px,
+    360px 300px,
+    420px 300px,
+    180px 180px;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -204,6 +312,75 @@ body {
 /* Tabular numerals for anything measurement-like */
 .vq-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ */
+/* Liquid-glass materials (brand system v4)                           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Four materials, one recipe: translucent fill + hairline border + edge
+ * light + backdrop blur with saturation (the "refraction" — colors behind
+ * the glass get slightly more vivid). The recipe is token-backed and emitted
+ * in two places by necessity:
+ *
+ *  - Literal classes here for the components that name them directly
+ *    (.vq-chrome = thin material, .vq-float = floating material, and
+ *    .vq-overlay = the modal scrim).
+ *  - Inline in uno.config.ts shortcuts for the surfaces built by shortcuts
+ *    (vq-panel / vq-card / vq-btn-secondary = standard material, vq-tooltip
+ *    = elevated, vq-input = thin) — UnoCSS shortcuts drop unknown class
+ *    names, so they cannot reference these classes.
+ *
+ * Blur is a progressive enhancement: engines without backdrop-filter still
+ * render a coherent translucent material with edge light; high-contrast mode
+ * forces every fill solid (tokens above) and removes blur outright (rule in
+ * the high-contrast section).
+ */
+
+/* Thin material — nav bars, secondary controls. High translucency, blur 10px. */
+.vq-chrome {
+  background: var(--vq-mat-thin-bg);
+  border-color: var(--vq-border);
+  box-shadow: var(--vq-edge-light);
+}
+
+/* Floating material — palette, dialogs, toasts, tour, preview modal. */
+.vq-float {
+  background: var(--vq-mat-float-bg);
+  border: 1px solid var(--vq-border-strong);
+  box-shadow: var(--vq-shadow-float);
+  animation: vq-fade-in 140ms var(--vq-ease-out);
+}
+
+/* Modal scrim: dim + blur the panel content behind a dialog. */
+.vq-overlay {
+  background: var(--vq-overlay);
+  animation: vq-fade-in 140ms var(--vq-ease-out);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .vq-chrome {
+    -webkit-backdrop-filter: blur(var(--vq-blur-thin)) saturate(var(--vq-saturate));
+    backdrop-filter: blur(var(--vq-blur-thin)) saturate(var(--vq-saturate));
+  }
+  .vq-float {
+    -webkit-backdrop-filter: blur(var(--vq-blur-float)) saturate(var(--vq-saturate));
+    backdrop-filter: blur(var(--vq-blur-float)) saturate(var(--vq-saturate));
+  }
+  .vq-overlay {
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+}
+
+@keyframes vq-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ------------------------------------------------------------------ */

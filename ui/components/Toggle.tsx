@@ -27,7 +27,9 @@ export function Toggle(props: ToggleProps) {
       <span
         aria-hidden="true"
         class={`relative h-5 w-9 shrink-0 rounded-full transition-colors duration-[var(--vq-duration-base)] ${
-          props.checked ? 'bg-[var(--vq-accent)]' : 'bg-[var(--vq-border-strong)]'
+          props.checked
+            ? 'bg-[var(--vq-accent)] shadow-[inset_0_1px_2px_rgb(0_0_0/0.2),0_0_12px_var(--vq-accent-soft)]'
+            : 'bg-[var(--vq-bg-sunken)] shadow-[inset_0_1px_2px_rgb(0_0_0/0.15)]'
         }`}
       >
         <span

@@ -5,21 +5,9 @@
  * Pure functions only — unit-testable without a browser.
  */
 import type { CacheEntry } from '../../../shared/types';
+import { normalizeCacheUrl } from '../../../shared/url';
 
-/** Normalize a URL into a stable cache identity (strip fragment, default port, trailing slash). */
-export function normalizeCacheUrl(url: string): string {
-  try {
-    const u = new URL(url);
-    u.hash = '';
-    if (u.protocol === 'http:' && u.port === '80') u.port = '';
-    if (u.protocol === 'https:' && u.port === '443') u.port = '';
-    let path = u.pathname;
-    if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
-    return `${u.protocol}//${u.host}${path}${u.search}`;
-  } catch {
-    return url.trim();
-  }
-}
+export { normalizeCacheUrl };
 
 /** FNV-1a 32-bit — deterministic, dependency-free, identical in every context. */
 export function fnv1a(input: string): string {

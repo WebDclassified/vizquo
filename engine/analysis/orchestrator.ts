@@ -6,24 +6,38 @@
  * events (colors → typography → scales → structure), so sections appear as
  * they complete instead of one blocking spinner.
  *
- * L2 / stale-while-revalidate (Section 2.3): units are memoized inside the
- * worker by content hash. An unchanged page (or unchanged color/type/spacing
- * sections) reuses cached results instantly; the assembled Inspection carries
- * `cached`/`stale` flags the panel surfaces honestly.
+ * L2 / stale-while-revalidate (Section 2.3): units are memoized by content
+ * hash. An unchanged page (or unchanged color/type/spacing sections) reuses
+ * cached results instantly; the assembled Inspection carries `cached`/`stale`
+ * flags the panel surfaces honestly.
+ *
+ * The analysis runs in the Comlink worker when the page allows it, and on the
+ * main thread when it does not: some sites (YouTube among them) ship a CSP
+ * whose `script-src` has no `blob:`, so a blob-URL worker is created but
+ * never loads and every Comlink call would hang. The worker is therefore
+ * health-checked before use, and `engine/analysis/pipeline.ts` — the same
+ * pure pipeline the worker wraps — runs synchronously as the fallback.
  */
 
 import * as Comlink from 'comlink';
 import { browser } from 'wxt/browser';
 import { STORAGE_KEYS } from '../../shared/constants';
 import type {
+  AssetAnalysis,
+  AuditAnalysis,
+  ColorAnalysis,
   ElementRef,
   ElementSample,
   FindInstancesKind,
   FindInstancesResult,
   Inspection,
+  ScalesAnalysis,
   ScanPageResult,
   ScanProgressPayload,
+  ScanSnapshot,
   SimilarityResult,
+  StructureAnalysis,
+  TypographyAnalysis,
 } from '../../shared/types';
 import type { AnalysisWorkerApi } from '../../workers/analysis-worker';
 // The emitted URL of the analysis worker asset (Vite ?url — a static string,
@@ -40,23 +54,28 @@ import { contentTabId } from '../dom/tab-id';
 import { buildInspection, buildScanSnapshot, partialInspection, sampleElement } from '../scan/scan';
 import { computeConsistency } from '../tokens/consistency';
 import { matchInstances } from '../tokens/find';
+import { createAnalysisPipeline } from './pipeline';
 
 export interface ScanHighlightSink {
   showHighlights(refs: ElementRef[], label: string): void;
   clearHighlights(): void;
 }
 
-/** A worker that never answers must fail the scan visibly — never hang it. */
+/** A runner that never answers must fail the scan visibly — never hang it. */
 const WORKER_RESPONSE_TIMEOUT_MS = 90_000;
 
-async function withResponseTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
+/** How long to wait for a freshly-built worker to prove it is alive before
+ *  concluding it was silently blocked (CSP) and falling back to main thread. */
+const WORKER_HEALTH_TIMEOUT_MS = 2_500;
+
+async function withResponseTimeout<T>(promise: MaybePromise<T>, label: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     return await Promise.race([
-      promise,
+      Promise.resolve(promise),
       new Promise<never>((_, reject) => {
         timer = setTimeout(
-          () => reject(new Error(`${label} timed out — the page may block web workers.`)),
+          () => reject(new Error(`${label} timed out — the analysis did not complete in time.`)),
           WORKER_RESPONSE_TIMEOUT_MS,
         );
       }),
@@ -66,8 +85,61 @@ async function withResponseTimeout<T>(promise: Promise<T>, label: string): Promi
   }
 }
 
+type MaybePromise<T> = T | Promise<T>;
+
+/**
+ * What the orchestrator calls — satisfied by both the Comlink worker remote
+ * (async) and the main-thread pipeline fallback (sync). `await` works on
+ * both, so call sites are identical.
+ */
+interface AnalysisRunner {
+  setSnapshot(snapshot: ScanSnapshot): MaybePromise<{ hash: string }>;
+  getSnapshotHash(): MaybePromise<string>;
+  analyzeColors(): MaybePromise<ColorAnalysis>;
+  analyzeTypography(): MaybePromise<TypographyAnalysis>;
+  analyzeScales(): MaybePromise<ScalesAnalysis>;
+  analyzeStructure(): MaybePromise<StructureAnalysis>;
+  analyzeAssets(): MaybePromise<AssetAnalysis>;
+  analyzeAccessibility(): MaybePromise<AuditAnalysis>;
+  analyzePerformance(): MaybePromise<AuditAnalysis>;
+  findSimilar(target: ElementSample): MaybePromise<SimilarityResult[]>;
+}
+
+/**
+ * Prove the worker actually loaded before trusting it. A page CSP without
+ * `blob:` in `script-src` (YouTube is a known case) lets `new Worker(blobUrl)`
+ * succeed but the worker never executes — no Comlink reply ever arrives, so
+ * without this gate every scan would hang until the response timeout. The
+ * worker's `error` event fires promptly on a blocked load; a healthy worker
+ * answers `ping()` immediately; silence for the health window means the load
+ * was neither blocked nor fast — assume healthy and let the scan's own
+ * timeout guard the rest.
+ */
+function probeWorkerHealth(
+  worker: Worker,
+  api: Comlink.Remote<AnalysisWorkerApi>,
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (ok: boolean): void => {
+      if (settled) return;
+      settled = true;
+      worker.removeEventListener('error', onError);
+      clearTimeout(timer);
+      resolve(ok);
+    };
+    const onError = (): void => finish(false);
+    worker.addEventListener('error', onError);
+    const timer = setTimeout(() => finish(true), WORKER_HEALTH_TIMEOUT_MS);
+    void api.ping().then(
+      () => finish(true),
+      () => finish(false),
+    );
+  });
+}
+
 export class ScanOrchestrator {
-  private workerPromise: Promise<Comlink.Remote<AnalysisWorkerApi>> | null = null;
+  private analysisPromise: Promise<AnalysisRunner> | null = null;
   private scanning = false;
   private cancelled = false;
   private lastSnapshotHash = '';
@@ -76,52 +148,68 @@ export class ScanOrchestrator {
   constructor(private readonly highlights: ScanHighlightSink) {}
 
   /**
-   * The analysis worker is created lazily on the first scan — never eagerly
-   * per tab (content scripts construct an orchestrator on every page they
-   * run in, even when the user never scans).
-   *
-   * Chrome cannot construct a Worker from a chrome-extension:// URL inside a
-   * content script — the Worker constructor enforces same-origin, and
-   * web_accessible_resources only permits *fetching* the script, so the URL
-   * is fetched here and the worker is built from a Blob URL instead (the
-   * canonical workaround). The emitted bundle is a self-contained classic
-   * script (no imports), so a classic worker is sufficient.
+   * The analysis runner (Comlink worker, or the main-thread pipeline when the
+   * page's CSP blocks blob workers) is created lazily on the first scan —
+   * never eagerly per tab (content scripts construct an orchestrator on every
+   * page they run in, even when the user never scans).
    */
-  private getWorker(): Promise<Comlink.Remote<AnalysisWorkerApi>> {
-    if (!this.workerPromise) {
-      this.workerPromise = this.createWorker().catch((error) => {
-        // A failed creation must not brick the page for its whole lifetime:
-        // reset so the next scan retries (the failure is likely transient —
-        // e.g. a momentary fetch/CSP hiccup), then re-throw for the caller.
-        this.workerPromise = null;
-        throw error;
-      });
+  private getAnalysis(): Promise<AnalysisRunner> {
+    if (!this.analysisPromise) {
+      // The worker is preferred; the main-thread pipeline is the fallback and
+      // always works, so this never rejects — the scan can only fail on the
+      // analysis itself, never on finding a way to run it.
+      this.analysisPromise = this.createAnalysis().catch(() => createAnalysisPipeline());
     }
-    return this.workerPromise;
+    return this.analysisPromise;
   }
 
-  private async createWorker(): Promise<Comlink.Remote<AnalysisWorkerApi>> {
+  /**
+   * Build the Comlink worker. Chrome cannot construct a Worker from a
+   * chrome-extension:// URL inside a content script — the Worker constructor
+   * enforces same-origin, and web_accessible_resources only permits
+   * *fetching* the script, so the URL is fetched here and the worker is built
+   * from a Blob URL instead (the canonical workaround). The emitted bundle is
+   * a self-contained classic script (no imports), so a classic worker is
+   * sufficient.
+   *
+   * Some pages (YouTube…) ship a CSP whose `script-src` lacks `blob:`. The
+   * blob worker is then created but never loads, and Comlink calls hang
+   * forever — the health probe below catches that and falls back to running
+   * the identical pipeline synchronously on the main thread, so the scan
+   * still completes on those pages.
+   */
+  private async createAnalysis(): Promise<AnalysisRunner> {
     // The asset path is a runtime string (Vite ?worker&url), not one of WXT's
     // statically-known entrypoint paths — getURL accepts any public path at
     // runtime, so the cast is type-only.
     const scriptUrl = browser.runtime.getURL(analysisWorkerUrl as unknown as '/sidepanel.html');
-    const response = await fetch(scriptUrl);
-    if (!response.ok) {
-      throw new Error(
-        `The analysis worker could not be loaded (HTTP ${response.status}). ` +
-          'A strict Content-Security-Policy on this page may block web workers.',
-      );
+    try {
+      const response = await fetch(scriptUrl);
+      if (!response.ok) {
+        throw new Error(`The analysis worker could not be loaded (HTTP ${response.status}).`);
+      }
+      const source = await response.text();
+      const workerUrl = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
+      const worker = new Worker(workerUrl);
+      // Surface worker load/runtime errors in the console (the health gate
+      // below turns the load-failure case into the main-thread fallback).
+      worker.addEventListener('error', (event) => {
+        // eslint-disable-next-line no-console
+        console.error('[vizquo] analysis worker error:', event.message ?? event);
+      });
+      const api = Comlink.wrap<AnalysisWorkerApi>(worker);
+      const healthy = await probeWorkerHealth(worker, api);
+      if (!healthy) {
+        worker.terminate();
+        URL.revokeObjectURL(workerUrl);
+        return createAnalysisPipeline();
+      }
+      return api;
+    } catch {
+      // Worker unavailable (fetch/CSP hiccup) — the main-thread pipeline is
+      // the identical logic, just synchronous.
+      return createAnalysisPipeline();
     }
-    const source = await response.text();
-    const workerUrl = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
-    const worker = new Worker(workerUrl);
-    // Surface worker load/runtime errors in the panel instead of letting
-    // Comlink calls hang forever on a dead worker.
-    worker.addEventListener('error', (event) => {
-      // eslint-disable-next-line no-console
-      console.error('[vizquo] analysis worker error:', event.message ?? event);
-    });
-    return Comlink.wrap<AnalysisWorkerApi>(worker);
   }
 
   getLastSnapshot() {
@@ -168,18 +256,18 @@ export class ScanOrchestrator {
       if (this.cancelled) return finishCancelled();
       this.lastSnapshot = snapshot;
 
-      // First scan creates the worker (fetch + Blob URL). A page CSP that
-      // forbids blob: workers surfaces here as a clean error instead of a
-      // hung scan; the response timeout turns a dead-but-loaded worker into
-      // a visible error rather than an infinite spinner.
-      const worker = await this.getWorker();
+      // First scan picks the analysis runner: the Comlink worker when the
+      // page allows blob workers, otherwise the identical pipeline on the
+      // main thread (a strict page CSP used to leave this hanging — the scan
+      // now works everywhere; the response timeout remains as a last resort).
+      const analysis = await this.getAnalysis();
       await withResponseTimeout(
-        worker.setSnapshot(snapshot),
-        'The analysis worker did not respond',
+        analysis.setSnapshot(snapshot),
+        'The analysis pipeline did not respond',
       );
 
       // Colors → Design DNA roles (fast; streams first).
-      const colorAnalysis = await worker.analyzeColors();
+      const colorAnalysis = await analysis.analyzeColors();
       if (this.cancelled) return finishCancelled();
       this.publishProgress({
         phase: 'colors',
@@ -187,7 +275,7 @@ export class ScanOrchestrator {
       });
 
       // Typography → hierarchy + fonts.
-      const typography = await worker.analyzeTypography();
+      const typography = await analysis.analyzeTypography();
       if (this.cancelled) return finishCancelled();
       this.publishProgress({
         phase: 'typography',
@@ -198,7 +286,7 @@ export class ScanOrchestrator {
       });
 
       // Scales → spacing / radius / shadows / gradients + outliers.
-      const scales = await worker.analyzeScales();
+      const scales = await analysis.analyzeScales();
       if (this.cancelled) return finishCancelled();
       this.publishProgress({
         phase: 'scales',
@@ -209,7 +297,7 @@ export class ScanOrchestrator {
       });
 
       // Structure → recurring components.
-      const structure = await worker.analyzeStructure();
+      const structure = await analysis.analyzeStructure();
       if (this.cancelled) return finishCancelled();
       this.publishProgress({
         phase: 'structure',
@@ -217,7 +305,7 @@ export class ScanOrchestrator {
       });
 
       // Assets → classified + issue-flagged (Phase 4).
-      const assetAnalysis = await worker.analyzeAssets();
+      const assetAnalysis = await analysis.analyzeAssets();
       if (this.cancelled) return finishCancelled();
       this.publishProgress({
         phase: 'assets',
@@ -226,8 +314,8 @@ export class ScanOrchestrator {
 
       // Audits → accessibility + performance findings (Phase 5).
       const [a11yAudit, perfAudit] = await Promise.all([
-        worker.analyzeAccessibility(),
-        worker.analyzePerformance(),
+        analysis.analyzeAccessibility(),
+        analysis.analyzePerformance(),
       ]);
       if (this.cancelled) return finishCancelled();
       this.publishProgress({
@@ -248,7 +336,7 @@ export class ScanOrchestrator {
       });
 
       const durationMs = performance.now() - start;
-      const hash = await worker.getSnapshotHash();
+      const hash = await analysis.getSnapshotHash();
       const cached = hash === this.lastSnapshotHash;
       const stale = !cached && this.lastSnapshotHash !== '';
       this.lastSnapshotHash = hash;
@@ -308,8 +396,8 @@ export class ScanOrchestrator {
     if (!el) return { results: [] };
     // Reuse the L1 cached style — one getComputedStyle per node per pass.
     const target: ElementSample = sampleElement(el, styleCache.computedFor(el));
-    const worker = await this.getWorker();
-    const results = await worker.findSimilar(target);
+    const analysis = await this.getAnalysis();
+    const results = await analysis.findSimilar(target);
     this.highlights.showHighlights(
       results.slice(0, 8).map((r) => r.ref),
       `${results.length} similar`,

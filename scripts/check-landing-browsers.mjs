@@ -147,12 +147,15 @@ async function runEngine(browserType, url) {
     }
     if (rows < 3) problems.push(`demo hover produced ${rows} rows`);
 
-    // Every Download ZIP button must point at a real file.
+    // Every Download ZIP button must point at a real local file. External
+    // buttons (e.g. the Safari "vote" link) are destinations, not ZIPs —
+    // skipping them keeps this check hermetic (no outbound network, which
+    // flaked CI/sandboxed runs when the remote host was slow or blocked).
     const dlHrefs = await page
       .locator('.btn-dl')
       .evaluateAll((els) => els.map((el) => el.getAttribute('href')));
     for (const href of dlHrefs) {
-      if (!href) continue;
+      if (!href || !href.startsWith('downloads/')) continue;
       const res = await page.request.get(new URL(href, url).toString());
       if (res.status() !== 200) problems.push(`download link 404: ${href}`);
     }

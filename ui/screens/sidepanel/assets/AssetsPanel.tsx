@@ -635,8 +635,8 @@ export function AssetsPanel() {
               />
             );
             return (
-              <div class="fixed inset-0 z-[140] flex items-end justify-center bg-[var(--vq-overlay)] p-3 sm:items-center">
-                <div class="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-[var(--vq-radius-lg)] border border-[var(--vq-border)] bg-[var(--vq-bg-raised)] shadow-[var(--vq-shadow-lg)]">
+              <div class="vq-overlay fixed inset-0 z-[140] flex items-end justify-center p-3 sm:items-center">
+                <div class="vq-float max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-[var(--vq-radius-lg)]">
                   {detail}
                 </div>
               </div>

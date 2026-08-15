@@ -44,7 +44,7 @@ function VizToast(props: {
   return (
     <Toast.Root
       toastId={props.toastId}
-      class="pointer-events-auto flex w-full items-start gap-2 rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg-raised)] px-3 py-2.5 shadow-[var(--vq-shadow-md)]"
+      class="vq-float pointer-events-auto flex w-full items-start gap-2 rounded-[var(--vq-radius-md)] px-3 py-2.5"
     >
       <span class={`mt-0.5 shrink-0 ${toneColor(props.tone)}`}>
         <ToastGlyph tone={props.tone} />

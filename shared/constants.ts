@@ -13,6 +13,11 @@ export const INSPECTION_SCHEMA_VERSION = 4;
 /** Sensible default cap for the L3 cache; configurable in Settings (Section 2.3). */
 export const DEFAULT_CACHE_MAX_BYTES = 200 * 1024 * 1024;
 
+/** Storage cap for the version timeline — the newest N scans per URL are kept
+ * (the timeline UI also renders at most this many versions per page); older
+ * versions beyond the cap are garbage-collected on history writes. */
+export const MAX_VERSIONS_PER_PAGE = 25;
+
 export const THEMES = ['light', 'dark', 'auto'] as const;
 export type ThemeId = (typeof THEMES)[number];
 

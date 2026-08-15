@@ -18,8 +18,9 @@ import type {
   ScanPhase,
   SimilarityResult,
 } from '../../../../shared/types';
+import { normalizeCacheUrl } from '../../../../shared/url';
 import { repository } from '../../../../storage';
-import { makeCacheKey, normalizeCacheUrl } from '../../../../storage/adapters/indexeddb/cache';
+import { makeCacheKey } from '../../../../storage/adapters/indexeddb/cache';
 import {
   analysis,
   mergePartialInspection,

@@ -565,11 +565,11 @@ export function CommandPalette() {
       }}
     >
       <KDialog.Portal>
-        <KDialog.Overlay class="fixed inset-0 z-[150] bg-[var(--vq-overlay)]" aria-hidden="true" />
+        <KDialog.Overlay class="vq-overlay fixed inset-0 z-[150]" aria-hidden="true" />
         {/* No overflow-hidden: the combobox dropdown is positioned below the
             control, inside the dialog subtree (portaling it to body would put it
             outside the modal dialog and aria-hide it from the a11y tree). */}
-        <KDialog.Content class="fixed left-1/2 top-[12vh] z-[160] w-[min(420px,calc(100%-32px))] -translate-x-1/2 rounded-[var(--vq-radius-xl)] border border-[var(--vq-border)] bg-[var(--vq-bg-raised)] shadow-[var(--vq-shadow-md)] focus:outline-none">
+        <KDialog.Content class="vq-float fixed left-1/2 top-[12vh] z-[160] w-[min(420px,calc(100%-32px))] -translate-x-1/2 rounded-[var(--vq-radius-xl)] focus:outline-none">
           <KDialog.Title class="sr-only">Command palette</KDialog.Title>
 
           <KCombobox.Root

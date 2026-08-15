@@ -4,6 +4,7 @@ import type {
   Collection,
   HistoryEntry,
   Inspection,
+  InspectionMeta,
   Note,
   Screenshot,
 } from '../shared/types';
@@ -20,6 +21,8 @@ export interface VizquoRepository {
   getInspection(id: string): Promise<Inspection | null>;
   saveInspection(inspection: Inspection): Promise<void>;
   listInspections(): Promise<Inspection[]>;
+  /** Light projection (no assets/findings) — version timeline + other list views. */
+  listInspectionMetas(): Promise<InspectionMeta[]>;
   deleteInspection(id: string): Promise<void>;
 
   /* ---- Collections ---- */

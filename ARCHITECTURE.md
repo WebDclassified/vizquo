@@ -69,13 +69,21 @@ panel or the page:
    cache — one `getComputedStyle` per node per pass. Output: a serializable
    `ScanSnapshot` (element samples, CSS variables, font sources,
    breakpoints, media counts).
-2. **Analysis worker** (`workers/analysis-worker.ts`, Comlink): each
-   analysis unit — colors (culori OKLCH clustering), typography hierarchy,
-   scales (spacing/radius/shadow/gradient + outliers), structure
-   (recurring components) — is memoized by a content hash of its input
-   projection (`engine/tokens/memo.ts`). An unchanged page reuses cached
-   results instantly; the assembled `Inspection` carries `cached`/`stale`
-   flags the panel surfaces honestly.
+2. **Analysis pipeline** (`engine/analysis/pipeline.ts`): the pure Design
+   DNA pipeline — colors (culori OKLCH clustering), typography hierarchy,
+   scales (spacing/radius/shadow/gradient + outliers), structure (recurring
+   components), asset classification, and the a11y/performance audits — each
+   unit memoized by a content hash of its input projection
+   (`engine/tokens/memo.ts`). An unchanged page reuses cached results
+   instantly; the assembled `Inspection` carries `cached`/`stale` flags the
+   panel surfaces honestly. The same code runs in two environments:
+   - **Comlink worker** (`workers/analysis-worker.ts`) — a thin wrapper;
+     heavy compute stays off the content-script thread.
+   - **Main thread** — some sites ship a CSP whose `script-src` lacks
+     `blob:` (YouTube is a known case), which makes a blob-URL worker load
+     silently fail. The orchestrator health-checks the worker (`ping()` +
+     the worker `error` event) and falls back to the identical pipeline
+     synchronously, so scans complete on every page.
 3. **Orchestrator** (`engine/analysis/orchestrator.ts`): runs in the content
    script, streams each finished unit to the panel via storage events
    (`scanProgress`) for progressive section reveal — colors first, then
@@ -196,3 +204,26 @@ live `matchMedia` listener — so the palette is defined exactly once. High
 contrast and reduced motion are data attributes; font scale is a CSS variable
 on the root. See `DECISIONS.md` for why this beats a pure-CSS media-query
 approach.
+
+The UI is a **liquid-glass material system (brand system v4)**: four
+materials (thin / standard / elevated / floating) built from token-backed
+recipes — translucent fill + hairline border + edge-light shadow + backdrop
+blur with saturation where it is visible. The side panel is its own document,
+so the "environment" the glass sits on is an ambient scene on `<body>`
+(visible radial color fields + a light beam + grain — all static). Backdrop
+blur is deliberately confined to floating surfaces (`.vq-float`, `.vq-overlay`,
+tooltips) that have real content behind them; inline surfaces (panels, cards,
+buttons, `.vq-chrome` bars) express glass through translucency and edge light
+alone, which is what keeps dozens of panels cheap. High-contrast mode forces
+solid fills and removes blur globally. UnoCSS shortcuts inline the material
+recipes because shortcuts drop unknown classes (see the comment in
+`uno.config.ts`).
+
+The **landing page** (`landing/index.html`) is a static single-file re-skin of
+the same system — its `<style>` block re-declares the v4 tokens (materials,
+blur radii, `--saturate`, `--edge-light`, ambient fields, radii, ease) and
+applies the identical ambient `body` environment and material-by-role rules
+(thin chrome, standard content surfaces, elevated chips, floating dialog). If
+you change a token value in `ui/theme.css`, mirror it in the landing's `:root`
+so the two surfaces keep reading as one product; the landing's smoke gate is
+`node scripts/check-landing-browsers.mjs`.

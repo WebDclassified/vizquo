@@ -12,6 +12,7 @@ import type {
   CollectionItem,
   HistoryEntry,
   Inspection,
+  InspectionMeta,
   Note,
   Screenshot,
 } from '../../../../shared/types';
@@ -103,6 +104,16 @@ export async function removeCollectionItem(
 export async function listInspections(): Promise<Inspection[]> {
   try {
     return await repository.listInspections();
+  } catch {
+    return [];
+  }
+}
+
+/** Light projections (no assets/findings) — the version timeline renders and
+ * diffs from these and fetches the full payload only when a version is opened. */
+export async function listInspectionMetas(): Promise<InspectionMeta[]> {
+  try {
+    return await repository.listInspectionMetas();
   } catch {
     return [];
   }

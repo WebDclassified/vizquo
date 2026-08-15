@@ -182,8 +182,8 @@ export function AiExplainDialog() {
   return (
     <KDialog.Root open={open()} onOpenChange={(o) => !o && setOpen(false)}>
       <KDialog.Portal>
-        <KDialog.Overlay class="fixed inset-0 z-[150] bg-[var(--vq-overlay)]" aria-hidden="true" />
-        <KDialog.Content class="fixed left-1/2 top-1/2 z-[160] w-[min(460px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[var(--vq-radius-xl)] border border-[var(--vq-border)] bg-[var(--vq-bg-raised)] shadow-[var(--vq-shadow-md)] focus:outline-none">
+        <KDialog.Overlay class="vq-overlay fixed inset-0 z-[150]" aria-hidden="true" />
+        <KDialog.Content class="vq-float fixed left-1/2 top-1/2 z-[160] w-[min(460px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[var(--vq-radius-xl)] focus:outline-none">
           <header class="flex items-center justify-between border-b border-[var(--vq-border)] px-4 py-3">
             <div class="min-w-0">
               <KDialog.Title class="flex items-center gap-1.5 text-[13px] font-semibold text-[var(--vq-fg)]">

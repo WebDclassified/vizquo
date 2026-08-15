@@ -36,7 +36,7 @@ export function GuidedTour(props: {
   const [rect, setRect] = createSignal<CardRect | null>(null);
 
   function measure(step: TourStep | undefined) {
-    if (!step || step.placement !== 'below' || !step.targetId) {
+    if (step?.placement !== 'below' || !step?.targetId) {
       setRect(null);
       return;
     }
@@ -70,11 +70,7 @@ export function GuidedTour(props: {
   return (
     <Show when={props.visible && !props.done}>
       <div class="fixed inset-0 z-[140]" role="dialog" aria-modal="true" aria-label={step()?.title}>
-        <div
-          class="absolute inset-0 bg-[var(--vq-overlay)]"
-          onClick={props.onClose}
-          aria-hidden="true"
-        />
+        <div class="vq-overlay absolute inset-0" onClick={props.onClose} aria-hidden="true" />
         <Show
           when={rect()}
           fallback={
@@ -123,7 +119,7 @@ function TourCard(props: {
   const current = () => props.steps[Math.min(Math.max(props.step, 0), props.steps.length - 1)];
   const last = () => props.step >= props.steps.length - 1;
   return (
-    <div class="overflow-hidden rounded-[var(--vq-radius-xl)] border border-[var(--vq-border)] bg-[var(--vq-bg-raised)] shadow-[var(--vq-shadow-md)]">
+    <div class="vq-float overflow-hidden rounded-[var(--vq-radius-xl)]">
       <div class="flex items-start justify-between gap-2 px-4 pt-3.5">
         <span class="text-[11px] font-semibold tracking-wider text-[var(--vq-accent)] uppercase">
           {props.label} · {props.step + 1} of {props.steps.length}

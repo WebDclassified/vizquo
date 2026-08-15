@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { INSPECTION_SCHEMA_VERSION } from '../shared/constants';
+import { INSPECTION_SCHEMA_VERSION, MAX_VERSIONS_PER_PAGE } from '../shared/constants';
 import type { CacheEntry, Collection, HistoryEntry, Note, Screenshot } from '../shared/types';
 import { IndexedDbRepository } from '../storage/adapters/indexeddb/indexeddb-repository';
 import { VizquoDatabase } from '../storage/adapters/indexeddb/schema';
@@ -46,6 +46,104 @@ describe('inspections', () => {
 
     await repo.deleteInspection('a');
     expect(await repo.getInspection('a')).toBeNull();
+  });
+
+  it('listInspectionMetas projects light rows (no assets/findings)', async () => {
+    await repo.saveInspection(
+      makeInspection({
+        id: 'full',
+        assets: [{ id: 'a1', type: 'image', url: 'https://x.test/a.png', source: 'img' }],
+        components: [{ id: 'c1', name: 'Button', count: 1 } as never],
+      }),
+    );
+    const metas = await repo.listInspectionMetas();
+    expect(metas).toHaveLength(1);
+    const meta = metas[0]!;
+    expect(meta.id).toBe('full');
+    expect(meta.consistencyScore).toBe(88); // fixture default survives the projection
+    expect('assets' in meta).toBe(false);
+    expect('components' in meta).toBe(false);
+    // The full row is untouched.
+    expect((await repo.getInspection('full'))?.assets).toHaveLength(1);
+  });
+
+  it('GC keeps the newest MAX_VERSIONS_PER_PAGE per URL and prunes the rest', async () => {
+    const make = (id: string, url: string, createdAt: number) =>
+      makeInspection({ id, createdAt, page: { url, title: 'X', scannedAt: createdAt } });
+    // 5 beyond the cap for one URL + 1 for another URL.
+    for (let i = 0; i < MAX_VERSIONS_PER_PAGE + 5; i += 1) {
+      await repo.saveInspection(make(`same-${i}`, 'https://x.test/', i));
+    }
+    await repo.saveInspection(make('other-0', 'https://y.test/', 0));
+    // Saving any history entry triggers GC (each scan lands here).
+    await repo.saveHistory({
+      id: 'h1',
+      inspectionId: `same-${MAX_VERSIONS_PER_PAGE + 4}`, // newest scan
+      page: { url: 'https://x.test/', title: 'X', scannedAt: MAX_VERSIONS_PER_PAGE + 4 },
+      scannedAt: MAX_VERSIONS_PER_PAGE + 4,
+      pinned: false,
+    });
+
+    const left = (await repo.listInspections()).map((i) => i.id).sort();
+    // Per URL: newest 25 kept (same-5..same-29), oldest 5 pruned; other URL untouched.
+    expect(left).toHaveLength(MAX_VERSIONS_PER_PAGE + 1);
+    for (let i = 0; i < MAX_VERSIONS_PER_PAGE; i += 1) {
+      expect(left).toContain(`same-${i + 5}`);
+    }
+    for (let i = 0; i < 5; i += 1) {
+      expect(left).not.toContain(`same-${i}`);
+    }
+    expect(left).toContain('other-0');
+  });
+
+  it('GC keeps history-referenced inspections even past the per-URL cap', async () => {
+    const make = (id: string, createdAt: number) =>
+      makeInspection({
+        id,
+        createdAt,
+        page: { url: 'https://x.test/', title: 'X', scannedAt: createdAt },
+      });
+    for (let i = 0; i < MAX_VERSIONS_PER_PAGE + 5; i += 1) {
+      await repo.saveInspection(make(`v-${i}`, i));
+    }
+    // Reference an OLD version directly (simulates a pinned older entry).
+    await repo.saveHistory({
+      id: 'h-old',
+      inspectionId: 'v-0',
+      page: { url: 'https://x.test/', title: 'X', scannedAt: 0 },
+      scannedAt: 0,
+      pinned: true,
+    });
+    const left = (await repo.listInspections()).map((i) => i.id);
+    expect(left).toContain('v-0');
+    // Newest 25 still kept alongside it.
+    expect(left.filter((id) => id.startsWith('v-'))).toHaveLength(MAX_VERSIONS_PER_PAGE + 1);
+  });
+
+  it('deleteHistory also prunes the inspection rows it orphaned', async () => {
+    const make = (id: string, createdAt: number) =>
+      makeInspection({
+        id,
+        createdAt,
+        page: { url: 'https://x.test/', title: 'X', scannedAt: createdAt },
+      });
+    for (let i = 0; i < MAX_VERSIONS_PER_PAGE + 5; i += 1) {
+      await repo.saveInspection(make(`v-${i}`, i));
+    }
+    await repo.saveHistory({
+      id: 'h1',
+      inspectionId: `v-${MAX_VERSIONS_PER_PAGE + 4}`,
+      page: { url: 'https://x.test/', title: 'X', scannedAt: MAX_VERSIONS_PER_PAGE + 4 },
+      scannedAt: MAX_VERSIONS_PER_PAGE + 4,
+      pinned: false,
+    });
+    // Deleting the only history entry re-runs GC: the referenced newest scan
+    // is kept (still within the cap), the older ones stay pruned.
+    await repo.deleteHistory('h1');
+    expect(await repo.listHistory()).toHaveLength(0);
+    const left = (await repo.listInspections()).map((i) => i.id);
+    expect(left).toHaveLength(MAX_VERSIONS_PER_PAGE);
+    expect(left).toContain(`v-${MAX_VERSIONS_PER_PAGE + 4}`);
   });
 });
 

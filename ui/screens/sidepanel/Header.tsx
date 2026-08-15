@@ -34,7 +34,7 @@ export function Header() {
   }
 
   return (
-    <header class="flex h-[var(--vq-header-height)] shrink-0 items-center justify-between gap-2 border-b border-[var(--vq-border)] px-3">
+    <header class="vq-chrome flex h-[var(--vq-header-height)] shrink-0 items-center justify-between gap-2 border-b border-[var(--vq-border)] px-3">
       <div class="flex min-w-0 items-center gap-2">
         <Logo class="h-[21px] w-auto shrink-0 text-[var(--vq-fg)]" />
       </div>

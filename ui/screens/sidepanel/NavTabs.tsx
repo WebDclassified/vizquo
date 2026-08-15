@@ -15,7 +15,7 @@ const TABS: { id: PanelId; label: string }[] = [
 ];
 
 const TAB_CLASS =
-  'relative shrink-0 whitespace-nowrap rounded-[var(--vq-radius-md)] px-2.5 py-1.5 text-[12.5px] font-medium text-[var(--vq-fg-muted)] transition-colors duration-[var(--vq-duration-fast)] hover:bg-[var(--vq-bg-hover)] hover:text-[var(--vq-fg)] data-[selected]:bg-[var(--vq-accent-soft)] data-[selected]:text-[var(--vq-accent)] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[var(--vq-ring)]';
+  'relative shrink-0 whitespace-nowrap rounded-[var(--vq-radius-md)] px-2.5 py-1.5 text-[12.5px] font-medium text-[var(--vq-fg-muted)] transition-colors duration-[var(--vq-duration-fast)] hover:bg-[var(--vq-bg-hover)] hover:text-[var(--vq-fg)] data-[selected]:bg-[var(--vq-accent-soft)] data-[selected]:text-[var(--vq-accent)] data-[selected]:shadow-[inset_0_1px_0_var(--vq-highlight)] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[var(--vq-ring)]';
 
 export function NavTabs() {
   function changeMode(mode: 'designer' | 'engineer') {
@@ -28,7 +28,7 @@ export function NavTabs() {
   return (
     <nav
       id="vq-nav"
-      class="flex h-[var(--vq-nav-height)] shrink-0 items-center gap-2 border-b border-[var(--vq-border)] px-2"
+      class="vq-chrome flex h-[var(--vq-nav-height)] shrink-0 items-center gap-2 border-b border-[var(--vq-border)] px-2"
       aria-label="Primary"
     >
       {/* The tab row scrolls horizontally when the panel is narrow (real

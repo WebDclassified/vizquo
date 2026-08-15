@@ -9,13 +9,14 @@ import { Clock3, Eye, History as HistoryIcon } from 'lucide-solid';
 import { createSignal, For, onMount, Show } from 'solid-js';
 import { groupInspectionsByUrl, type TimelineGroup } from '../../../../../engine/timeline/timeline';
 import { compareInspections, summarizeComparison } from '../../../../../export/compare';
-import type { Inspection } from '../../../../../shared/types';
+import type { InspectionMeta } from '../../../../../shared/types';
 import { Badge } from '../../../../components/Badge';
 import { Button } from '../../../../components/Button';
 import { Panel } from '../../../../components/Panel';
 import { setAnalysis } from '../../../../stores/analysis-store';
+import { notify } from '../../../../stores/toast';
 import { setActivePanel } from '../../../../stores/ui-store';
-import { listInspections } from '../library-client';
+import { getInspection, listInspectionMetas } from '../library-client';
 
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString(undefined, {
@@ -33,7 +34,7 @@ function consistencyTone(score: number): string {
 }
 
 /** Diff summary of newer vs older — compact \"what changed\" chips. */
-function diffLines(newer: Inspection, older: Inspection): string[] {
+function diffLines(newer: InspectionMeta, older: InspectionMeta): string[] {
   return summarizeComparison(compareInspections(newer, older)).lines.slice(0, 4);
 }
 
@@ -41,12 +42,10 @@ export function TimelineTab(props: { query?: () => string }) {
   const [groups, setGroups] = createSignal<TimelineGroup[]>([]);
   const [selectedUrl, setSelectedUrl] = createSignal<string | null>(null);
 
-  // Loads full inspections (assets + usedBy refs included) rather than a
-  // metadata projection — fine for a local tool, and grouping caps the rows
-  // this tab renders; revisit with a metadata-only query if the library ever
-  // grows past thousands of scans.
+  // Light projections only — no asset/finding payloads. The full inspection
+  // is fetched lazily when a version is opened (see open()).
   onMount(() => {
-    void listInspections().then((inspections) => {
+    void listInspectionMetas().then((inspections) => {
       const grouped = groupInspectionsByUrl(inspections);
       setGroups(grouped);
       setSelectedUrl(grouped[0]?.url ?? null);
@@ -61,9 +60,15 @@ export function TimelineTab(props: { query?: () => string }) {
     );
   };
 
-  function open(version: Inspection) {
+  async function open(version: InspectionMeta) {
     // Recall the stored scan into the Design panel (the page is untouched).
-    setAnalysis('inspection', version);
+    // The list only holds metas — fetch the full payload for this one version.
+    const inspection = await getInspection(version.id);
+    if (!inspection) {
+      notify({ title: 'This scan is no longer stored', tone: 'warning' });
+      return;
+    }
+    setAnalysis('inspection', inspection);
     setAnalysis('cached', true);
     setAnalysis('stale', false);
     setActivePanel('design');
@@ -150,7 +155,11 @@ export function TimelineTab(props: { query?: () => string }) {
                                     : 'First recorded scan'}
                               </p>
                             </div>
-                            <Button size="sm" variant="secondary" onClick={() => open(version)}>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => void open(version)}
+                            >
                               <Eye class="size-3" aria-hidden="true" />
                               Open
                             </Button>

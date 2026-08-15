@@ -228,6 +228,22 @@ export interface Inspection {
   stale: boolean;
 }
 
+/** Light projection of an Inspection for list-heavy views (version timeline).
+ * Everything the timeline renders and diffs fits in this shape — only "Open"
+ * fetches the full payload (assets, findings, etc.) via getInspection. */
+export type InspectionMeta = Pick<
+  Inspection,
+  | 'id'
+  | 'page'
+  | 'createdAt'
+  | 'tokens'
+  | 'gradients'
+  | 'breakpoints'
+  | 'technologies'
+  | 'consistencyScore'
+  | 'scannedElementCount'
+>;
+
 export type CollectionItem =
   | { kind: 'asset'; asset: Asset }
   | { kind: 'color'; token: ColorToken }

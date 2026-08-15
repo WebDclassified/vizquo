@@ -2,9 +2,12 @@ import type { ParentProps } from 'solid-js';
 
 export type BadgeTone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger' | 'info';
 
+// Glass pills: translucent tinted fill + hairline rim (the vq-badge shortcut
+// supplies the neutral border + sunken base; tones override fill/text and
+// give the accent its tinted rim).
 const TONE_CLASS: Record<BadgeTone, string> = {
-  neutral: 'border border-[var(--vq-border)] bg-[var(--vq-bg-sunken)] text-[var(--vq-fg-muted)]',
-  accent: 'bg-[var(--vq-accent-soft)] text-[var(--vq-accent)]',
+  neutral: 'bg-[var(--vq-bg-sunken)] text-[var(--vq-fg-muted)]',
+  accent: 'border-[var(--vq-accent-border)] bg-[var(--vq-accent-soft)] text-[var(--vq-accent)]',
   success: 'bg-[var(--vq-success-soft)] text-[var(--vq-success-fg)]',
   warning: 'bg-[var(--vq-warning-soft)] text-[var(--vq-warning-fg)]',
   danger: 'bg-[var(--vq-danger-soft)] text-[var(--vq-danger-fg)]',

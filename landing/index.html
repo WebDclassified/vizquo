@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vizquo — Inspect any webpage. Extract its design system.</title>
 <meta name="description" content="Vizquo is a free, local-first browser extension that inspects any webpage and extracts its design system — colors, typography, spacing, components, and assets. Optional AI. Works in Chrome, Edge, Firefox, Brave, Opera, Vivaldi, and Arc. Safari coming soon.">
-<meta name="theme-color" content="#05060b">
+<meta name="theme-color" content="#08090e">
 <meta property="og:title" content="Vizquo — Inspect any webpage. Extract its design system.">
 <meta property="og:description" content="The design-intelligence layer for your browser. Free, local-first, private by default. Optional AI.">
 <meta property="og:type" content="website">
@@ -39,41 +39,71 @@
      Design tokens
   ============================================================ */
   :root {
-    --bg: #05060b;
-    --bg-2: #090b13;
-    --surface: rgba(255, 255, 255, 0.035);
-    --surface-2: rgba(255, 255, 255, 0.06);
-    --border: rgba(255, 255, 255, 0.09);
-    --border-strong: rgba(255, 255, 255, 0.18);
-    --fg: #f4f6fb;
-    --muted: #9aa2b6;
-    --dim: #7a8299; /* ≥ 4.5:1 on --bg for small text */
+    /* Design tokens — mirrors the Vizquo extension (brand system v4, liquid
+       glass): same palette, materials, radii, and motion, so the landing page
+       and the side panel read as one product. */
+    --bg: #08090e;
+    --bg-2: #0a0c13;
+    --surface: rgba(255,255,255,.04);
+    --surface-2: rgba(255,255,255,.07);
+    --border: rgba(255,255,255,.1);
+    --border-strong: rgba(255,255,255,.18);
+    --fg: #f5f7fa;
+    --muted: #b4bac5;
+    --dim: #747b87;
     --indigo: #6e7bff;
     --indigo-2: #8b7bff;
     --teal: #3fe0c8;
     --violet: #a78bfa;
-    --green: #3ecf8e;
-    --amber: #ffc857;
-    --red: #ff7b7b;
+    --green: #45d483;
+    --amber: #e7b75b;
+    --red: #f06b73;
     --grad: linear-gradient(120deg, #6e7bff 0%, #a78bfa 50%, #3fe0c8 100%);
     --grad-soft: linear-gradient(120deg, rgba(110,123,255,.16), rgba(167,139,250,.12), rgba(63,224,200,.14));
     --grad-anim: linear-gradient(120deg, #6e7bff, #a78bfa, #3fe0c8, #6e7bff);
-    --radius: 18px;
-    --radius-sm: 11px;
+    --radius: 16px;
+    --radius-sm: 10px;
     --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
     --font-serif: "Instrument Serif", Georgia, serif;
     --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 24px 64px rgba(0,0,0,.5);
     --shadow-glow: 0 0 0 1px rgba(110,123,255,.35), 0 24px 64px rgba(110,123,255,.22);
-    --ease-out: cubic-bezier(.22,.75,.24,1);
+    --ease-out: cubic-bezier(.16,1,.3,1);
     --ease-spring: cubic-bezier(.34,1.45,.4,1);
+    /* ---- Liquid-glass materials (extension v4) ---- */
+    --mat-thin: rgba(18,21,29,.34);       /* chrome bars, inputs, chips */
+    --mat-standard: rgba(20,23,32,.5);    /* panels, cards, content */
+    --mat-elevated: rgba(25,29,40,.58);   /* floating chips, tooltips, back-top */
+    --mat-float: rgba(28,32,45,.68);      /* dialogs, overlay card */
+    --blur-thin: 10px;
+    --blur-standard: 16px;
+    --blur-elevated: 20px;
+    --blur-float: 26px;
+    --saturate: 1.5;                      /* refraction — colors behind glass */
+    --edge-light: inset 0 1px 0 rgba(255,255,255,.08), inset 1px 0 0 rgba(255,255,255,.025), inset -1px 0 0 rgba(255,255,255,.025);
+    /* Ambient environment — the color fields the glass sits above. */
+    --ambient-1: rgba(122,106,255,.24);   /* violet, top-left */
+    --ambient-2: rgba(63,224,200,.13);    /* teal, bottom-right */
+    --ambient-3: rgba(90,102,230,.18);    /* indigo, top */
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; scroll-padding-top: 92px; }
   body {
     font-family: var(--font-sans);
-    background: var(--bg);
+    /* Ambient environment (extension v4): opaque base + three visible color
+       fields + a soft top-left beam + baked-in grain. Fixed, so the glass
+       surfaces above it read as translucent at any scroll position. */
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(760px 540px at 8% -6%, var(--ambient-1), transparent 70%),
+      radial-gradient(640px 500px at 104% 104%, var(--ambient-2), transparent 70%),
+      radial-gradient(460px 380px at 82% -10%, var(--ambient-3), transparent 72%),
+      radial-gradient(520px 360px at 12% -2%, rgba(255,255,255,.05), transparent 78%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 760px 540px, 640px 500px, 460px 380px, 520px 360px, 180px 180px;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+    background-attachment: fixed;
     color: var(--fg);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -91,11 +121,8 @@
   .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
   section { padding: clamp(88px, 9vw, 140px) 0; position: relative; }
 
-  /* Noise overlay — subtle film grain over everything */
-  body::after {
-    content: ""; position: fixed; inset: 0; z-index: 200; pointer-events: none; opacity: .05;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
-  }
+  /* Film grain is baked into the body background stack above — one static
+     layer, matching the extension's ambient environment. */
 
   .kicker {
     display: inline-flex; align-items: center; gap: 10px;
@@ -148,13 +175,15 @@
   ============================================================ */
   header {
     position: sticky; top: 0; z-index: 80;
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
-    background: rgba(5, 6, 11, 0.72);
+    /* Thin glass — high translucency over the scrolling page, blur 10px. */
+    background: var(--mat-thin);
+    -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
     border-bottom: 1px solid transparent;
+    box-shadow: var(--edge-light);
     transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
   }
-  header.scrolled { border-color: var(--border); background: rgba(5, 6, 11, 0.85); box-shadow: 0 14px 44px rgba(0,0,0,.5); }
+  header.scrolled { border-color: var(--border); background: var(--mat-elevated); box-shadow: var(--edge-light), 0 14px 44px rgba(0,0,0,.5); }
   .nav { display: flex; align-items: center; justify-content: space-between; height: 76px; gap: 20px; }
   .brand { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); font-weight: 700; font-size: 19px; letter-spacing: -0.02em; }
   .brand .logo-wrap { position: relative; }
@@ -176,23 +205,23 @@
     color: #0a0b14; font-weight: 700; font-size: 14px;
     padding: 10px 22px; border-radius: 11px;
     transition: transform .18s ease, box-shadow .18s ease;
-    box-shadow: 0 6px 22px rgba(110,123,255,.35);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 6px 22px rgba(110,123,255,.35);
   }
   .nav-cta::after {
     content: ""; position: absolute; top: 0; left: -70%; width: 45%; height: 100%;
     background: linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent);
     transform: skewX(-20deg); transition: left .55s ease;
   }
-  .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(110,123,255,.5); }
+  .nav-cta:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 10px 30px rgba(110,123,255,.5); }
   .nav-cta:hover::after { left: 130%; }
-  .nav-burger { display: none; background: rgba(255,255,255,.05); border: 1px solid var(--border); color: var(--fg); width: 44px; height: 44px; border-radius: 11px; font-size: 20px; cursor: pointer; transition: background .15s ease; }
-  .nav-burger:hover { background: rgba(255,255,255,.1); }
+  .nav-burger { display: none; background: var(--mat-thin); border: 1px solid var(--border); color: var(--fg); width: 44px; height: 44px; border-radius: 11px; font-size: 20px; cursor: pointer; box-shadow: var(--edge-light); transition: background .15s ease; }
+  .nav-burger:hover { background: var(--mat-standard); }
   @media (max-width: 900px) {
     .nav-burger { display: block; }
     .nav-links {
       position: absolute; top: 76px; left: 0; right: 0;
       flex-direction: column; align-items: flex-start; gap: 2px;
-      background: rgba(7, 8, 14, 0.98); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+      background: var(--mat-float); -webkit-backdrop-filter: blur(var(--blur-float)) saturate(var(--saturate)); backdrop-filter: blur(var(--blur-float)) saturate(var(--saturate));
       border-bottom: 1px solid var(--border);
       padding: 14px 24px 22px;
       display: none;
@@ -241,12 +270,14 @@
 
   .hero-pill {
     display: inline-flex; align-items: center; gap: 10px;
-    border: 1px solid var(--border); border-radius: 999px;
-    background: rgba(255,255,255,.04); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border: 1px solid var(--border-strong); border-radius: 999px;
+    background: var(--mat-thin);
+    -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
     padding: 8px 18px;
     font-size: 13px; color: var(--muted); font-weight: 500;
     margin-bottom: 30px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    box-shadow: var(--edge-light);
   }
   .hero-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(62,207,142,.6); animation: pulse 2.2s infinite; }
   @keyframes pulse {
@@ -281,7 +312,7 @@
     color: #0a0b14; font-weight: 800; font-size: 16px;
     padding: 16px 32px; border-radius: 14px;
     position: relative; overflow: hidden;
-    box-shadow: 0 10px 34px rgba(110,123,255,.4);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 10px 34px rgba(110,123,255,.4);
     transition: transform .18s ease, box-shadow .18s ease;
   }
   .btn-primary::after {
@@ -290,16 +321,17 @@
     transform: skewX(-20deg);
     transition: left .6s ease;
   }
-  .btn-primary:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 16px 44px rgba(110,123,255,.55); }
+  .btn-primary:hover { transform: translateY(-2px) scale(1.01); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 16px 44px rgba(110,123,255,.55); }
   .btn-primary:hover::after { left: 130%; }
   .btn-ghost {
     display: inline-flex; align-items: center; gap: 9px;
     color: var(--fg); font-weight: 600; font-size: 15.5px;
     padding: 16px 26px; border-radius: 14px;
     border: 1px solid var(--border-strong);
-    background: rgba(255,255,255,.04);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+    background: var(--mat-thin);
+    -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    box-shadow: var(--edge-light);
     transition: border-color .18s ease, background .18s ease, transform .18s ease;
   }
   .btn-ghost:hover { border-color: var(--indigo); background: var(--grad-soft); transform: translateY(-2px); }
@@ -315,14 +347,15 @@
     max-width: 880px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: rgba(255,255,255,.03);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    background: var(--mat-standard);
+    -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    box-shadow: var(--edge-light);
     overflow: hidden;
   }
   .stat { padding: 24px 14px; border-left: 1px solid var(--border); position: relative; }
   .stat:first-child { border-left: none; }
-  .stat .v { font-family: var(--font-display); font-size: clamp(24px, 3vw, 32px); font-weight: 700; letter-spacing: -0.02em; }
+  .stat .v { font-family: var(--font-display); font-size: clamp(24px, 3vw, 32px); font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
   .stat .v .grad-text { animation-duration: 4s; }
   .stat .l { font-size: 12.5px; color: var(--dim); margin-top: 3px; line-height: 1.4; }
   @media (max-width: 640px) {
@@ -350,7 +383,8 @@
   }
   .showcase-body {
     display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr);
-    background: #0b0d16; text-align: left;
+    /* Transparent: the browser-frame's glass shows through on the panel side. */
+    text-align: left;
   }
   @media (max-width: 820px) { .showcase-body { grid-template-columns: 1fr; } .showcase-panel { display: none; } }
   .showcase-page { background: #f6f7fb; color: #10141f; padding: 26px 30px 34px; min-height: 380px; position: relative; }
@@ -379,7 +413,14 @@
     50% { box-shadow: 0 0 0 8px rgba(110,123,255,0); }
   }
   /* Vizquo side panel mock */
-  .showcase-panel { background: #0d0f18; border-left: 1px solid rgba(255,255,255,.07); display: flex; flex-direction: column; padding: 16px; }
+  .showcase-panel {
+    /* Elevated glass — a brighter inset surface over the window glass below. */
+    background: var(--mat-elevated); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 16px;
+    -webkit-backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
+    box-shadow: var(--edge-light);
+  }
   .sp-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 14px; border-bottom: 1px solid rgba(255,255,255,.07); }
   .sp-head .t { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--fg); }
   .sp-head .logo-mini { width: 18px; height: 18px; border-radius: 5px; background: var(--grad); }
@@ -409,11 +450,14 @@
   .float-chip {
     position: absolute; z-index: 2;
     display: flex; align-items: center; gap: 8px;
-    background: rgba(13, 15, 24, 0.85); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    /* Elevated glass — brighter fill, blur 20px, clear separation. */
+    background: var(--mat-elevated);
+    -webkit-backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
     border: 1px solid var(--border-strong);
     border-radius: 13px; padding: 10px 15px;
     font-size: 13px; font-weight: 600; color: var(--fg);
-    box-shadow: var(--shadow);
+    box-shadow: var(--edge-light), var(--shadow);
     animation: chipFloat 5s ease-in-out infinite;
   }
   .float-chip .ic { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
@@ -442,7 +486,8 @@
     display: inline-flex; align-items: center; gap: 9px;
     border: 1px solid var(--border); border-radius: 999px;
     padding: 9px 18px; font-size: 13.5px; font-weight: 600; color: var(--muted);
-    background: rgba(255,255,255,.03);
+    background: var(--mat-thin);
+    box-shadow: var(--edge-light);
     white-space: nowrap; transition: color .18s ease, border-color .18s ease, transform .18s ease;
   }
   .mq-item:hover { color: var(--fg); border-color: var(--border-strong); transform: translateY(-2px); }
@@ -461,8 +506,8 @@
   @media (max-width: 920px) { .demo-wrap { grid-template-columns: 1fr; } }
   .browser-frame {
     border: 1px solid var(--border-strong); border-radius: 16px; overflow: hidden;
-    background: #0d0f18;
-    box-shadow: var(--shadow);
+    background: var(--mat-standard);
+    box-shadow: var(--edge-light), var(--shadow);
   }
   .browser-bar { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: rgba(255,255,255,.04); border-bottom: 1px solid var(--border); }
   .b-dot { width: 11px; height: 11px; border-radius: 50%; transition: transform .2s ease; }
@@ -505,8 +550,10 @@
   .inspector {
     display: flex; flex-direction: column;
     border: 1px solid var(--border-strong); border-radius: 16px;
-    background: #0c0e16;
-    box-shadow: var(--shadow);
+    background: var(--mat-standard);
+    box-shadow: var(--edge-light), var(--shadow);
+    -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
     overflow: hidden;
     min-height: 420px;
   }
@@ -521,9 +568,10 @@
   .insp-body { flex: 1; padding: 10px 0; overflow-y: auto; }
   .insp-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 16px; font-size: 12.5px; animation: rowIn .3s var(--ease-out) backwards; }
   .insp-row .k { color: var(--dim); font-weight: 500; flex-shrink: 0; }
-  .insp-row .val { font-family: var(--font-mono); font-size: 11.5px; color: var(--fg); text-align: right; word-break: break-word; display: flex; align-items: center; gap: 7px; }
+  .insp-row .val { font-family: var(--font-mono); font-size: 11.5px; color: var(--fg); text-align: right; word-break: break-word; display: flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; }
   .swatch { width: 12px; height: 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,.25); flex-shrink: 0; }
-  .insp-foot { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--dim); }
+  .insp-foot { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: var(--dim); }
+  #inspPos { margin-right: auto; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .06em; font-variant-numeric: tabular-nums; color: var(--dim); }
   .insp-foot .conf { color: var(--teal); font-weight: 700; }
 
   /* ============================================================
@@ -533,8 +581,9 @@
   @media (max-width: 940px) { .steps-row { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 540px) { .steps-row { grid-template-columns: 1fr; } }
   .step {
-    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+    background: var(--mat-standard);
     border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--edge-light);
     padding: 28px 24px 24px; position: relative; overflow: hidden;
     transition: transform .25s var(--ease-out), border-color .25s ease;
   }
@@ -564,8 +613,9 @@
   @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
   .glow-card {
     position: relative;
-    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    background: var(--mat-standard);
     border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--edge-light);
     padding: 28px 26px;
     overflow: hidden;
     transition: transform .25s var(--ease-out), border-color .25s ease;
@@ -620,8 +670,9 @@
   @media (max-width: 900px) { .ai-layout { grid-template-columns: 1fr; } }
   .ai-grid { display: grid; gap: 16px; }
   .ai-card {
-    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    background: var(--mat-standard);
     border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--edge-light);
     padding: 28px 26px;
     position: relative; overflow: hidden;
     transition: transform .25s var(--ease-out), border-color .25s ease;
@@ -645,8 +696,10 @@
   /* Chat mock */
   .chat-card {
     border: 1px solid var(--border-strong); border-radius: var(--radius);
-    background: #0b0d16; overflow: hidden;
-    box-shadow: var(--shadow);
+    background: var(--mat-standard); overflow: hidden;
+    box-shadow: var(--edge-light), var(--shadow);
+    -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
     position: sticky; top: 96px;
   }
   .chat-head { display: flex; align-items: center; gap: 9px; padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 700; }
@@ -689,7 +742,8 @@
   .free-card {
     position: relative; max-width: 720px; margin: 0 auto; text-align: center;
     border-radius: 24px; padding: 54px 40px;
-    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+    background: var(--mat-standard);
+    box-shadow: var(--edge-light);
     overflow: hidden;
   }
   .free-card::before {
@@ -705,7 +759,7 @@
   .free-card .big .grad-text { animation-duration: 4s; }
   .free-card p { color: var(--muted); font-size: 15px; max-width: 460px; margin: 0 auto 26px; }
   .free-perks { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
-  .free-perk { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 6px 13px; background: rgba(255,255,255,.03); }
+  .free-perk { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 6px 13px; background: var(--mat-thin); box-shadow: var(--edge-light); }
   .free-perk .ok { color: var(--teal); font-weight: 800; }
 
   /* ============================================================
@@ -716,8 +770,9 @@
   @media (max-width: 1000px) { .browser-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 470px) { .browser-grid { grid-template-columns: 1fr; } }
   .browser {
-    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+    background: var(--mat-standard);
     border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--edge-light);
     padding: 26px 18px; text-align: center; position: relative;
     transition: transform .25s var(--ease-out), border-color .25s ease, box-shadow .25s ease;
   }
@@ -755,7 +810,7 @@
   .browser .soon-note { font-size: 12px; color: var(--dim); padding: 11px 4px; }
   .note-box {
     display: flex; align-items: flex-start; gap: 13px;
-    background: rgba(255,255,255,.03); border: 1px dashed var(--border-strong);
+    background: var(--mat-thin); border: 1px dashed var(--border-strong);
     border-radius: var(--radius-sm); padding: 16px 18px;
     font-size: 14px; color: var(--muted);
   }
@@ -764,7 +819,7 @@
 
   .os-selector { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; border: none; padding: 0; min-inline-size: 0; }
   .os-label { font-size: 13px; color: var(--dim); font-weight: 600; padding: 0; margin: 0; }
-  .os-tabs { display: inline-flex; background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 12px; padding: 4px; gap: 4px; }
+  .os-tabs { display: inline-flex; background: var(--mat-thin); border: 1px solid var(--border); border-radius: 12px; padding: 4px; gap: 4px; box-shadow: var(--edge-light); }
   .os-tab { background: none; border: none; color: var(--muted); font-size: 13.5px; font-weight: 600; padding: 9px 17px; border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: color .15s ease, background .15s ease, transform .15s ease; }
   .os-tab:hover { color: var(--fg); }
   .os-tab.on { background: var(--grad); color: #0a0b14; }
@@ -779,8 +834,9 @@
   .pipeline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 32px; }
   .pipe-step {
     display: flex; align-items: center; gap: 9px;
-    background: rgba(255,255,255,.04); border: 1px solid var(--border);
+    background: var(--mat-thin); border: 1px solid var(--border);
     border-radius: 999px; padding: 10px 19px; font-size: 13.5px; font-weight: 600;
+    box-shadow: var(--edge-light);
     transition: border-color .2s ease, transform .2s ease;
   }
   .pipe-step:hover { border-color: var(--border-strong); transform: translateY(-1px); }
@@ -792,11 +848,12 @@
   }
   .pipe-arrow { color: var(--dim); font-size: 15px; }
   details {
-    background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--mat-standard); border: 1px solid var(--border); border-radius: var(--radius);
     margin-bottom: 13px; overflow: hidden;
+    box-shadow: var(--edge-light);
     transition: border-color .25s ease, background .25s ease;
   }
-  details[open] { border-color: rgba(110,123,255,.45); background: rgba(255,255,255,.04); }
+  details[open] { border-color: rgba(110,123,255,.45); background: var(--mat-elevated); }
   summary {
     cursor: pointer; padding: 18px 22px;
     font-weight: 700; font-size: 15px;
@@ -824,7 +881,7 @@
   /* ============================================================
      Requirements
   ============================================================ */
-  .table-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .table-wrap { border: 1px solid var(--border); border-radius: var(--radius); background: var(--mat-standard); box-shadow: var(--edge-light); overflow: hidden; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th, td { text-align: left; padding: 15px 18px; border-bottom: 1px solid var(--border); }
   tr:last-child td { border-bottom: none; }
@@ -877,9 +934,10 @@
   ============================================================ */
   .dl-overlay {
     position: fixed; inset: 0; z-index: 120;
-    background: rgba(5, 6, 10, 0.82);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    /* Floating-glass scrim: dim + soft blur, like the extension's modal. */
+    background: rgba(3, 4, 7, 0.6);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
     display: flex; align-items: center; justify-content: center;
     opacity: 0; pointer-events: none;
     transition: opacity .28s ease;
@@ -887,10 +945,13 @@
   .dl-overlay.show { opacity: 1; pointer-events: auto; }
   .dl-card {
     width: min(360px, calc(100vw - 48px));
-    background: linear-gradient(180deg, #121524, #0c0e16);
+    /* Floating glass — deepest blur + saturation, strongest edge definition. */
+    background: var(--mat-float);
+    -webkit-backdrop-filter: blur(var(--blur-float)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-float)) saturate(var(--saturate));
     border: 1px solid var(--border-strong); border-radius: 22px;
     padding: 42px 32px 34px; text-align: center;
-    box-shadow: var(--shadow); position: relative; overflow: hidden;
+    box-shadow: var(--edge-light), var(--shadow); position: relative; overflow: hidden;
     transform: scale(.93); transition: transform .3s var(--ease-spring);
   }
   .dl-overlay.show .dl-card { transform: scale(1); }
@@ -935,7 +996,11 @@
     position: fixed; right: 22px; bottom: 22px; z-index: 90;
     width: 46px; height: 46px; border-radius: 13px;
     border: 1px solid var(--border-strong);
-    background: rgba(13, 15, 24, 0.85); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    /* Elevated glass — bright, blurred, clearly floating above content. */
+    background: var(--mat-elevated);
+    -webkit-backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
+    box-shadow: var(--edge-light);
     color: var(--fg); font-size: 17px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     opacity: 0; pointer-events: none; transform: translateY(12px);
@@ -1226,6 +1291,7 @@
         <div class="insp-path" id="inspPath">—</div>
         <div class="insp-body" id="inspRows"></div>
         <div class="insp-foot">
+          <span id="inspPos"></span>
           <span id="inspSrc">Vizquo · element inspector</span>
           <span class="conf" id="inspConf"></span>
         </div>
@@ -1847,6 +1913,7 @@
     const rowsEl = document.getElementById('inspRows');
     const srcEl = document.getElementById('inspSrc');
     const confEl = document.getElementById('inspConf');
+    const posEl = document.getElementById('inspPos');
     if (!items.length || !rowsEl) return;
 
     const DATA = {
@@ -1937,7 +2004,7 @@
 
     items.forEach((el) => {
       el.addEventListener('mouseenter', () => { if (!pinned) setActive(el, false); });
-      el.addEventListener('mouseleave', () => { if (!pinned) { pathEl.textContent = '—'; rowsEl.innerHTML = ''; srcEl.textContent = 'Vizquo · element inspector'; confEl.textContent = ''; } });
+      el.addEventListener('mouseleave', () => { if (!pinned) { pathEl.textContent = '—'; rowsEl.innerHTML = ''; srcEl.textContent = 'Vizquo · element inspector'; confEl.textContent = ''; if (posEl) posEl.textContent = ''; } });
       el.addEventListener('click', () => {
         if (pinned === el) { pinned = null; el.classList.remove('is-pin'); return; }
         setActive(el, true);
@@ -1946,6 +2013,17 @@
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
       });
     });
+
+    // Live cursor coordinates — the "instrumentation" readout in the footer.
+    const zone = document.querySelector('.inspect-zone');
+    if (zone && posEl) {
+      zone.addEventListener('mousemove', (e) => {
+        const r = zone.getBoundingClientRect();
+        const x = Math.round(e.clientX - r.left);
+        const y = Math.round(e.clientY - r.top);
+        posEl.textContent = `x:${String(x).padStart(3, '0')} y:${String(y).padStart(3, '0')}`;
+      });
+    }
   })();
 
   // ================= Scroll FX: header, progress, reveal, glow, back-top =================
@@ -2051,7 +2129,7 @@
         const t0 = performance.now();
         function frame(t) {
           const p = Math.min(1, (t - t0) / dur);
-          const eased = 1 - Math.pow(1 - p, 3);
+          const eased = 1 - (1 - p) ** 3;
           el.textContent = `${Math.round(target * eased)}${suffix}`;
           if (p < 1) requestAnimationFrame(frame);
         }

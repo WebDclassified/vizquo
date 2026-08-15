@@ -501,6 +501,12 @@ export async function buildScanSnapshot(
     if (isCancelled?.()) return cancelledSnapshot();
     const el = elements[i];
     if (!el || isNonVisual(el)) continue;
+    // Cheap render check BEFORE the expensive getComputedStyle: checkVisibility()
+    // covers the element's own display/visibility, hidden ancestors, and
+    // content-visibility — big sites (YouTube) are mostly collapsed subtrees,
+    // and skipping them avoids a style computation per hidden node. Browsers
+    // without it (older Safari) fall through to the computed-style check below.
+    if (typeof el.checkVisibility === 'function' && !el.checkVisibility()) continue;
     const style = styleCache.computedFor(el);
     const display = style.display;
     const visibility = style.visibility;

@@ -6,11 +6,19 @@
  * normalization history upserts use, so grouping never disagrees with the
  * History tab.
  *
+ * Works on the light `InspectionMeta` projection (no assets/findings) — the
+ * list view only renders + diffs those fields; "Open" fetches the full
+ * payload. Storage is capped at `MAX_VERSIONS_PER_PAGE` per URL by the
+ * repository's GC, matching what this module renders.
+ *
  * Pure — unit-testable without a browser.
  */
 
-import type { Inspection } from '../../shared/types';
-import { normalizeCacheUrl } from '../../storage/adapters/indexeddb/cache';
+import { MAX_VERSIONS_PER_PAGE } from '../../shared/constants';
+import type { InspectionMeta } from '../../shared/types';
+import { normalizeCacheUrl } from '../../shared/url';
+
+export { MAX_VERSIONS_PER_PAGE };
 
 /** One page and its scan history, newest scan first. */
 export interface TimelineGroup {
@@ -19,15 +27,12 @@ export interface TimelineGroup {
   /** Display title from the newest version. */
   title: string;
   /** Versions, newest first. */
-  versions: Inspection[];
+  versions: InspectionMeta[];
 }
 
-/** Cap per URL — the panel shows the most recent N versions. */
-export const MAX_VERSIONS_PER_PAGE = 25;
-
 /** Group inspections by normalized URL, newest version first per page. */
-export function groupInspectionsByUrl(inspections: Inspection[]): TimelineGroup[] {
-  const byUrl = new Map<string, Inspection[]>();
+export function groupInspectionsByUrl(inspections: InspectionMeta[]): TimelineGroup[] {
+  const byUrl = new Map<string, InspectionMeta[]>();
   for (const inspection of inspections) {
     const key = normalizeCacheUrl(inspection.page.url);
     const list = byUrl.get(key);

@@ -5,6 +5,7 @@
 import {
   DEFAULT_CACHE_MAX_BYTES,
   INSPECTION_SCHEMA_VERSION,
+  MAX_VERSIONS_PER_PAGE,
   SETTING_KEYS,
 } from '../../../shared/constants';
 import type {
@@ -13,9 +14,11 @@ import type {
   Collection,
   HistoryEntry,
   Inspection,
+  InspectionMeta,
   Note,
   Screenshot,
 } from '../../../shared/types';
+import { normalizeCacheUrl } from '../../../shared/url';
 import type { VizquoRepository } from '../../repository';
 import { evictToBudget, totalCacheBytes } from './cache';
 import type { VizquoDatabase } from './schema';
@@ -32,6 +35,34 @@ export class IndexedDbRepository implements VizquoRepository {
   }
   async listInspections(): Promise<Inspection[]> {
     return this.db.inspections.orderBy('createdAt').reverse().toArray();
+  }
+  async listInspectionMetas(): Promise<InspectionMeta[]> {
+    const rows = await this.db.inspections.orderBy('createdAt').reverse().toArray();
+    // Project to the timeline's needs so list views never hold asset/finding
+    // payloads (SVG markup, element refs) in memory at once.
+    return rows.map(
+      ({
+        id,
+        page,
+        createdAt,
+        tokens,
+        gradients,
+        breakpoints,
+        technologies,
+        consistencyScore,
+        scannedElementCount,
+      }) => ({
+        id,
+        page,
+        createdAt,
+        tokens,
+        gradients,
+        breakpoints,
+        technologies,
+        consistencyScore,
+        scannedElementCount,
+      }),
+    );
   }
   async deleteInspection(id: string): Promise<void> {
     await this.db.inspections.delete(id);
@@ -80,12 +111,16 @@ export class IndexedDbRepository implements VizquoRepository {
   }
   async saveHistory(entry: HistoryEntry): Promise<void> {
     await this.db.history.put(entry);
+    // Every scan lands here — enforce the per-URL version cap continuously.
+    await this.gcInspections();
   }
   async listHistory(): Promise<HistoryEntry[]> {
     return this.db.history.orderBy('scannedAt').reverse().toArray();
   }
   async deleteHistory(id: string): Promise<void> {
     await this.db.history.delete(id);
+    // Deleting history no longer leaves inspection rows behind forever.
+    await this.gcInspections();
   }
 
   /* ---- Screenshots ---- */
@@ -166,6 +201,37 @@ export class IndexedDbRepository implements VizquoRepository {
       this.db.cache.clear(),
       this.db.settings.clear(),
     ]);
+  }
+
+  /**
+   * Bound the inspections table: keep every version history still references
+   * (pinned or not) plus the newest MAX_VERSIONS_PER_PAGE per URL — exactly
+   * what the version timeline renders. Older versions were never displayed,
+   * so removing them is invisible; this stops storage growing unboundedly
+   * when a page is rescanned hundreds of times. Runs on history writes.
+   */
+  private async gcInspections(): Promise<void> {
+    const [history, inspections] = await Promise.all([
+      this.db.history.toArray(),
+      this.db.inspections.toArray(),
+    ]);
+    if (inspections.length === 0) return;
+    const keep = new Set(history.map((h) => h.inspectionId));
+    const byUrl = new Map<string, Inspection[]>();
+    for (const inspection of inspections) {
+      const key = normalizeCacheUrl(inspection.page.url);
+      const list = byUrl.get(key);
+      if (list) list.push(inspection);
+      else byUrl.set(key, [inspection]);
+    }
+    for (const list of byUrl.values()) {
+      list.sort((a, b) => b.createdAt - a.createdAt);
+      for (const inspection of list.slice(0, MAX_VERSIONS_PER_PAGE)) keep.add(inspection.id);
+    }
+    const doomed = inspections.filter((i) => !keep.has(i.id));
+    if (doomed.length > 0) {
+      await this.db.inspections.bulkDelete(doomed.map((i) => i.id));
+    }
   }
 
   private async evictToBudget(): Promise<void> {

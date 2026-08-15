@@ -16,6 +16,13 @@ import type {
   Token,
 } from '../shared/types';
 
+/** The inspection fields a diff actually reads — satisfied by both a full
+ * Inspection and the light InspectionMeta projection (timeline uses metas). */
+type InspectionSummary = Pick<
+  Inspection,
+  'page' | 'tokens' | 'gradients' | 'breakpoints' | 'technologies' | 'consistencyScore'
+>;
+
 export interface ComparisonSectionMeta {
   key: string;
   label: string;
@@ -197,8 +204,12 @@ export function summarizeComparison(comparison: InspectionComparison): Compariso
   };
 }
 
-/** Compare two inspections. Pure — unit-testable without a browser. */
-export function compareInspections(a: Inspection, b: Inspection): InspectionComparison {
+/** Compare two inspections (full or light projections). Pure — unit-testable
+ * without a browser. */
+export function compareInspections(
+  a: InspectionSummary,
+  b: InspectionSummary,
+): InspectionComparison {
   const sections: ComparisonSection[] = [
     section('colors', 'Colors', colorsMap(a.tokens.colors), colorsMap(b.tokens.colors)),
     section('fonts', 'Fonts', fontsMap(a.tokens.fonts), fontsMap(b.tokens.fonts)),

@@ -22,11 +22,14 @@
   },
   "overrides": [
     {
-      "includes": ["ui/theme.css"],
+      "includes": ["ui/theme.css", "landing/index.html"],
       "linter": {
         "rules": {
           "complexity": {
             "noImportantStyles": "off"
+          },
+          "style": {
+            "noDescendingSpecificity": "off"
           }
         }
       }
