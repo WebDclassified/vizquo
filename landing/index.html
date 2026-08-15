@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vizquo — Inspect any webpage. Extract its design system.</title>
-<meta name="description" content="Vizquo is a free, local-first browser extension that inspects any webpage and extracts its design system — colors, typography, spacing, components, and assets. Optional AI. Works in Chrome, Edge, Firefox, Brave, Opera, Vivaldi, and Arc. Safari coming soon.">
+<title>Vizquo — See the web differently. Inspect any page, extract its design system.</title>
+<meta name="description" content="Vizquo is a free, local-first browser extension that inspects live webpages and reveals their design system — colors, typography, spacing, components, responsive behavior, and assets. Optional AI. Works in Chrome, Edge, Firefox, Brave, Opera, Vivaldi, and Arc. Safari coming soon.">
 <meta name="theme-color" content="#08090e">
-<meta property="og:title" content="Vizquo — Inspect any webpage. Extract its design system.">
-<meta property="og:description" content="The design-intelligence layer for your browser. Free, local-first, private by default. Optional AI.">
+<meta property="og:title" content="Vizquo — See the web differently.">
+<meta property="og:description" content="The visual inspection instrument for your browser. Free, local-first, no tracking. Inspect interfaces, extract assets, uncover design systems, analyze responsive behavior.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://webdclassified.github.io/vizquo/landing/">
 <meta property="og:image" content="https://webdclassified.github.io/vizquo/deploy-kit/promo/og-1200x630.png">
@@ -18,7 +18,7 @@
 <link rel="icon" type="image/png" href="../public/icon/32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <noscript><style>.reveal, .reveal-scale, .reveal-l, .reveal-r { opacity: 1 !important; transform: none !important; }</style></noscript>
 <script type="application/ld+json">
 {
@@ -30,70 +30,71 @@
   "operatingSystem": "Windows, macOS, Linux",
   "browserRequirements": "Chrome, Edge, Firefox, Brave, Opera, Vivaldi or Arc (Manifest V3)",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "description": "Free, local-first browser extension that inspects any webpage and extracts its design system: colors, typography, spacing, components and assets. Optional AI, private by default."
+  "description": "Free, local-first browser extension that inspects live webpages and reveals their design system: colors, typography, spacing, components, responsive behavior and assets. Optional AI, private by default."
 }
 </script>
 <style>
   /* ============================================================
-     Vizquo landing — premium redesign
-     Design tokens
+     Vizquo landing — premium inspection instrument
+     Design tokens (--vz-*) — values matched to the Vizquo extension
+     palette so the landing and the side panel read as one product.
   ============================================================ */
   :root {
-    /* Design tokens — mirrors the Vizquo extension (brand system v4, liquid
-       glass): same palette, materials, radii, and motion, so the landing page
-       and the side panel read as one product. */
-    --bg: #08090e;
-    --bg-2: #0a0c13;
-    --surface: rgba(255,255,255,.04);
-    --surface-2: rgba(255,255,255,.07);
-    --border: rgba(255,255,255,.1);
-    --border-strong: rgba(255,255,255,.18);
-    --fg: #f5f7fa;
-    --muted: #b4bac5;
-    --dim: #747b87;
-    --indigo: #6e7bff;
-    --indigo-2: #8b7bff;
-    --teal: #3fe0c8;
-    --violet: #a78bfa;
-    --green: #45d483;
-    --amber: #e7b75b;
-    --red: #f06b73;
-    --grad: linear-gradient(120deg, #6e7bff 0%, #a78bfa 50%, #3fe0c8 100%);
-    --grad-soft: linear-gradient(120deg, rgba(110,123,255,.16), rgba(167,139,250,.12), rgba(63,224,200,.14));
-    --radius: 16px;
-    --radius-sm: 10px;
-    --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
-    --font-serif: "Instrument Serif", Georgia, serif;
-    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 24px 64px rgba(0,0,0,.5);
-    --shadow-glow: 0 0 0 1px rgba(110,123,255,.35), 0 24px 64px rgba(110,123,255,.22);
-    --ease-out: cubic-bezier(.16,1,.3,1);
-    --ease-spring: cubic-bezier(.34,1.45,.4,1);
-    /* ---- Liquid-glass materials (extension v4) ---- */
-    --mat-thin: rgba(18,21,29,.34);       /* chrome bars, inputs, chips */
-    --mat-standard: rgba(20,23,32,.5);    /* panels, cards, content */
-    --mat-elevated: rgba(25,29,40,.58);   /* floating chips, tooltips, back-top */
-    --mat-float: rgba(28,32,45,.68);      /* dialogs, overlay card */
+    /* Base — near-black foundation */
+    --vz-bg: #08090e;
+    --vz-bg-elevated: #0a0c13;
+    /* Text */
+    --vz-text-primary: #f5f7fa;
+    --vz-text-secondary: rgba(245,247,250,.62);
+    --vz-text-muted: rgba(245,247,250,.42);
+    /* Borders */
+    --vz-border: rgba(255,255,255,.08);
+    --vz-border-strong: rgba(255,255,255,.12);
+    /* Glass surfaces */
+    --vz-glass: rgba(255,255,255,.045);
+    --vz-glass-hover: rgba(255,255,255,.065);
+    /* Accent — one color, the extension's indigo. Never turns the page purple. */
+    --vz-accent: #6e7bff;
+    --vz-accent-2: #a78bfa;
+    --vz-accent-soft: rgba(110,123,255,.16);
+    --vz-accent-border: rgba(110,123,255,.42);
+    --vz-teal: #3fe0c8;      /* success / observed signals (extension) */
+    --vz-amber: #e7b75b;     /* derived signals */
+    --vz-green: #45d483;
+    --vz-red: #f06b73;
+    /* Radius */
+    --vz-radius-sm: 8px;
+    --vz-radius-md: 12px;
+    --vz-radius-lg: 16px;
+    --vz-radius-xl: 24px;
+    --vz-content-width: 1180px;
+    /* Type */
+    --vz-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --vz-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
+    /* Liquid-glass materials (extension v4) */
+    --mat-thin: rgba(18,21,29,.34);
+    --mat-standard: rgba(20,23,32,.5);
+    --mat-elevated: rgba(25,29,40,.58);
+    --mat-float: rgba(28,32,45,.68);
     --blur-thin: 10px;
     --blur-standard: 16px;
     --blur-elevated: 20px;
     --blur-float: 26px;
-    --saturate: 1.5;                      /* refraction — colors behind glass */
+    --saturate: 1.5;
     --edge-light: inset 0 1px 0 rgba(255,255,255,.08), inset 1px 0 0 rgba(255,255,255,.025), inset -1px 0 0 rgba(255,255,255,.025);
-    /* Ambient environment — the color fields the glass sits above. */
-    --ambient-1: rgba(122,106,255,.24);   /* violet, top-left */
-    --ambient-2: rgba(63,224,200,.13);    /* teal, bottom-right */
-    --ambient-3: rgba(90,102,230,.18);    /* indigo, top */
+    /* Ambient environment — color fields the glass sits above */
+    --ambient-1: rgba(122,106,255,.24);
+    --ambient-2: rgba(63,224,200,.13);
+    --ambient-3: rgba(90,102,230,.18);
+    /* Motion */
+    --vz-ease-out: cubic-bezier(.16,1,.3,1);
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 24px 64px rgba(0,0,0,.5);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+  html { scroll-behavior: smooth; scroll-padding-top: 88px; }
   body {
-    font-family: var(--font-sans);
-    /* Ambient environment (extension v4): opaque base + three visible color
-       fields + a soft top-left beam + baked-in grain. Fixed, so the glass
-       surfaces above it read as translucent at any scroll position. */
-    background-color: var(--bg);
+    font-family: var(--vz-font-sans);
+    background-color: var(--vz-bg);
     background-image:
       radial-gradient(760px 540px at 8% -6%, var(--ambient-1), transparent 70%),
       radial-gradient(640px 500px at 104% 104%, var(--ambient-2), transparent 70%),
@@ -103,106 +104,107 @@
     background-size: 760px 540px, 640px 500px, 460px 380px, 520px 360px, 180px 180px;
     background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
     background-attachment: fixed;
-    color: var(--fg);
+    color: var(--vz-text-primary);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
   ::selection { background: rgba(110,123,255,.4); color: #fff; }
   ::-webkit-scrollbar { width: 11px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: #232741; border-radius: 8px; border: 3px solid var(--bg); }
+  ::-webkit-scrollbar-track { background: var(--vz-bg); }
+  ::-webkit-scrollbar-thumb { background: #232741; border-radius: 8px; border: 3px solid var(--vz-bg); }
   ::-webkit-scrollbar-thumb:hover { background: #343a63; }
   a { color: inherit; text-decoration: none; }
   img { max-width: 100%; display: block; }
   button { font-family: inherit; }
-  :focus-visible { outline: 2px solid var(--indigo); outline-offset: 3px; border-radius: 4px; }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
-  section { padding: clamp(88px, 9vw, 140px) 0; position: relative; }
+  :focus-visible { outline: 2px solid var(--vz-accent); outline-offset: 3px; border-radius: 4px; }
+  .wrap { max-width: var(--vz-content-width); margin: 0 auto; padding: 0 24px; }
+  section { padding: clamp(80px, 8vw, 128px) 0; position: relative; }
 
-  /* Film grain is baked into the body background stack above — one static
-     layer, matching the extension's ambient environment. */
+  /* Instrumentation crosshair — the Vizquo motif (structural, not decorative) */
+  .crosshair {
+    position: absolute; pointer-events: none;
+    width: 18px; height: 18px;
+    border: 1px solid rgba(110,123,255,.55);
+    border-radius: 3px;
+    background:
+      linear-gradient(rgba(110,123,255,.5), rgba(110,123,255,.5)) center / 1px 100%,
+      linear-gradient(rgba(110,123,255,.5), rgba(110,123,255,.5)) center / 100% 1px;
+    background-repeat: no-repeat;
+  }
 
   .kicker {
     display: inline-flex; align-items: center; gap: 10px;
-    font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+    font-family: var(--vz-font-mono); font-size: 12px; font-weight: 600;
     letter-spacing: .18em; text-transform: uppercase;
-    color: var(--teal); margin: 0 0 16px;
+    color: var(--vz-teal); margin: 0 0 16px;
   }
-  .kicker::before { content: ""; width: 26px; height: 1.5px; background: var(--grad); border-radius: 2px; box-shadow: 0 0 12px rgba(110,123,255,.8); }
+  .kicker::before { content: ""; width: 26px; height: 1.5px; background: var(--vz-accent); border-radius: 2px; }
   h2 {
-    font-family: var(--font-display);
     font-size: clamp(30px, 4.2vw, 46px);
     letter-spacing: -0.03em;
     line-height: 1.08;
-    font-weight: 700;
+    font-weight: 800;
     margin: 0 0 18px;
   }
-  h2 .serif { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
-  .lead { color: var(--muted); font-size: 17px; max-width: 660px; margin: 0 0 46px; }
-
-  /* Gradient text — static, restrained (no animation). */
-  .grad-text {
-    background: var(--grad);
+  .lead { color: var(--vz-text-secondary); font-size: 17px; max-width: 660px; margin: 0 0 46px; }
+  .accent {
+    background: linear-gradient(120deg, var(--vz-accent) 0%, var(--vz-accent-2) 60%, var(--vz-teal) 110%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-
-  @media (max-width: 340px) {
-    .btn-primary, .btn-ghost { padding-left: 20px; padding-right: 20px; }
-    .hero h1 { font-size: 40px; }
-    .hero-pill { font-size: 12px; padding: 7px 14px; }
-  }
+  /* Technical mono labels — measurements, selectors, coordinates */
+  .mono { font-family: var(--vz-font-mono); font-variant-numeric: tabular-nums; }
 
   /* ============================================================
-     Header
+     Header — thin glass, transparent at top, elevated on scroll
   ============================================================ */
   header {
     position: sticky; top: 0; z-index: 80;
-    /* Thin glass — high translucency over the scrolling page, blur 10px. */
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    transition: background .25s ease, border-color .25s ease, box-shadow .25s ease, backdrop-filter .25s ease;
+  }
+  header.scrolled {
     background: var(--mat-thin);
     -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
     backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
-    border-bottom: 1px solid transparent;
-    box-shadow: var(--edge-light);
-    transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+    border-color: var(--vz-border);
+    box-shadow: var(--edge-light), 0 14px 44px rgba(0,0,0,.45);
   }
-  header.scrolled { border-color: var(--border); background: var(--mat-elevated); box-shadow: var(--edge-light), 0 14px 44px rgba(0,0,0,.5); }
-  .nav { display: flex; align-items: center; justify-content: space-between; height: 76px; gap: 20px; }
-  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); font-weight: 700; font-size: 19px; letter-spacing: -0.02em; }
-  .brand .logo-wrap { position: relative; }
-  .brand img { width: 32px; height: 32px; border-radius: 9px; box-shadow: 0 0 0 1px rgba(110,123,255,.4), 0 4px 18px rgba(110,123,255,.45); transition: transform .3s var(--ease-spring); }
-  .brand:hover img { transform: rotate(-6deg) scale(1.08); }
-  .nav-links { display: flex; align-items: center; gap: 28px; font-size: 14.5px; font-weight: 500; color: var(--muted); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 20px; }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 18px; letter-spacing: -0.02em; }
+  .brand img { width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 0 0 1px var(--vz-accent-border), 0 4px 18px rgba(110,123,255,.45); }
+  .nav-links { display: flex; align-items: center; gap: 26px; font-size: 14px; font-weight: 500; color: var(--vz-text-secondary); }
   .nav-links a { position: relative; transition: color .15s ease; }
   .nav-links a::after {
-    content: ""; position: absolute; left: 0; right: 0; bottom: -9px; height: 2px; border-radius: 2px;
-    background: var(--grad); transform: scaleX(0); transform-origin: left; transition: transform .28s var(--ease-out);
+    content: ""; position: absolute; left: 0; right: 0; bottom: -8px; height: 2px; border-radius: 2px;
+    background: var(--vz-accent); transform: scaleX(0); transform-origin: left; transition: transform .28s var(--vz-ease-out);
   }
-  .nav-links a:hover { color: var(--fg); }
-  .nav-links a:hover::after { transform: scaleX(1); }
-  .nav-links a.active { color: var(--fg); font-weight: 600; }
-  .nav-links a.active::after { transform: scaleX(1); }
+  .nav-links a:hover { color: var(--vz-text-primary); }
+  .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+  .nav-links a.active { color: var(--vz-text-primary); font-weight: 600; }
   .nav-cta {
-    background: var(--indigo);
-    color: #fff; font-weight: 700; font-size: 14px;
-    padding: 10px 22px; border-radius: 11px;
-    transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--vz-accent);
+    color: #fff; font-weight: 700; font-size: 13.5px;
+    padding: 10px 20px; border-radius: 10px;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 6px 22px rgba(110,123,255,.28);
+    transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+    white-space: nowrap;
   }
-  .nav-cta:hover { background: var(--indigo-2); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 30px rgba(110,123,255,.35); }
-  .nav-burger { display: none; background: var(--mat-thin); border: 1px solid var(--border); color: var(--fg); width: 44px; height: 44px; border-radius: 11px; font-size: 20px; cursor: pointer; box-shadow: var(--edge-light); transition: background .15s ease; }
-  .nav-burger:hover { background: var(--mat-standard); }
+  .nav-cta:hover { background: var(--vz-accent-2); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 30px rgba(110,123,255,.35); }
+  .nav-burger { display: none; background: var(--mat-thin); border: 1px solid var(--vz-border); color: var(--vz-text-primary); width: 42px; height: 42px; border-radius: 10px; font-size: 19px; cursor: pointer; box-shadow: var(--edge-light); }
   @media (max-width: 900px) {
     .nav-burger { display: block; }
     .nav-links {
-      position: absolute; top: 76px; left: 0; right: 0;
+      position: absolute; top: 72px; left: 0; right: 0;
       flex-direction: column; align-items: flex-start; gap: 2px;
       background: var(--mat-float); -webkit-backdrop-filter: blur(var(--blur-float)) saturate(var(--saturate)); backdrop-filter: blur(var(--blur-float)) saturate(var(--saturate));
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--vz-border);
       padding: 14px 24px 22px;
       display: none;
     }
-    .nav-links.open { display: flex; animation: dropIn .25s var(--ease-out); }
+    .nav-links.open { display: flex; animation: dropIn .25s var(--vz-ease-out); }
     @keyframes dropIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
     .nav-links a { padding: 12px 0; font-size: 16px; width: 100%; }
     .nav-links a::after { display: none; }
@@ -210,17 +212,14 @@
   }
 
   /* ============================================================
-     Hero
+     Hero — "See the web differently." + live inspection demo
   ============================================================ */
   .hero {
     position: relative;
-    padding: clamp(90px, 10vw, 140px) 0 clamp(40px, 5vw, 72px);
+    padding: clamp(64px, 8vw, 104px) 0 clamp(32px, 4vw, 56px);
     text-align: center;
     overflow: hidden;
   }
-  /* Aurora background — the ambient environment lives on <body>; the orbs
-     were decorative motion, so they're removed. Only the technical grid stays. */
-  .aurora { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
   .hero-grid {
     position: absolute; inset: 0; pointer-events: none;
     background-image:
@@ -235,956 +234,726 @@
 
   .hero-pill {
     display: inline-flex; align-items: center; gap: 10px;
-    border: 1px solid var(--border-strong); border-radius: 999px;
+    border: 1px solid var(--vz-border-strong); border-radius: 999px;
     background: var(--mat-thin);
     -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
     backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
     padding: 8px 18px;
-    font-size: 13px; color: var(--muted); font-weight: 500;
-    margin-bottom: 30px;
+    font-size: 13px; color: var(--vz-text-secondary); font-weight: 500;
+    margin-bottom: 28px;
     box-shadow: var(--edge-light);
   }
-  .hero-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+  .hero-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--vz-green); }
+  .hero-pill .mono { color: var(--vz-text-primary); font-weight: 600; }
 
   .hero h1 {
-    font-family: var(--font-display);
-    font-size: clamp(44px, 7vw, 84px);
-    font-weight: 700;
+    font-size: clamp(46px, 7.2vw, 88px);
+    font-weight: 800;
     letter-spacing: -0.045em;
-    line-height: 1.02;
-    margin: 0 0 26px;
-  }
-  .hero h1 .serif {
-    font-family: var(--font-serif); font-style: italic; font-weight: 400;
-    letter-spacing: -0.02em;
+    line-height: 1.01;
+    margin: 0 0 24px;
   }
   .hero .sub {
-    color: var(--muted);
+    color: var(--vz-text-secondary);
     font-size: clamp(16.5px, 2vw, 19.5px);
     max-width: 660px;
-    margin: 0 auto 40px;
+    margin: 0 auto 34px;
   }
-  .hero .sub b { color: var(--fg); font-weight: 600; }
+  .hero .sub b { color: var(--vz-text-primary); font-weight: 600; }
   .hero-btns { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
-  /* Primary button — the extension's solid accent glass, edge-lit, calm. */
   .btn-primary {
     display: inline-flex; align-items: center; gap: 10px;
-    background: var(--indigo);
+    background: var(--vz-accent);
     color: #fff; font-weight: 700; font-size: 16px;
-    padding: 16px 32px; border-radius: 14px;
+    padding: 15px 30px; border-radius: 13px;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 28px rgba(110,123,255,.28);
     transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
   }
-  .btn-primary:hover { background: var(--indigo-2); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 12px 34px rgba(110,123,255,.35); }
+  .btn-primary:hover { background: var(--vz-accent-2); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 12px 34px rgba(110,123,255,.35); }
   .btn-ghost {
     display: inline-flex; align-items: center; gap: 9px;
-    color: var(--fg); font-weight: 600; font-size: 15.5px;
-    padding: 16px 26px; border-radius: 14px;
-    border: 1px solid var(--border-strong);
+    color: var(--vz-text-primary); font-weight: 600; font-size: 15px;
+    padding: 15px 24px; border-radius: 13px;
+    border: 1px solid var(--vz-border-strong);
     background: var(--mat-thin);
     -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
     backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
     box-shadow: var(--edge-light);
     transition: border-color .18s ease, background .18s ease, transform .18s ease;
   }
-  .btn-ghost:hover { border-color: var(--indigo); background: var(--grad-soft); transform: translateY(-2px); }
-  .btn-ghost .arr { transition: transform .25s var(--ease-out); display: inline-block; }
+  .btn-ghost:hover { border-color: var(--vz-accent); background: var(--vz-accent-soft); transform: translateY(-2px); }
+  .btn-ghost .arr { transition: transform .25s var(--vz-ease-out); display: inline-block; }
   .btn-ghost:hover .arr { transform: translateY(3px); }
-  .hero-note { margin-top: 20px; color: var(--dim); font-size: 14px; }
-  .hero-note b { color: var(--muted); font-weight: 600; }
+  .hero-note { margin-top: 18px; color: var(--vz-text-muted); font-size: 14px; }
+  .hero-note b { color: var(--vz-text-secondary); font-weight: 600; }
 
-  /* Hero stats */
-  .hero-stats {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    margin: clamp(44px, 6vw, 68px) auto 0;
-    max-width: 880px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--mat-standard);
-    -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
-    backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
-    box-shadow: var(--edge-light);
-    overflow: hidden;
-  }
-  .stat { padding: 24px 14px; border-left: 1px solid var(--border); position: relative; }
-  .stat:first-child { border-left: none; }
-  .stat .v { font-family: var(--font-display); font-size: clamp(24px, 3vw, 32px); font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-  .stat .v .grad-text { animation-duration: 4s; }
-  .stat .l { font-size: 12.5px; color: var(--dim); margin-top: 3px; line-height: 1.4; }
-  @media (max-width: 640px) {
-    .hero-stats { grid-template-columns: 1fr 1fr; }
-    .stat:nth-child(3) { border-left: none; border-top: 1px solid var(--border); }
-    .stat:nth-child(4) { border-top: 1px solid var(--border); }
-  }
-
-  /* ============================================================
-     Hero product showcase
-  ============================================================ */
-  .showcase-wrap { position: relative; max-width: 1080px; margin: clamp(48px, 6vw, 76px) auto 0; }
-  .showcase-glow {
-    position: absolute; inset: -4% -6%; z-index: 0; pointer-events: none;
-    background:
-      radial-gradient(60% 55% at 30% 30%, rgba(110,123,255,.22), transparent 70%),
-      radial-gradient(55% 55% at 75% 25%, rgba(167,139,250,.16), transparent 70%),
-      radial-gradient(60% 60% at 55% 85%, rgba(63,224,200,.14), transparent 70%);
-    filter: blur(30px);
-  }
-  .showcase-frame {
-    position: relative; z-index: 1;
-    transform-style: preserve-3d;
-    transition: transform .35s var(--ease-out);
-  }
-  .showcase-body {
-    display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr);
-    /* Transparent: the browser-frame's glass shows through on the panel side. */
-    text-align: left;
-  }
-  @media (max-width: 820px) { .showcase-body { grid-template-columns: 1fr; } .showcase-panel { display: none; } }
-  .showcase-page { background: #f6f7fb; color: #10141f; padding: 26px 30px 34px; min-height: 380px; position: relative; }
-  .sp-nav { display: flex; align-items: center; gap: 16px; }
-  .sp-logo { width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(135deg, #6e7bff, #a78bfa); }
-  .sp-links { display: flex; gap: 14px; flex: 1; }
-  .sp-link { font-size: 12px; color: #8a93a6; font-weight: 500; }
-  .sp-btn { font-size: 11.5px; font-weight: 700; background: #10141f; color: #fff; border-radius: 7px; padding: 6px 12px; }
-  .sp-hero { margin-top: 34px; }
-  .sp-title { font-family: var(--font-display); font-size: 30px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; color: #131725; }
-  .sp-sub { font-size: 13.5px; color: #5b6472; max-width: 400px; margin: 10px 0 18px; }
-  .sp-cta { display: inline-block; font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(120deg, #6e7bff, #8b7bff); border-radius: 10px; padding: 11px 20px; box-shadow: 0 8px 24px rgba(110,123,255,.35); }
-  .sp-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 26px; }
-  .sp-card { background: #fff; border: 1px solid #e7eaf2; border-radius: 12px; padding: 14px; box-shadow: 0 6px 20px rgba(16,20,31,.06); }
-  .sp-card .dot { display: block; width: 22px; height: 22px; border-radius: 7px; margin-bottom: 9px; }
-  .sp-card.c1 .dot { background: #6e7bff; } .sp-card.c2 .dot { background: #3fe0c8; } .sp-card.c3 .dot { background: #a78bfa; }
-  .sp-card h4 { font-size: 12.5px; font-weight: 700; margin-bottom: 3px; }
-  .sp-card p { font-size: 11px; color: #8b93a3; margin: 0; }
-  /* Selection highlight on the mock page */
-  .sp-hit {
-    outline: 2px solid #6e7bff; outline-offset: 3px; border-radius: 8px;
-  }
-  /* Vizquo side panel mock */
-  .showcase-panel {
-    /* Elevated glass — a brighter inset surface over the window glass below. */
-    background: var(--mat-elevated); border-left: 1px solid var(--border);
-    display: flex; flex-direction: column; padding: 16px;
-    -webkit-backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
-    backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
-    box-shadow: var(--edge-light);
-  }
-  .sp-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 14px; border-bottom: 1px solid rgba(255,255,255,.07); }
-  .sp-head .t { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--fg); }
-  .sp-head .logo-mini { width: 18px; height: 18px; border-radius: 5px; background: var(--grad); }
-  .sp-head .pulse { width: 6px; height: 6px; }
-  .sp-score { margin: 16px 2px 6px; }
-  .sp-score .row { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 7px; }
-  .sp-score .row b { color: var(--fg); font-family: var(--font-mono); font-size: 12px; }
-  .sp-score .bar { height: 7px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; }
-  .sp-score .bar i {
-    display: block; height: 100%; width: 92%;
-    background: var(--grad); border-radius: 99px;
-  }
-  .sp-token { display: flex; align-items: center; justify-content: space-between; padding: 10px 10px; border-radius: 10px; font-size: 12px; color: var(--muted); transition: background .2s ease; }
-  .sp-token:hover { background: rgba(255,255,255,.05); }
-  .sp-token .k { display: flex; align-items: center; gap: 9px; }
-  .sp-token .k .sw { width: 11px; height: 11px; border-radius: 4px; border: 1px solid rgba(255,255,255,.25); }
-  .sp-token .v { font-family: var(--font-mono); font-size: 11px; color: var(--teal); }
-  .sp-consistency { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.07); font-size: 11.5px; color: var(--dim); }
-  .sp-consistency .badge { background: rgba(63,224,200,.12); color: var(--teal); border: 1px solid rgba(63,224,200,.35); border-radius: 99px; padding: 3px 10px; font-weight: 700; font-size: 10.5px; }
-  /* Floating chips */
-  .float-chip {
-    position: absolute; z-index: 2;
-    display: flex; align-items: center; gap: 8px;
-    /* Elevated glass — brighter fill, blur 20px, clear separation. */
-    background: var(--mat-elevated);
-    -webkit-backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
-    backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
-    border: 1px solid var(--border-strong);
-    border-radius: 13px; padding: 10px 15px;
-    font-size: 13px; font-weight: 600; color: var(--fg);
-    box-shadow: var(--edge-light), var(--shadow);
-  }
-  .float-chip .ic { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
-  .float-chip.fc1 { top: -26px; right: 8%; }
-  .float-chip.fc1 .ic { background: rgba(110,123,255,.18); }
-  .float-chip.fc2 { bottom: -22px; left: 4%; }
-  .float-chip.fc2 .ic { background: rgba(63,224,200,.15); }
-  .float-chip.fc3 { top: 30%; left: -30px; }
-  .float-chip.fc3 .ic { background: rgba(167,139,250,.16); }
-  @media (max-width: 920px) { .float-chip.fc3 { display: none; } }
-
-  /* ============================================================
-     Marquee
-  ============================================================ */
-  .marquee-band { padding: 26px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: rgba(255,255,255,.015); overflow: hidden; }
-  .marquee-label { text-align: center; font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--dim); font-family: var(--font-mono); margin-bottom: 16px; }
-  .marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
-  .marquee-track { display: flex; gap: 14px; width: max-content; animation: marquee 32s linear infinite; }
-  .marquee:hover .marquee-track { animation-play-state: paused; }
-  @keyframes marquee { to { transform: translateX(-50%); } }
-  .mq-item {
-    display: inline-flex; align-items: center; gap: 9px;
-    border: 1px solid var(--border); border-radius: 999px;
-    padding: 9px 18px; font-size: 13.5px; font-weight: 600; color: var(--muted);
-    background: var(--mat-thin);
-    box-shadow: var(--edge-light);
-    white-space: nowrap; transition: color .18s ease, border-color .18s ease, transform .18s ease;
-  }
-  .mq-item:hover { color: var(--fg); border-color: var(--border-strong); transform: translateY(-2px); }
-  .mq-item .sq { width: 10px; height: 10px; border-radius: 3px; }
-  .mq-item .sq.q1 { background: var(--indigo); } .mq-item .sq.q2 { background: var(--teal); }
-  .mq-item .sq.q3 { background: var(--violet); } .mq-item .sq.q4 { background: var(--amber); }
-  .mq-item .sq.q5 { background: #4fd1ff; }
-
-  /* ============================================================
-     Live demo
-  ============================================================ */
-  .demo-section { background: radial-gradient(900px 500px at 50% 0%, rgba(110,123,255,.08), transparent 65%), var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .demo-head { text-align: center; }
-  .demo-head .lead { margin-left: auto; margin-right: auto; }
-  .demo-wrap { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 26px; align-items: stretch; }
-  @media (max-width: 920px) { .demo-wrap { grid-template-columns: 1fr; } }
+  /* ---- Hero live inspection demo (the product, above the fold) ---- */
+  .demo-wrap { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 22px; align-items: stretch; text-align: left; margin-top: clamp(40px, 5vw, 64px); position: relative; }
+  .demo-wrap > * { min-width: 0; }
+  .inspector { min-width: 0; }
+  @media (max-width: 920px) { .demo-wrap { grid-template-columns: 1fr; } .inspector { display: none; } }
   .browser-frame {
-    border: 1px solid var(--border-strong); border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--vz-border-strong); border-radius: 16px; overflow: hidden;
     background: var(--mat-standard);
     box-shadow: var(--edge-light), var(--shadow);
   }
-  .browser-bar { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: rgba(255,255,255,.04); border-bottom: 1px solid var(--border); }
-  .b-dot { width: 11px; height: 11px; border-radius: 50%; transition: transform .2s ease; }
+  .browser-bar { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: rgba(255,255,255,.04); border-bottom: 1px solid var(--vz-border); }
+  .b-dot { width: 11px; height: 11px; border-radius: 50%; }
   .b-dot.r { background: #ff5f57; } .b-dot.y { background: #febc2e; } .b-dot.g { background: #28c840; }
-  .browser-frame:hover .b-dot { transform: scale(1.15); }
-  .b-url { flex: 1; display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,.06); border: 1px solid var(--border); border-radius: 8px; padding: 5px 12px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
-  .b-url svg { flex-shrink: 0; }
-  .b-live { font-size: 11px; font-weight: 700; color: var(--teal); letter-spacing: .05em; }
-  .mock-site { position: relative; background: #f6f7fb; color: #10141f; padding: 30px 34px 34px; cursor: crosshair; min-height: 420px; }
+  .b-url { flex: 1; display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,.06); border: 1px solid var(--vz-border); border-radius: 8px; padding: 5px 12px; font-family: var(--vz-font-mono); font-size: 12px; color: var(--vz-text-muted); overflow: hidden; white-space: nowrap; }
+  .b-live { font-size: 11px; font-weight: 700; color: var(--vz-teal); letter-spacing: .05em; }
+  .mock-site { position: relative; background: #f6f7fb; color: #10141f; padding: 28px 32px 32px; cursor: crosshair; min-height: 430px; }
   .mock-site::after {
-    content: "Hover anything to inspect it"; position: absolute; bottom: 12px; right: 16px;
+    content: "Hover anything to inspect it — click to pin"; position: absolute; bottom: 12px; right: 16px;
     font-size: 11px; color: #9aa3b5; background: rgba(255,255,255,.9);
     border: 1px solid #e4e7f0; border-radius: 999px; padding: 4px 10px;
-    font-family: var(--font-mono); letter-spacing: .03em; pointer-events: none;
+    font-family: var(--vz-font-mono); letter-spacing: .03em; pointer-events: none;
   }
   .mock-nav { display: flex; align-items: center; gap: 18px; }
   .mock-logo { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, #6e7bff, #a78bfa); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 13px; }
   .mock-nav .m-links { display: flex; gap: 16px; flex: 1; }
   .mock-nav .m-link { font-size: 12.5px; font-weight: 500; color: #5b6472; }
   .mock-btn-sm { font-size: 12px; font-weight: 700; background: #10141f; color: #fff; border-radius: 8px; padding: 7px 14px; }
-  .mock-hero { margin-top: 34px; }
+  .mock-hero { margin-top: 32px; }
   .mock-site button { font-family: inherit; text-align: inherit; }
-  .m-title { display: block; background: none; border: none; font-family: var(--font-display); font-size: 30px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.12; margin: 0 0 10px; color: inherit; padding: 0; cursor: inherit; }
+  .m-title { display: block; background: none; border: none; font-family: var(--vz-font-sans); font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.12; margin: 0 0 10px; color: inherit; padding: 0; cursor: inherit; }
   .m-sub { display: block; background: none; border: none; font-size: 13.5px; color: #5b6472; max-width: 380px; margin: 0 0 18px; padding: 0; cursor: inherit; }
   .mock-cta { display: inline-block; font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(120deg, #6e7bff, #8b7bff); border-radius: 10px; padding: 11px 20px; box-shadow: 0 8px 24px rgba(110,123,255,.35); border: none; cursor: inherit; }
   .mock-badge { display: inline-block; margin-left: 12px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #0d9488; background: rgba(63,224,200,.14); border-radius: 999px; padding: 6px 12px; border: none; cursor: inherit; }
-  .mock-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 30px; }
-  @media (max-width: 520px) { .mock-cards { grid-template-columns: 1fr; } .mock-site { padding: 22px 20px 40px; } }
-  .mock-card { background: #fff; border: 1px solid #e7eaf2; border-radius: 14px; padding: 18px; box-shadow: 0 6px 20px rgba(16,20,31,.06); text-align: left; cursor: inherit; transition: transform .18s ease, box-shadow .18s ease; }
-  .mock-card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(16,20,31,.1); }
+  .mock-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 28px; }
+  @media (max-width: 520px) { .mock-cards { grid-template-columns: 1fr; } .mock-site { padding: 22px 20px 44px; } }
+  .mock-card { background: #fff; border: 1px solid #e7eaf2; border-radius: 14px; padding: 18px; box-shadow: 0 6px 20px rgba(16,20,31,.06); text-align: left; cursor: inherit; color: inherit; font-family: inherit; }
   .mock-card .dot { display: block; width: 26px; height: 26px; border-radius: 8px; margin-bottom: 12px; }
   .mock-card.d1 .dot { background: #6e7bff; } .mock-card.d2 .dot { background: #3fe0c8; } .mock-card.d3 .dot { background: #a78bfa; }
   .mock-card h4 { font-size: 13.5px; font-weight: 700; margin-bottom: 5px; }
   .mock-card p { font-size: 11.5px; color: #8b93a3; margin: 0; }
   .inspect-zone { position: relative; }
-  .inspect-zone .i-item { position: relative; transition: outline-color .15s ease, background .15s ease, box-shadow .2s ease; border-radius: 4px; }
+  .inspect-zone .i-item { position: relative; border-radius: 4px; transition: outline-color .15s ease, background .15s ease, box-shadow .2s ease; }
   .inspect-zone .i-item.is-hover { outline: 2px dashed #6e7bff; outline-offset: 3px; background: rgba(110,123,255,.06); }
   .inspect-zone .i-item.is-pin { outline: 2px solid #6e7bff; outline-offset: 3px; background: rgba(110,123,255,.08); box-shadow: 0 0 0 6px rgba(110,123,255,.12); }
+
+  /* Measurement hairline + readout over the mock page */
+  .meas { position: absolute; pointer-events: none; z-index: 3; opacity: 0; transition: opacity .15s ease; }
+  .inspect-zone.has-meas .meas { opacity: 1; }
+  .meas .hair { position: absolute; background: rgba(110,123,255,.7); }
+  .meas .hair.h-x { height: 1px; left: 0; right: 0; top: -18px; }
+  .meas .hair.h-y { width: 1px; top: 0; bottom: 0; left: -18px; }
+  .meas .lab {
+    position: absolute; font-family: var(--vz-font-mono); font-size: 10px; font-weight: 600;
+    color: #fff; background: #6e7bff; border-radius: 4px; padding: 2px 6px; white-space: nowrap;
+  }
+  .meas .lab.lx { top: -30px; left: 50%; transform: translateX(-50%); }
+  .meas .lab.ly { left: -8px; top: 50%; transform: translateY(-50%) translateX(-100%); }
+
+  /* Inspector panel — elevated glass */
   .inspector {
     display: flex; flex-direction: column;
-    border: 1px solid var(--border-strong); border-radius: 16px;
+    border: 1px solid var(--vz-border-strong); border-radius: 16px;
     background: var(--mat-standard);
     box-shadow: var(--edge-light), var(--shadow);
     -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
     backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
     overflow: hidden;
-    min-height: 420px;
+    min-height: 430px;
   }
-  .insp-head { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+  .insp-head { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-bottom: 1px solid var(--vz-border); }
   .insp-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
-  .insp-title .lock { color: var(--dim); }
-  .insp-head .pulse { width: 7px; height: 7px; }
-  .insp-tabs { display: flex; gap: 2px; padding: 8px 12px 0; border-bottom: 1px solid var(--border); position: relative; }
-  .insp-tab { font-size: 12px; font-weight: 600; color: var(--dim); padding: 8px 12px; border-radius: 8px 8px 0 0; cursor: pointer; transition: color .15s ease; }
-  .insp-tab.on { color: var(--fg); background: rgba(255,255,255,.05); box-shadow: inset 0 -2px 0 var(--indigo); }
-  .insp-path { display: flex; align-items: center; gap: 6px; padding: 10px 16px; font-family: var(--font-mono); font-size: 11.5px; color: var(--teal); border-bottom: 1px solid var(--border); background: rgba(255,255,255,.02); }
-  .insp-body { flex: 1; padding: 10px 0; overflow-y: auto; }
-  .insp-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 16px; font-size: 12.5px; }
-  .insp-row .k { color: var(--dim); font-weight: 500; flex-shrink: 0; }
-  .insp-row .val { font-family: var(--font-mono); font-size: 11.5px; color: var(--fg); text-align: right; word-break: break-word; display: flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; }
-  .swatch { width: 12px; height: 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,.25); flex-shrink: 0; }
-  .insp-foot { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: var(--dim); }
-  #inspPos { margin-right: auto; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .06em; font-variant-numeric: tabular-nums; color: var(--dim); }
-  .insp-foot .conf { color: var(--teal); font-weight: 700; }
+  .insp-title .lock { color: var(--vz-text-muted); font-weight: 400; }
+  .insp-head .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--vz-teal); box-shadow: 0 0 0 0 rgba(63,224,200,.5); }
+  .insp-path {
+    padding: 13px 16px; border-bottom: 1px solid var(--vz-border);
+    font-family: var(--vz-font-mono); font-size: 12px; color: var(--vz-accent-2);
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .insp-body { flex: 1; padding: 10px 16px; display: flex; flex-direction: column; gap: 2px; }
+  .insp-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 7px 2px; font-size: 12.5px; }
+  .insp-row .k { color: var(--vz-text-muted); font-weight: 500; }
+  .insp-row .val { font-family: var(--vz-font-mono); font-size: 12px; color: var(--vz-text-primary); display: inline-flex; align-items: center; gap: 7px; }
+  .insp-row .swatch { width: 11px; height: 11px; border-radius: 3px; border: 1px solid rgba(255,255,255,.25); display: inline-block; }
+  .insp-foot {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px 10px;
+    padding: 10px 16px; border-top: 1px solid var(--vz-border);
+    font-family: var(--vz-font-mono); font-size: 10.5px; color: var(--vz-text-muted);
+  }
+  .insp-foot .conf { color: var(--vz-teal); }
 
   /* ============================================================
-     How it works — timeline steps
+     Trust strip — only claims the implementation actually makes
   ============================================================ */
-  .steps-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; position: relative; }
-  @media (max-width: 940px) { .steps-row { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 540px) { .steps-row { grid-template-columns: 1fr; } }
-  .step {
-    background: var(--mat-standard);
-    border: 1px solid var(--border); border-radius: var(--radius);
+  .trust-band { padding: 22px 0; border-top: 1px solid var(--vz-border); border-bottom: 1px solid var(--vz-border); background: rgba(255,255,255,.015); }
+  .trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 820px) { .trust-grid { grid-template-columns: 1fr 1fr; } }
+  .trust-item { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13.5px; font-weight: 600; color: var(--vz-text-secondary); padding: 10px; }
+  .trust-item .tk { font-family: var(--vz-font-mono); font-size: 10.5px; font-weight: 700; letter-spacing: .12em; color: var(--vz-teal); border: 1px solid rgba(63,224,200,.35); background: rgba(63,224,200,.08); border-radius: 6px; padding: 3px 7px; }
+
+  /* ============================================================
+     Product reveal — "Your browser already contains the design
+     system. Vizquo reveals it."
+  ============================================================ */
+  .reveal-band { text-align: center; }
+  .reveal-band .lead { margin-left: auto; margin-right: auto; }
+  .rv-values { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; max-width: 860px; margin: 34px auto 0; }
+  .rv {
+    display: inline-flex; align-items: center; gap: 10px;
+    border: 1px solid var(--vz-border-strong); border-radius: 999px;
+    background: var(--mat-thin);
+    -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    padding: 10px 18px;
+    font-family: var(--vz-font-mono); font-size: 12.5px; font-weight: 600; letter-spacing: .04em;
+    color: var(--vz-text-secondary);
     box-shadow: var(--edge-light);
-    padding: 28px 24px 24px; position: relative; overflow: hidden;
-    transition: transform .25s var(--ease-out), border-color .25s ease;
+    opacity: 0; transform: translateY(10px);
   }
-  .step::before {
-    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: var(--grad); transform: scaleX(0); transform-origin: left;
-    transition: transform .4s var(--ease-out);
-  }
-  .step:hover { transform: translateY(-6px); border-color: var(--border-strong); }
-  .step:hover::before { transform: scaleX(1); }
-  .step .num {
-    font-family: var(--font-display); font-size: 60px; font-weight: 700; line-height: 1;
-    background: var(--grad);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    opacity: .95; display: block; margin-bottom: 14px;
-  }
-  .step h3 { font-size: 16px; font-weight: 700; margin-bottom: 7px; }
-  .step p { font-size: 13.5px; color: var(--muted); margin: 0; }
-  .step .tagline { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); margin-bottom: 10px; font-family: var(--font-mono); }
-
-  /* ============================================================
-     Features
-  ============================================================ */
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-  @media (max-width: 940px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
-  .glow-card {
-    position: relative;
+  .rv .sq { width: 10px; height: 10px; border-radius: 3px; }
+  .rv .sq.q1 { background: var(--vz-accent); } .rv .sq.q2 { background: var(--vz-teal); }
+  .rv .sq.q3 { background: var(--vz-accent-2); } .rv .sq.q4 { background: var(--vz-amber); }
+  .rv .sq.q5 { background: #4fd1ff; } .rv .sq.q6 { background: var(--vz-green); } .rv .sq.q7 { background: #ff8fa3; }
+  .rv .v { color: var(--vz-text-primary); }
+  .rv.in { opacity: 1; transform: none; transition: opacity .5s var(--vz-ease-out), transform .5s var(--vz-ease-out); }
+  .rv-honesty { font-size: 12.5px; color: var(--vz-text-muted); margin-top: 16px; font-family: var(--vz-font-mono); }
+  .hero-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    margin: clamp(40px, 5vw, 56px) auto 0;
+    max-width: 880px;
+    border: 1px solid var(--vz-border);
+    border-radius: var(--vz-radius-lg);
     background: var(--mat-standard);
-    border: 1px solid var(--border); border-radius: var(--radius);
-    box-shadow: var(--edge-light);
-    padding: 28px 26px;
-    overflow: hidden;
-    transition: transform .25s var(--ease-out), border-color .25s ease;
-  }
-  .glow-card:hover { transform: translateY(-3px); border-color: var(--border-strong); }
-  .glow-card .ic {
-    width: 46px; height: 46px; border-radius: 13px;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--grad-soft); border: 1px solid rgba(110,123,255,.3);
-    margin-bottom: 20px; color: var(--indigo);
-    transition: transform .25s ease;
-  }
-  .glow-card:hover .ic { transform: translateY(-2px); }
-  .glow-card .ic svg { width: 22px; height: 22px; }
-  .glow-card h3 { font-size: 16.5px; font-weight: 700; margin-bottom: 8px; }
-  .glow-card p { font-size: 13.5px; color: var(--muted); margin: 0; }
-
-  /* ============================================================
-     Screenshots
-  ============================================================ */
-  .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  @media (max-width: 800px) { .shots { grid-template-columns: 1fr; max-width: 560px; margin: 0 auto; } }
-  .shot {
-    border-radius: 16px; border: 1px solid var(--border); overflow: hidden;
-    background: var(--bg-2); box-shadow: var(--shadow);
-    transition: transform .3s var(--ease-out), box-shadow .3s ease, border-color .3s ease;
-  }
-  .shot:hover { transform: translateY(-4px); border-color: rgba(110,123,255,.5); box-shadow: var(--shadow-glow); }
-  .shot .shot-img { overflow: hidden; }
-  .shot img { width: 100%; transition: transform .6s var(--ease-out); }
-  .shot:hover img { transform: scale(1.04); }
-  .shot .cap { padding: 14px 18px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
-  .shot .cap b { color: var(--fg); }
-  .shot-tag { margin-left: auto; font-size: 10.5px; font-weight: 700; color: var(--teal); letter-spacing: .06em; text-transform: uppercase; font-family: var(--font-mono); }
-
-  /* ============================================================
-     AI — with chat mock
-  ============================================================ */
-  .ai-layout { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 28px; align-items: start; }
-  @media (max-width: 900px) { .ai-layout { grid-template-columns: 1fr; } }
-  .ai-grid { display: grid; gap: 16px; }
-  .ai-card {
-    background: var(--mat-standard);
-    border: 1px solid var(--border); border-radius: var(--radius);
-    box-shadow: var(--edge-light);
-    padding: 28px 26px;
-    position: relative; overflow: hidden;
-    transition: transform .25s var(--ease-out), border-color .25s ease;
-  }
-  .ai-card .tag {
-    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-    padding: 4px 12px; border-radius: 999px; margin-bottom: 14px; font-family: var(--font-mono);
-  }
-  .ai-card:hover { transform: translateY(-5px); border-color: var(--border-strong); }
-  .ai-card .tag.cloud { background: rgba(110,123,255,.14); color: #b9c0ff; border: 1px solid rgba(110,123,255,.4); }
-  .ai-card .tag.local { background: rgba(63,224,200,.12); color: #7fe9d6; border: 1px solid rgba(63,224,200,.4); }
-  .ai-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-  .ai-card p { color: var(--muted); font-size: 14px; margin-bottom: 14px; }
-  .ai-card ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13.5px; }
-  .ai-card li { margin-bottom: 6px; }
-  .ai-card code, .faq code, .steps code {
-    font-family: var(--font-mono); font-size: 12px;
-    background: rgba(255,255,255,.07); border: 1px solid var(--border);
-    padding: 1px 6px; border-radius: 6px; color: #cfe0ff;
-  }
-  /* Chat mock */
-  .chat-card {
-    border: 1px solid var(--border-strong); border-radius: var(--radius);
-    background: var(--mat-standard); overflow: hidden;
-    box-shadow: var(--edge-light), var(--shadow);
     -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
     backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
-    position: sticky; top: 96px;
-  }
-  .chat-head { display: flex; align-items: center; gap: 9px; padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 700; }
-  .chat-head .logo-mini { width: 20px; height: 20px; border-radius: 6px; background: var(--grad); }
-  .chat-head .tag { margin-left: auto; font-size: 10.5px; font-family: var(--font-mono); color: var(--teal); background: rgba(63,224,200,.1); border: 1px solid rgba(63,224,200,.3); padding: 3px 9px; border-radius: 99px; }
-  .chat-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
-  .bubble { max-width: 88%; border-radius: 14px; padding: 12px 15px; font-size: 13.5px; line-height: 1.55; }
-  .bubble.q { align-self: flex-end; background: rgba(110,123,255,.18); border: 1px solid rgba(110,123,255,.4); color: #dbe0ff; border-bottom-right-radius: 4px; }
-  .bubble.a { align-self: flex-start; background: rgba(255,255,255,.05); border: 1px solid var(--border); color: var(--fg); border-bottom-left-radius: 4px; }
-  .bubble.a .sw { display: inline-block; width: 11px; height: 11px; border-radius: 4px; background: #6e7bff; margin: 0 4px 0 2px; vertical-align: -1px; }
-  .typing { display: inline-flex; gap: 4px; padding: 4px 2px; }
-  .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typing 1.2s ease-in-out infinite; }
-  .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
-  @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
-  .chat-answer { display: flex; flex-direction: column; gap: 10px; }
-  .chat-answer p { margin: 0; }
-  .chat-answer .hl { background: linear-gradient(90deg, rgba(110,123,255,.2), rgba(63,224,200,.14)); border: 1px solid rgba(110,123,255,.3); border-radius: 10px; padding: 9px 12px; font-family: var(--font-mono); font-size: 12px; color: #cfe0ff; }
-  .ai-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 26px; margin: 0 0 26px; padding: 0; list-style: none; }
-  @media (max-width: 620px) { .ai-list { grid-template-columns: 1fr; } }
-  .ai-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--muted); }
-  .ai-list .tick {
-    width: 19px; height: 19px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
-    background: rgba(63,224,200,.15); color: var(--teal);
-    display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;
-  }
-  .consent-note {
-    display: flex; align-items: flex-start; gap: 14px;
-    background: var(--grad-soft); border: 1px solid rgba(110,123,255,.35);
-    border-radius: var(--radius-sm); padding: 16px 18px;
-    font-size: 14px; color: #c7ccf5;
-    transition: transform .25s var(--ease-out);
-  }
-  .consent-note:hover { transform: translateY(-2px); }
-  .consent-note .shield { font-size: 20px; flex-shrink: 0; }
-
-  /* ============================================================
-     Free band
-  ============================================================ */
-  .free-band { padding: 0 0 clamp(88px, 9vw, 140px); }
-  .free-card {
-    position: relative; max-width: 720px; margin: 0 auto; text-align: center;
-    border-radius: 24px; padding: 54px 40px;
-    background: var(--mat-standard);
     box-shadow: var(--edge-light);
     overflow: hidden;
   }
-  .free-card::before {
-    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
-    background: linear-gradient(120deg, rgba(110,123,255,.55), rgba(167,139,250,.4), rgba(63,224,200,.45));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask-composite: exclude;
+  .stat { padding: 22px 14px; border-left: 1px solid var(--vz-border); }
+  .stat:first-child { border-left: none; }
+  .stat .v { font-size: clamp(24px, 3vw, 32px); font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; font-family: var(--vz-font-sans); }
+  .stat .l { font-size: 12.5px; color: var(--vz-text-muted); margin-top: 3px; line-height: 1.4; }
+  @media (max-width: 640px) {
+    .hero-stats { grid-template-columns: 1fr 1fr; }
+    .stat:nth-child(3) { border-left: none; border-top: 1px solid var(--vz-border); }
+    .stat:nth-child(4) { border-top: 1px solid var(--vz-border); }
   }
-  .free-card .big { font-family: var(--font-display); font-size: clamp(40px, 6vw, 60px); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
-  .free-card .big .grad-text { animation-duration: 4s; }
-  .free-card p { color: var(--muted); font-size: 15px; max-width: 460px; margin: 0 auto 26px; }
-  .free-perks { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
-  .free-perk { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 6px 13px; background: var(--mat-thin); box-shadow: var(--edge-light); }
-  .free-perk .ok { color: var(--teal); font-weight: 800; }
 
   /* ============================================================
-     Download
+     How it works — the 7-step inspection narrative
   ============================================================ */
-  #download { background: radial-gradient(900px 420px at 50% 100%, rgba(167,139,250,.08), transparent 60%), var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .browser-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 26px; }
-  @media (max-width: 1000px) { .browser-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 470px) { .browser-grid { grid-template-columns: 1fr; } }
-  .browser {
+  .how-band { background: radial-gradient(900px 500px at 50% 0%, rgba(110,123,255,.07), transparent 65%), var(--vz-bg-elevated); border-top: 1px solid var(--vz-border); border-bottom: 1px solid var(--vz-border); }
+  .how-head { text-align: center; }
+  .how-head .lead { margin-left: auto; margin-right: auto; }
+  .how-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 10px; }
+  @media (max-width: 1080px) { .how-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 640px) { .how-grid { grid-template-columns: repeat(2, 1fr); } }
+  .how-step {
+    border: 1px solid var(--vz-border); border-radius: var(--vz-radius-md);
+    background: var(--mat-thin);
+    -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    padding: 14px 14px 12px;
+    text-align: left;
+    box-shadow: var(--edge-light);
+    transition: border-color .18s ease, transform .18s ease;
+  }
+  .how-step:hover { border-color: var(--vz-accent-border); transform: translateY(-2px); }
+  .how-step .n { font-family: var(--vz-font-mono); font-size: 11px; font-weight: 700; color: var(--vz-accent-2); letter-spacing: .1em; }
+  .how-step h4 { font-size: 13.5px; font-weight: 700; margin: 6px 0 3px; }
+  .how-step p { font-size: 11.5px; color: var(--vz-text-muted); margin: 0; line-height: 1.45; }
+
+  /* ============================================================
+     Inspect — measurement overlay section
+  ============================================================ */
+  .inspect-band { text-align: center; }
+  .inspect-band .lead { margin-left: auto; margin-right: auto; }
+  .meas-demo { position: relative; max-width: 780px; margin: 20px auto 0; text-align: left; }
+  .meas-window {
+    position: relative;
+    border: 1px solid var(--vz-border-strong); border-radius: var(--vz-radius-lg);
     background: var(--mat-standard);
-    border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--edge-light), var(--shadow);
+    overflow: hidden;
+  }
+  .meas-page { background: #f6f7fb; color: #10141f; padding: 40px 44px; position: relative; }
+  .meas-card {
+    position: relative; background: #fff; border: 1px solid #e7eaf2; border-radius: 14px;
+    padding: 20px 22px; max-width: 420px; margin: 0 auto;
+    box-shadow: 0 10px 30px rgba(16,20,31,.08);
+  }
+  .meas-card .tag { font-family: var(--vz-font-mono); font-size: 10px; font-weight: 700; letter-spacing: .14em; color: #8b93a3; text-transform: uppercase; margin-bottom: 8px; }
+  .meas-card h4 { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .meas-card p { font-size: 12.5px; color: #5b6472; margin: 0 0 12px; }
+  .meas-card .btn { display: inline-block; font-size: 11.5px; font-weight: 700; color: #fff; background: linear-gradient(120deg, #6e7bff, #8b7bff); border-radius: 8px; padding: 8px 14px; }
+  /* Selection frame + rulers */
+  .sel-frame { position: absolute; inset: -14px; border: 1.5px solid #6e7bff; border-radius: 18px; pointer-events: none; }
+  .sel-frame::before, .sel-frame::after {
+    content: ""; position: absolute; background: rgba(110,123,255,.75);
+  }
+  .sel-frame::before { left: -14px; right: -14px; height: 1px; top: 50%; }
+  .sel-frame::after { top: -14px; bottom: -14px; width: 1px; left: 50%; }
+  .ruler-x, .ruler-y { position: absolute; pointer-events: none; }
+  .ruler-x { left: 14px; right: 14px; bottom: 18px; height: 14px; }
+  .ruler-y { top: 14px; bottom: 14px; left: 18px; width: 14px; }
+  .ruler-x { background-image: repeating-linear-gradient(90deg, rgba(110,123,255,.5) 0 1px, transparent 1px 12px); }
+  .ruler-y { background-image: repeating-linear-gradient(0deg, rgba(110,123,255,.5) 0 1px, transparent 1px 12px); }
+  .m-label {
+    position: absolute; font-family: var(--vz-font-mono); font-size: 10.5px; font-weight: 600;
+    color: #fff; background: #6e7bff; border-radius: 5px; padding: 3px 8px; white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(110,123,255,.4); pointer-events: none;
+  }
+  .m-label.ml-w { top: -34px; left: 50%; transform: translateX(-50%); }
+  .m-label.ml-h { left: -14px; top: 50%; transform: translateY(-50%) translateX(-100%); }
+  .m-label.ml-el { top: -64px; left: 0; }
+  .m-label .d { opacity: .75; font-weight: 400; }
+  .meas-tokens { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 26px; }
+  .token-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--vz-font-mono); font-size: 11.5px; font-weight: 600;
+    color: var(--vz-text-secondary);
+    border: 1px solid var(--vz-border-strong); border-radius: 8px;
+    background: var(--mat-thin);
+    -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    padding: 7px 12px; box-shadow: var(--edge-light);
+  }
+  .token-chip .sw { width: 10px; height: 10px; border-radius: 3px; border: 1px solid rgba(255,255,255,.25); }
+  .token-chip .v { color: var(--vz-text-primary); }
+
+  /* ============================================================
+     Features bento
+  ============================================================ */
+  .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-top: 34px; }
+  @media (max-width: 1080px) { .bento { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .bento { grid-template-columns: 1fr; } }
+  .bento-tile {
+    min-width: 0; /* grid items default to min-width:auto — long mono rows must never blow out the page */
+    border: 1px solid var(--vz-border); border-radius: var(--vz-radius-lg);
+    background: var(--mat-standard);
+    -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
     box-shadow: var(--edge-light);
-    padding: 26px 18px; text-align: center; position: relative;
-    transition: transform .25s var(--ease-out), border-color .25s ease, box-shadow .25s ease;
+    padding: 24px;
+    text-align: left;
+    transition: border-color .18s ease, transform .18s ease;
   }
-  .browser:hover { transform: translateY(-5px); border-color: var(--border-strong); }
-  .browser.detected { border-color: rgba(110,123,255,.6); box-shadow: 0 0 0 1px rgba(110,123,255,.5), 0 20px 48px rgba(110,123,255,.22); }
-  .browser .logo {
-    width: 48px; height: 48px; margin: 0 auto 13px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 23px; background: var(--surface-2); border: 1px solid var(--border);
-    transition: transform .25s ease;
+  .bento-tile:hover { border-color: var(--vz-border-strong); transform: translateY(-2px); }
+  .bento-tile.wide { grid-column: span 2; }
+  .bento-tile.full { grid-column: 1 / -1; }
+  @media (max-width: 1080px) { .bento-tile.wide, .bento-tile.full { grid-column: span 2; } }
+  @media (max-width: 640px) { .bento-tile.wide, .bento-tile.full { grid-column: 1; } }
+  .bento-tile .bt-kicker { font-family: var(--vz-font-mono); font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--vz-accent-2); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .bento-tile h3 { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .bento-tile p { font-size: 13.5px; color: var(--vz-text-secondary); margin: 0 0 18px; line-height: 1.55; }
+  .bt-vis { position: relative; min-height: 96px; display: flex; align-items: center; }
+  .conf { font-family: var(--vz-font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: .08em; border-radius: 5px; padding: 2px 7px; }
+  .conf.detected { color: var(--vz-teal); background: rgba(63,224,200,.1); border: 1px solid rgba(63,224,200,.3); }
+  .conf.derived { color: var(--vz-amber); background: rgba(231,183,91,.1); border: 1px solid rgba(231,183,91,.3); }
+  .conf.inferred { color: var(--vz-accent-2); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); }
+  /* Design-system tile */
+  .ds-swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
+  .ds-swatch { border-radius: 8px; height: 44px; border: 1px solid rgba(255,255,255,.12); display: flex; align-items: flex-end; padding: 5px 7px; font-family: var(--vz-font-mono); font-size: 9.5px; color: rgba(255,255,255,.85); }
+  .ds-row { display: flex; align-items: center; justify-content: space-between; font-family: var(--vz-font-mono); font-size: 11px; color: var(--vz-text-secondary); width: 100%; padding: 0 2px; }
+  /* Assets tile */
+  .asset-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
+  .asset-cell { aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--vz-border); background: rgba(255,255,255,.04); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .asset-cell.sv { background: rgba(167,139,250,.12); } .asset-cell.im { background: rgba(110,123,255,.12); }
+  .asset-cell.fn { background: rgba(63,224,200,.1); } .asset-cell.vd { background: rgba(231,183,91,.1); }
+  /* Responsive tile */
+  .bp-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+  .bp-row { display: flex; align-items: center; gap: 10px; font-family: var(--vz-font-mono); font-size: 11px; color: var(--vz-text-secondary); }
+  .bp-row .w { width: 64px; color: var(--vz-accent-2); font-weight: 600; }
+  .bp-row .bar { flex: 1; height: 7px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .bp-row .bar i { display: block; height: 100%; border-radius: 99px; background: var(--vz-accent); }
+  .bp-row .tag { font-size: 9.5px; border-radius: 4px; padding: 2px 6px; border: 1px solid var(--vz-border-strong); color: var(--vz-text-muted); }
+  /* Analyze tile */
+  .score-list { display: flex; flex-direction: column; gap: 7px; width: 100%; }
+  .score-row { display: flex; align-items: center; gap: 10px; font-size: 11.5px; }
+  .score-row .name { width: 96px; color: var(--vz-text-secondary); font-weight: 500; }
+  .score-row .bar { flex: 1; height: 7px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .score-row .bar i { display: block; height: 100%; border-radius: 99px; }
+  .score-row .bar i.good { background: var(--vz-teal); } .score-row .bar i.mid { background: var(--vz-amber); }
+  .score-row .num { font-family: var(--vz-font-mono); font-size: 12px; font-weight: 700; width: 26px; text-align: right; }
+  /* Screenshot tile */
+  .cap-frame { position: relative; width: 100%; height: 84px; border-radius: 10px; border: 1.5px solid var(--vz-teal); overflow: hidden; background: linear-gradient(rgba(255,255,255,.06), rgba(255,255,255,.02)); }
+  .cap-frame::after { content: "viewport · full-page · element · selection"; position: absolute; bottom: 6px; left: 10px; font-family: var(--vz-font-mono); font-size: 9px; color: var(--vz-text-muted); }
+  .cap-sweep { position: absolute; left: 0; right: 0; height: 34px; top: 0; background: linear-gradient(rgba(63,224,200,.35), transparent); }
+  /* Live edit tile */
+  .edit-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; width: 100%; font-family: var(--vz-font-mono); font-size: 11.5px; }
+  .edit-row .prop { color: var(--vz-text-muted); }
+  .edit-row .val { color: var(--vz-accent-2); font-weight: 600; }
+  .edit-row .arrow { color: var(--vz-text-muted); }
+  .edit-row .undo { color: var(--vz-teal); font-weight: 700; }
+  /* Code tile */
+  .code-lines { width: 100%; font-family: var(--vz-font-mono); font-size: 11px; line-height: 1.7; color: var(--vz-text-secondary); }
+  .code-lines .c-tag { color: var(--vz-accent-2); } .code-lines .c-str { color: var(--vz-teal); } .code-lines .c-num { color: var(--vz-amber); }
+
+  /* ============================================================
+     AI — optional, honest, never the hero
+  ============================================================ */
+  .ai-band { background: radial-gradient(900px 500px at 50% 0%, rgba(110,123,255,.07), transparent 65%), var(--vz-bg-elevated); border-top: 1px solid var(--vz-border); border-bottom: 1px solid var(--vz-border); }
+  .ai-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: center; }
+  .ai-grid > * { min-width: 0; }
+  @media (max-width: 900px) { .ai-grid { grid-template-columns: 1fr; } }
+  .ai-card {
+    border: 1px solid var(--vz-border-strong); border-radius: var(--vz-radius-lg);
+    background: var(--mat-standard);
+    -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    box-shadow: var(--edge-light), var(--shadow);
+    overflow: hidden;
   }
-  .browser:hover .logo { transform: scale(1.05); }
-  .browser h4 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
-  .browser .ver { font-size: 12px; color: var(--dim); margin-bottom: 16px; }
+  .ai-bar { display: flex; align-items: center; gap: 8px; padding: 11px 16px; border-bottom: 1px solid var(--vz-border); font-size: 12.5px; font-weight: 700; }
+  .ai-bar .ai-badge { font-family: var(--vz-font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: .1em; color: var(--vz-accent-2); border: 1px solid rgba(167,139,250,.4); background: rgba(167,139,250,.1); border-radius: 5px; padding: 2px 7px; margin-left: auto; }
+  .ai-body { padding: 18px 18px 16px; }
+  .ai-q { font-size: 13px; color: var(--vz-text-muted); font-family: var(--vz-font-mono); margin-bottom: 14px; }
+  .ai-a { font-size: 14px; line-height: 1.65; color: var(--vz-text-primary); }
+  .ai-a .k { color: var(--vz-accent-2); font-weight: 600; }
+  .ai-providers { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .ai-provider { font-family: var(--vz-font-mono); font-size: 11px; font-weight: 600; border: 1px solid var(--vz-border-strong); border-radius: 999px; padding: 6px 13px; color: var(--vz-text-secondary); }
+  .ai-provider.off { border-color: rgba(240,107,115,.35); color: var(--vz-red); }
+
+  /* ============================================================
+     Privacy / security
+  ============================================================ */
+  .sec-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  .sec-grid > * { min-width: 0; }
+  @media (max-width: 900px) { .sec-grid { grid-template-columns: 1fr; } }
+  .flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 22px 0 26px; }
+  .flow-node {
+    border: 1px solid var(--vz-border-strong); border-radius: var(--vz-radius-md);
+    background: var(--mat-standard);
+    -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    padding: 12px 18px; font-family: var(--vz-font-mono); font-size: 12px; font-weight: 600; color: var(--vz-text-secondary);
+    box-shadow: var(--edge-light);
+  }
+  .flow-node.local { border-color: var(--vz-accent-border); color: var(--vz-text-primary); }
+  .flow-arrow { color: var(--vz-accent-2); font-family: var(--vz-font-mono); font-size: 14px; }
+  .flow-note { font-size: 13px; color: var(--vz-text-muted); max-width: 460px; }
+  .check-list { display: flex; flex-direction: column; gap: 9px; margin-top: 8px; }
+  .check-item { display: flex; align-items: center; gap: 11px; font-size: 14px; color: var(--vz-text-secondary); }
+  .check-item .ck { width: 19px; height: 19px; border-radius: 6px; background: rgba(63,224,200,.12); border: 1px solid rgba(63,224,200,.35); color: var(--vz-teal); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .guarantee { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--vz-border); align-items: flex-start; }
+  .guarantee:first-of-type { border-top: none; }
+  .guarantee .g-ic { width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--vz-accent-border); background: var(--vz-accent-soft); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .guarantee h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .guarantee p { font-size: 12.5px; color: var(--vz-text-muted); margin: 0; line-height: 1.5; }
+
+  /* ============================================================
+     Personas
+  ============================================================ */
+  .persona-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 34px; }
+  @media (max-width: 1080px) { .persona-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .persona-grid { grid-template-columns: 1fr; } }
+  .persona {
+    border: 1px solid var(--vz-border); border-radius: var(--vz-radius-lg);
+    background: var(--mat-standard);
+    -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    box-shadow: var(--edge-light);
+    padding: 22px;
+    transition: border-color .18s ease, transform .18s ease;
+  }
+  .persona:hover { border-color: var(--vz-accent-border); transform: translateY(-2px); }
+  .persona .p-ic { font-size: 22px; margin-bottom: 12px; }
+  .persona h3 { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .persona p { font-size: 13px; color: var(--vz-text-secondary); margin: 0 0 14px; line-height: 1.55; }
+  .persona .p-flow { font-family: var(--vz-font-mono); font-size: 10.5px; color: var(--vz-text-muted); line-height: 1.9; }
+  .persona .p-flow b { color: var(--vz-accent-2); font-weight: 600; }
+
+  /* ============================================================
+     Product proof — real evidence, no fake testimonials
+  ============================================================ */
+  .proof-band { background: var(--vz-bg-elevated); border-top: 1px solid var(--vz-border); border-bottom: 1px solid var(--vz-border); }
+  .proof-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 26px; }
+  .proof-chip {
+    font-family: var(--vz-font-mono); font-size: 12px; font-weight: 600;
+    color: var(--vz-text-secondary);
+    border: 1px solid var(--vz-border-strong); border-radius: 999px;
+    background: var(--mat-thin);
+    -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
+    padding: 9px 16px; box-shadow: var(--edge-light);
+  }
+  .proof-chip b { color: var(--vz-text-primary); }
+  .proof-note { text-align: center; font-size: 12.5px; color: var(--vz-text-muted); margin-top: 18px; }
+
+  /* ============================================================
+     Download / install
+  ============================================================ */
+  .dl-section { text-align: center; }
+  .dl-section .lead { margin-left: auto; margin-right: auto; }
+  .os-selector { border: none; display: inline-flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; margin: 0 0 22px; }
+  .os-label { font-family: var(--vz-font-mono); font-size: 12px; color: var(--vz-text-muted); }
+  .os-tabs { display: inline-flex; gap: 6px; }
+  .os-tab {
+    font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    color: var(--vz-text-secondary);
+    background: var(--mat-thin); border: 1px solid var(--vz-border);
+    border-radius: 9px; padding: 8px 16px;
+    box-shadow: var(--edge-light);
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .os-tab:hover { color: var(--vz-text-primary); border-color: var(--vz-border-strong); }
+  .os-tab.on { color: #fff; background: var(--vz-accent); border-color: var(--vz-accent); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 6px 18px rgba(110,123,255,.3); }
+  .os-note { font-size: 12.5px; color: var(--vz-text-muted); }
+  .browser-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 8px; }
+  @media (max-width: 1080px) { .browser-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .browser-grid { grid-template-columns: 1fr; } }
+  .browser {
+    position: relative;
+    border: 1px solid var(--vz-border); border-radius: var(--vz-radius-lg);
+    background: var(--mat-standard);
+    -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    box-shadow: var(--edge-light);
+    padding: 22px;
+    text-align: left;
+    display: flex; flex-direction: column;
+    transition: border-color .18s ease, transform .18s ease;
+  }
+  .browser:hover { border-color: var(--vz-border-strong); transform: translateY(-2px); }
+  .browser.detected { border-color: var(--vz-accent-border); box-shadow: var(--edge-light), 0 0 0 1px var(--vz-accent-border), 0 14px 44px rgba(110,123,255,.18); }
   .browser .badge {
-    position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
-    background: var(--indigo); color: #fff; font-size: 10.5px; font-weight: 700;
-    padding: 4px 12px; border-radius: 999px; letter-spacing: .04em; text-transform: uppercase;
-    display: none; white-space: nowrap; box-shadow: 0 6px 18px rgba(110,123,255,.3);
+    position: absolute; top: 14px; right: 14px;
+    font-family: var(--vz-font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: .1em;
+    color: var(--vz-accent-2); border: 1px solid var(--vz-accent-border); background: var(--vz-accent-soft);
+    border-radius: 6px; padding: 3px 8px; opacity: 0; transition: opacity .2s ease;
   }
-  .browser.detected .badge { display: block; }
+  .browser.detected .badge { opacity: 1; }
+  .browser .logo { font-size: 26px; margin-bottom: 10px; }
+  .browser h4 { font-size: 15.5px; font-weight: 800; margin-bottom: 3px; }
+  .browser .ver { font-size: 12px; color: var(--vz-text-muted); margin-bottom: 14px; font-family: var(--vz-font-mono); }
   .btn-dl {
-    display: inline-block; width: 100%; cursor: pointer;
-    padding: 12px 14px; border-radius: var(--radius-sm);
-    background: rgba(110,123,255,.12); border: 1px solid rgba(110,123,255,.4);
-    color: #b9c0ff; font-weight: 700; font-size: 14px; font-family: inherit;
-    transition: background .18s ease, color .18s ease, transform .18s ease, opacity .18s ease;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: auto;
+    font-size: 13.5px; font-weight: 700; color: #fff;
+    background: var(--vz-accent);
+    border-radius: 10px; padding: 11px 18px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 6px 20px rgba(110,123,255,.25);
+    transition: background .18s ease, transform .18s ease;
   }
-  .btn-dl:hover { background: var(--indigo); color: #fff; transform: translateY(-1px); }
-  .btn-dl.teal { background: rgba(63,224,200,.1); border-color: rgba(63,224,200,.4); color: #7fe9d6; }
-  .btn-dl.teal:hover { background: var(--teal); color: #07110f; }
-  .btn-dl.busy { opacity: .5; pointer-events: none; }
-  .btn-dl.soon { background: rgba(255,200,87,.08); border-color: rgba(255,200,87,.35); color: #ffd98a; }
-  .btn-dl.soon:hover { background: rgba(255,200,87,.18); color: #ffe3b3; }
-  .browser .soon-note { font-size: 12px; color: var(--dim); padding: 11px 4px; }
+  .btn-dl:hover { background: var(--vz-accent-2); transform: translateY(-1px); }
+  .btn-dl.teal { background: var(--vz-teal); color: #0a1f1a; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 6px 20px rgba(63,224,200,.25); }
+  .btn-dl.teal:hover { background: #5de8d3; }
+  .btn-dl.soon { background: transparent; color: var(--vz-text-secondary); border: 1px solid var(--vz-border-strong); box-shadow: var(--edge-light); }
+  .btn-dl.busy { pointer-events: none; opacity: .7; }
   .note-box {
-    display: flex; align-items: flex-start; gap: 13px;
-    background: var(--mat-thin); border: 1px dashed var(--border-strong);
-    border-radius: var(--radius-sm); padding: 16px 18px;
-    font-size: 14px; color: var(--muted);
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 18px; padding: 14px 18px;
+    border: 1px solid var(--vz-border); border-radius: var(--vz-radius-md);
+    background: var(--mat-thin); box-shadow: var(--edge-light);
+    text-align: left; font-size: 13px; color: var(--vz-text-secondary);
   }
-  .note-box b { color: var(--fg); }
-  .note-box .ic { font-size: 18px; flex-shrink: 0; }
-
-  .os-selector { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; border: none; padding: 0; min-inline-size: 0; }
-  .os-label { font-size: 13px; color: var(--dim); font-weight: 600; padding: 0; margin: 0; }
-  .os-tabs { display: inline-flex; background: var(--mat-thin); border: 1px solid var(--border); border-radius: 12px; padding: 4px; gap: 4px; box-shadow: var(--edge-light); }
-  .os-tab { background: none; border: none; color: var(--muted); font-size: 13.5px; font-weight: 600; padding: 9px 17px; border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: color .15s ease, background .15s ease, transform .15s ease; }
-  .os-tab:hover { color: var(--fg); }
-  .os-tab.on { background: var(--indigo); color: #fff; }
-  .os-tab:active { transform: scale(.96); }
-  .os-note { font-size: 12.5px; color: var(--dim); }
-  tr.os-current { background: rgba(110,123,255,.08); }
-  tr.os-current td:first-child::after { content: " — you're on this"; font-size: 11px; font-weight: 700; color: var(--teal); }
-
-  /* ============================================================
-     Setup guide — smooth accordions
-  ============================================================ */
-  .pipeline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 32px; }
-  .pipe-step {
-    display: flex; align-items: center; gap: 9px;
-    background: var(--mat-thin); border: 1px solid var(--border);
-    border-radius: 999px; padding: 10px 19px; font-size: 13.5px; font-weight: 600;
-    box-shadow: var(--edge-light);
-    transition: border-color .2s ease, transform .2s ease;
-  }
-  .pipe-step:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  .note-box .ic { font-size: 18px; }
+  .note-box b { color: var(--vz-text-primary); }
+  .pipeline { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 8px 0 26px; font-size: 13.5px; color: var(--vz-text-secondary); }
+  .pipe-step { display: inline-flex; align-items: center; gap: 9px; font-weight: 600; }
   .pipe-step .n {
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--indigo); color: #fff;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 800;
+    width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--vz-font-mono); font-size: 12px; font-weight: 700;
+    background: var(--vz-accent-soft); color: var(--vz-accent-2); border: 1px solid var(--vz-accent-border);
   }
-  .pipe-arrow { color: var(--dim); font-size: 15px; }
-  details {
-    background: var(--mat-standard); border: 1px solid var(--border); border-radius: var(--radius);
-    margin-bottom: 13px; overflow: hidden;
-    box-shadow: var(--edge-light);
-    transition: border-color .25s ease, background .25s ease;
-  }
-  details[open] { border-color: rgba(110,123,255,.45); background: var(--mat-elevated); }
-  summary {
-    cursor: pointer; padding: 18px 22px;
-    font-weight: 700; font-size: 15px;
-    list-style: none; display: flex; align-items: center; gap: 12px;
-    user-select: none;
-  }
-  summary::-webkit-details-marker { display: none; }
-  summary .chev { color: var(--dim); transition: transform .3s var(--ease-out), color .3s ease; font-size: 11px; display: inline-flex; }
-  details[open] summary .chev { transform: rotate(90deg); color: var(--indigo); }
-  summary .b-ic { font-size: 18px; }
-  .steps { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .38s var(--ease-out); }
-  details[open] .steps { grid-template-rows: 1fr; }
-  .steps > div { overflow: hidden; }
-  .steps-inner { padding: 0 22px 22px; }
-  .steps ol { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
-  .steps li { margin-bottom: 9px; }
-  .steps li::marker { color: var(--indigo); font-weight: 700; }
-  .steps b { color: var(--fg); }
-  .warn {
-    background: rgba(255,200,87,.07); border: 1px solid rgba(255,200,87,.28);
-    color: #ffd98a; border-radius: 10px; padding: 12px 14px;
-    font-size: 13px; margin-top: 14px; line-height: 1.55;
-  }
-
-  /* ============================================================
-     Requirements
-  ============================================================ */
-  .table-wrap { border: 1px solid var(--border); border-radius: var(--radius); background: var(--mat-standard); box-shadow: var(--edge-light); overflow: hidden; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { text-align: left; padding: 15px 18px; border-bottom: 1px solid var(--border); }
-  tr:last-child td { border-bottom: none; }
-  th { color: var(--dim); font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em; background: rgba(255,255,255,.03); }
-  td:first-child { font-weight: 600; }
-  td:nth-child(2) { color: var(--muted); }
-  .ok { color: var(--teal); font-weight: 700; }
-  .no { color: var(--red); font-weight: 700; }
-  .wip { color: var(--amber); font-weight: 700; }
+  .pipe-arrow { color: var(--vz-text-muted); }
+  .setup-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; text-align: left; margin-top: 34px; }
+  .setup-grid > * { min-width: 0; }
+  @media (max-width: 900px) { .setup-grid { grid-template-columns: 1fr; } }
+  details.setup, details.faq-item { border: 1px solid var(--vz-border); border-radius: var(--vz-radius-md); background: var(--mat-thin); box-shadow: var(--edge-light); overflow: hidden; }
+  details.setup[open], details.faq-item[open] { border-color: var(--vz-border-strong); }
+  details.setup summary, details.faq-item summary { cursor: pointer; padding: 15px 18px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 10px; list-style: none; }
+  details.setup summary::-webkit-details-marker, details.faq-item summary::-webkit-details-marker { display: none; }
+  details.setup summary .chev, details.faq-item summary .chev { margin-left: auto; font-family: var(--vz-font-mono); font-size: 11px; color: var(--vz-text-muted); transition: transform .2s var(--vz-ease-out); }
+  details.setup[open] summary .chev, details.faq-item[open] summary .chev { transform: rotate(90deg); }
+  details.setup .steps, details.faq-item .steps { padding: 0 18px 16px; }
+  details.setup .steps-inner { border-top: 1px solid var(--vz-border); padding-top: 13px; font-size: 13.5px; color: var(--vz-text-secondary); }
+  details .steps-inner ol { padding-left: 20px; display: flex; flex-direction: column; gap: 7px; }
+  details .steps-inner code { font-family: var(--vz-font-mono); font-size: 12px; color: var(--vz-accent-2); background: rgba(110,123,255,.08); border-radius: 5px; padding: 1px 6px; }
+  details .steps-inner .warn { margin-top: 10px; font-size: 12.5px; color: var(--vz-amber); }
+  .unzip-hint { color: var(--vz-text-primary); font-weight: 500; }
+  .table-wrap { margin-top: 26px; overflow-x: auto; text-align: left; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table th, table td { padding: 11px 14px; border-bottom: 1px solid var(--vz-border); text-align: left; }
+  table th { font-family: var(--vz-font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--vz-text-muted); }
+  table td { color: var(--vz-text-secondary); }
+  table tr:last-child td { border-bottom: none; }
+  table .ok { color: var(--vz-teal); font-weight: 600; }
+  table .wip { color: var(--vz-amber); font-weight: 600; }
+  table .no { color: var(--vz-red); font-weight: 600; }
+  table tr.os-current td { color: var(--vz-text-primary); background: rgba(110,123,255,.05); }
 
   /* ============================================================
      FAQ
   ============================================================ */
-  .faq details summary { font-weight: 600; font-size: 15px; }
-  .faq .steps-inner { color: var(--muted); font-size: 14px; line-height: 1.65; }
-  .faq .steps-inner p { margin: 0 0 8px; }
-  .faq .steps-inner b { color: var(--fg); }
+  .faq-band { background: var(--vz-bg-elevated); border-top: 1px solid var(--vz-border); border-bottom: 1px solid var(--vz-border); }
+  .faq-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 34px; }
+  .faq-grid > * { min-width: 0; }
+  @media (max-width: 900px) { .faq-grid { grid-template-columns: 1fr; } }
 
   /* ============================================================
      Final CTA
   ============================================================ */
   .cta-band { position: relative; text-align: center; overflow: hidden; }
-  .cta-band::before {
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(720px 380px at 50% 130%, rgba(110,123,255,.32), transparent 70%);
-  }
+  .cta-band .cta-grid { position: absolute; inset: 0; pointer-events: none; opacity: .5; background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px); background-size: 44px 44px; -webkit-mask-image: radial-gradient(ellipse 70% 90% at 50% 50%, #000 30%, transparent 75%); mask-image: radial-gradient(ellipse 70% 90% at 50% 50%, #000 30%, transparent 75%); }
   .cta-band .wrap { position: relative; }
-  .cta-band h2 { font-size: clamp(34px, 5vw, 56px); margin-bottom: 16px; }
-  .cta-band p { color: var(--muted); max-width: 560px; margin: 0 auto 32px; font-size: 17px; }
+  .cta-band h2 { font-size: clamp(32px, 5vw, 56px); }
+  .cta-sub { font-size: 15px; color: var(--vz-text-secondary); margin: 0 0 10px; font-family: var(--vz-font-mono); letter-spacing: .06em; }
+  .cta-band .btn-primary { margin-top: 26px; font-size: 17px; padding: 17px 34px; }
 
   /* ============================================================
      Footer
   ============================================================ */
-  footer { border-top: 1px solid var(--border); padding: 44px 0 52px; color: var(--dim); font-size: 13px; background: var(--bg-2); }
-  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 36px; margin-bottom: 34px; }
-  @media (max-width: 760px) { .footer-grid { grid-template-columns: 1fr; gap: 26px; } }
-  .footer-brand .brand { margin-bottom: 12px; }
-  .footer-brand p { color: var(--muted); font-size: 13.5px; max-width: 300px; }
-  .footer-col h5 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .14em; color: var(--dim); margin-bottom: 14px; font-family: var(--font-mono); }
-  .footer-col a, .footer-col span { display: block; color: var(--muted); margin-bottom: 10px; transition: color .15s ease, transform .15s ease; }
-  .footer-col a:hover { color: var(--fg); transform: translateX(3px); }
-  .footer-col .soon { opacity: .55; cursor: default; }
-  .footer-bottom { border-top: 1px solid var(--border); padding-top: 22px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .footer-bottom .tag { font-family: var(--font-mono); font-size: 11px; color: var(--dim); }
-  .footer-bottom .tag b { color: var(--teal); }
+  footer { border-top: 1px solid var(--vz-border); padding: 44px 0 36px; background: rgba(0,0,0,.2); }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 30px; }
+  .footer-grid > * { min-width: 0; }
+  @media (max-width: 820px) { .footer-grid { grid-template-columns: 1fr; gap: 22px; } }
+  .footer-brand p { font-size: 13.5px; color: var(--vz-text-muted); max-width: 320px; margin-top: 12px; }
+  .footer-col { display: flex; flex-direction: column; gap: 9px; }
+  .footer-col h5 { font-family: var(--vz-font-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--vz-text-muted); margin-bottom: 4px; }
+  .footer-col a { font-size: 13.5px; color: var(--vz-text-secondary); transition: color .15s ease; }
+  .footer-col a:hover { color: var(--vz-text-primary); }
+  .footer-col .soon { font-size: 13px; color: var(--vz-text-muted); }
+  .footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: 34px; padding-top: 20px; border-top: 1px solid var(--vz-border); font-size: 12.5px; color: var(--vz-text-muted); }
+  .footer-bottom .tag { font-family: var(--vz-font-mono); font-size: 11.5px; }
 
   /* ============================================================
-     Download overlay
+     Download overlay + back-to-top
   ============================================================ */
   .dl-overlay {
-    position: fixed; inset: 0; z-index: 120;
-    /* Floating-glass scrim: dim + soft blur, like the extension's modal. */
-    background: rgba(3, 4, 7, 0.6);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none;
-    transition: opacity .28s ease;
+    position: fixed; inset: 0; z-index: 100; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(4,5,9,.72);
+    -webkit-backdrop-filter: blur(var(--blur-float)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-float)) saturate(var(--saturate));
   }
-  .dl-overlay.show { opacity: 1; pointer-events: auto; }
+  .dl-overlay.show { display: flex; }
   .dl-card {
-    width: min(360px, calc(100vw - 48px));
-    /* Floating glass — deepest blur + saturation, strongest edge definition. */
+    width: 320px; text-align: center; padding: 34px 28px 30px;
+    border: 1px solid var(--vz-border-strong); border-radius: var(--vz-radius-xl);
     background: var(--mat-float);
     -webkit-backdrop-filter: blur(var(--blur-float)) saturate(var(--saturate));
     backdrop-filter: blur(var(--blur-float)) saturate(var(--saturate));
-    border: 1px solid var(--border-strong); border-radius: 22px;
-    padding: 42px 32px 34px; text-align: center;
-    box-shadow: var(--edge-light), var(--shadow); position: relative; overflow: hidden;
-    transform: scale(.93); transition: transform .3s var(--ease-spring);
+    box-shadow: var(--edge-light), var(--shadow);
   }
-  .dl-overlay.show .dl-card { transform: scale(1); }
-  .dl-card::before {
-    content: ""; position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
-    width: 320px; height: 230px; background: radial-gradient(ellipse, rgba(110,123,255,.32), transparent 70%);
-    pointer-events: none;
-  }
-  .dl-logo-wrap { position: relative; width: 68px; height: 68px; margin: 0 auto 18px; }
-  .dl-logo { width: 68px; height: 68px; border-radius: 18px; position: relative; z-index: 2; }
+  .dl-logo-wrap { position: relative; width: 64px; height: 64px; margin: 0 auto 14px; }
+  .dl-logo-wrap img { width: 64px; height: 64px; border-radius: 16px; }
   .dl-ring {
-    position: absolute; inset: -10px; border-radius: 24px; z-index: 1;
-    border: 2px solid transparent;
-    background: var(--grad) border-box;
-    -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    animation: dlSpin 2.4s linear infinite;
-    opacity: .6;
+    position: absolute; inset: -5px; border-radius: 22px;
+    border: 2px solid rgba(110,123,255,.35); border-top-color: var(--vz-accent);
+    animation: dlSpin 1.1s linear infinite;
   }
   @keyframes dlSpin { to { transform: rotate(360deg); } }
-  .dl-title { font-family: var(--font-display); font-weight: 700; font-size: 20px; margin-bottom: 5px; }
-  .dl-status { font-size: 13.5px; color: var(--muted); min-height: 21px; margin-bottom: 18px; }
-  .dl-track { height: 8px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
-  .dl-fill { height: 100%; width: 0%; border-radius: 999px; background: var(--grad); transition: width .12s linear; position: relative; }
-  .dl-fill::after {
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
-    animation: sheen 1.1s linear infinite;
-  }
-  @keyframes sheen { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
-  .dl-done { display: none; font-size: 15px; font-weight: 800; color: var(--teal); margin: 0; }
-  .dl-overlay.done .dl-status, .dl-overlay.done .dl-track, .dl-overlay.done .dl-logo-wrap { display: none; }
+  .dl-card p { margin: 0; }
+  .dl-title { font-size: 18px; font-weight: 800; margin-bottom: 6px !important; }
+  .dl-status { font-size: 13px; color: var(--vz-text-muted); min-height: 20px; }
+  .dl-track { height: 6px; border-radius: 99px; background: rgba(255,255,255,.09); overflow: hidden; margin: 16px 0 10px; }
+  .dl-fill { height: 100%; width: 0%; border-radius: 99px; background: var(--vz-accent); box-shadow: 0 0 12px rgba(110,123,255,.6); transition: width .09s linear; }
+  .dl-done { font-size: 13px; color: var(--vz-teal); font-weight: 600; display: none; }
+  .dl-overlay.done .dl-ring { display: none; }
   .dl-overlay.done .dl-done { display: block; }
-
-  /* ============================================================
-     Back to top
-  ============================================================ */
   #backTop {
     position: fixed; right: 22px; bottom: 22px; z-index: 90;
-    width: 46px; height: 46px; border-radius: 13px;
-    border: 1px solid var(--border-strong);
-    /* Elevated glass — bright, blurred, clearly floating above content. */
+    width: 46px; height: 46px; border-radius: 50%;
     background: var(--mat-elevated);
     -webkit-backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
     backdrop-filter: blur(var(--blur-elevated)) saturate(var(--saturate));
-    box-shadow: var(--edge-light);
-    color: var(--fg); font-size: 17px; cursor: pointer;
+    border: 1px solid var(--vz-border-strong);
+    box-shadow: var(--edge-light), 0 10px 30px rgba(0,0,0,.5);
+    cursor: pointer; color: var(--vz-text-primary);
     display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transform: translateY(12px);
-    transition: opacity .25s ease, transform .25s var(--ease-out), border-color .2s ease;
+    opacity: 0; pointer-events: none; transform: translateY(8px);
+    transition: opacity .25s ease, transform .25s var(--vz-ease-out);
   }
   #backTop.show { opacity: 1; pointer-events: auto; transform: none; }
-  #backTop:hover { border-color: var(--indigo); }
+  .back-ring { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .back-ring-track { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 2; }
+  .back-ring-fill { fill: none; stroke: var(--vz-accent); stroke-width: 2.5; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; }
+  .back-arrow { font-size: 17px; position: relative; z-index: 1; }
 
   /* ============================================================
-     Reveal system
+     Reveal + reduced motion
   ============================================================ */
-  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .75s cubic-bezier(.2,.7,.3,1), transform .75s cubic-bezier(.2,.7,.3,1); }
-  .reveal.in { opacity: 1; transform: none; }
-  .reveal[data-delay="1"] { transition-delay: .08s; }
-  .reveal[data-delay="2"] { transition-delay: .16s; }
-  .reveal[data-delay="3"] { transition-delay: .24s; }
-  /* Reduced-motion users must never depend on JS scroll-reveal for content,
-     and infinite decorative animations (marquee, orbs, typing, pulses) stop. */
-  @media (prefers-reduced-motion: reduce) {
-    .reveal, .reveal-scale { opacity: 1 !important; transform: none !important; transition: none !important; }
-    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  .reveal, .reveal-scale, .reveal-l, .reveal-r { opacity: 0; transform: translateY(18px); transition: opacity .6s var(--vz-ease-out), transform .6s var(--vz-ease-out); }
+  .reveal-scale { transform: scale(.97); }
+  .reveal-l { transform: translateX(-22px); }
+  .reveal-r { transform: translateX(22px); }
+  .reveal.in, .reveal-scale.in, .reveal-l.in, .reveal-r.in { opacity: 1; transform: none; }
+  .rv.in { opacity: 1; transform: none; }
+  @media (max-width: 340px) {
+    .btn-primary, .btn-ghost { padding-left: 20px; padding-right: 20px; }
+    .hero h1 { font-size: 40px; }
   }
-  .reveal[data-delay="4"] { transition-delay: .32s; }
-  .reveal-scale { opacity: 0; transform: scale(.94) translateY(16px); transition: opacity .8s var(--ease-out), transform .8s var(--ease-out); }
-  .reveal-scale.in { opacity: 1; transform: none; }
-  /* Once the entrance settles, hand transforms back to hover micro-interactions. */
-  .reveal.settled, .reveal-scale.settled { transition: opacity .3s ease; }
-
-  /* ============================================================
-     Word-mask reveals (premium headline animation)
-  ============================================================ */
-  /* Directional reveals — 2-column layouts enter from their own side.
-     Only sideways on wide screens: on mobile the full-width columns must not
-     push past the viewport while waiting to reveal (overflow check). */
-  .reveal-l { opacity: 0; transform: translateX(-44px); transition: opacity .8s var(--ease-out), transform .8s var(--ease-out); }
-  .reveal-r { opacity: 0; transform: translateX(44px); transition: opacity .8s var(--ease-out), transform .8s var(--ease-out); }
-  .reveal-l.in, .reveal-r.in { opacity: 1; transform: none; }
-  .reveal-l.settled, .reveal-r.settled { transition: opacity .3s ease; }
-  /* Sideways only where the wrap has margin to spare (≥1080px): below that
-     the full-width columns would push past the viewport while waiting to
-     reveal, causing horizontal overflow on tablets. */
-  @media (max-width: 1079px) {
-    .reveal-l, .reveal-r { transform: translateY(28px); }
-  }
-
-
-
-  /* Header shrink on scroll. */
-  .nav { transition: height .28s var(--ease-out); }
-  header.scrolled .nav { height: 62px; }
-
-  /* Back-to-top scroll ring. */
-  .back-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
-  .back-ring-track { fill: none; stroke: rgba(255,255,255,.08); stroke-width: 3; }
-  .back-ring-fill { fill: none; stroke: url(#backRingGrad); stroke-width: 3; stroke-linecap: round; }
-  .back-arrow { position: relative; z-index: 1; font-size: 17px; line-height: 1; }
-
-  /* ============================================================
-     Reduced motion
-  ============================================================ */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; }
     html { scroll-behavior: auto; }
-    .reveal, .reveal-scale, .reveal-l, .reveal-r { opacity: 1; transform: none; }
+    .reveal, .reveal-scale, .reveal-l, .reveal-r, .rv { opacity: 1 !important; transform: none !important; transition: none !important; }
+    .dl-ring { animation: none; }
+    .meas { transition: none; }
   }
 </style>
 </head>
 <body>
 
+<!-- ============ HEADER ============ -->
 <header id="siteHeader">
   <div class="wrap nav">
-    <a class="brand" href="#top">
-      <span class="logo-wrap"><img src="../public/icon/128.png" alt="Vizquo logo"></span>
-      Vizquo
-    </a>
-    <nav class="nav-links" id="navLinks">
-      <a href="#demo">Live demo</a>
-      <a href="#how">How it works</a>
+    <a class="brand" href="#top"><img src="../public/icon/32.png" alt="Vizquo logo"> Vizquo</a>
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="#product">Product</a>
       <a href="#features">Features</a>
-      <a href="#ai">AI</a>
-      <a href="#download">Download</a>
-      <a href="#install">Setup</a>
-      <a href="#faq">FAQ</a>
-      <a href="https://github.com/WebDclassified/vizquo" target="_blank" rel="noopener">GitHub ↗</a>
+      <a href="#how">How it works</a>
+      <a href="#security">Security</a>
+      <a href="#resources">Resources</a>
     </nav>
+    <a class="nav-cta" href="#install">Add Vizquo — Free</a>
     <button class="nav-burger" id="navBurger" type="button" aria-label="Toggle menu" aria-expanded="false">☰</button>
-    <a class="nav-cta" href="#download">Get Vizquo</a>
   </div>
 </header>
 
+<main>
 <!-- ============ HERO ============ -->
 <section class="hero" id="top">
-  <div class="aurora" aria-hidden="true">
-    <div class="hero-grid"></div>
-  </div>
+  <div class="hero-grid" aria-hidden="true"></div>
   <div class="hero-vignette" aria-hidden="true"></div>
   <div class="wrap">
-    <span class="hero-pill reveal"><span class="dot"></span> v0.10.9 · by Prabhat Teotia · Free &amp; open source</span>
-    <h1 class="reveal" data-delay="1">
-      Inspect any webpage.<br>
-      Extract its <span class="serif">design system</span><span class="grad-text">.</span>
-    </h1>
-    <p class="sub reveal" data-delay="2">
-      Vizquo is the <b>design-intelligence layer</b> for your browser. It reads the live
-      DOM and CSS of any page — then hands you the colors, typography, spacing,
-      components, and assets, <b>every value traced to its source</b>.
-    </p>
+    <span class="hero-pill reveal"><span class="dot"></span> <span class="mono">v0.10.9</span> · by Prabhat Teotia · Free &amp; open source</span>
+    <h1 class="reveal" data-delay="1">See the web<br><span class="accent">differently.</span></h1>
+    <p class="sub reveal" data-delay="2">Inspect interfaces, extract assets, uncover design systems, analyze responsive behavior, and understand how modern websites are built — <b>directly in your browser</b>.</p>
     <div class="hero-btns reveal" data-delay="3">
-      <a class="btn-primary" id="heroCta" href="#download">⬇ Download for free</a>
-      <a class="btn-ghost" href="#demo">Try the live demo <span class="arr">↓</span></a>
+      <a class="btn-primary" id="heroCta" href="#install">Add Vizquo — Free</a>
+      <a class="btn-ghost" href="#demo">Watch it inspect <span class="arr">↓</span></a>
     </div>
-    <p class="hero-note reveal" data-delay="3" id="heroNote">Detecting your browser…</p>
-    <div class="hero-stats reveal" data-delay="3">
-      <div class="stat"><div class="v"><span class="counter grad-text" data-count="0" data-suffix="">0</span></div><div class="l">Network requests by default</div></div>
-      <div class="stat"><div class="v"><span class="counter grad-text" data-count="100" data-suffix="%">100%</span></div><div class="l">Local — your data stays in your browser</div></div>
-      <div class="stat"><div class="v"><span class="grad-text">MIT</span></div><div class="l">Free forever, open source</div></div>
-      <div class="stat"><div class="v"><span class="counter grad-text" data-count="7" data-suffix="">7</span></div><div class="l">Desktop browsers supported</div></div>
-    </div>
-  </div>
+    <p class="hero-note reveal" data-delay="4" id="heroNote">Free · Local-first · No tracking</p>
 
-  <!-- Product showcase -->
-  <div class="wrap showcase-wrap reveal-scale" data-delay="2">
-    <div class="showcase-glow" aria-hidden="true"></div>
-    <div class="browser-frame showcase-frame" id="showcase">
-      <div class="browser-bar">
-        <span class="b-dot r"></span><span class="b-dot y"></span><span class="b-dot g"></span>
-        <div class="b-url">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" role="img" aria-label="Secure connection"><title>Secure connection</title><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          acme.co
-        </div>
-        <span class="b-live">● LIVE</span>
-      </div>
-      <div class="showcase-body">
-        <div class="showcase-page">
-          <div class="sp-nav">
-            <div class="sp-logo"></div>
-            <div class="sp-links"><span class="sp-link">Product</span><span class="sp-link">Pricing</span><span class="sp-link">Docs</span></div>
-            <span class="sp-btn">Sign in</span>
-          </div>
-          <div class="sp-hero">
-            <div class="sp-title sp-hit">Build products people love</div>
-            <div class="sp-sub">The fastest way to ship delightful software — loved by 12,000+ teams.</div>
-            <div class="sp-cta">Get started</div>
-          </div>
-          <div class="sp-cards">
-            <div class="sp-card c1"><span class="dot"></span><h4>Analytics</h4><p>Real-time insights</p></div>
-            <div class="sp-card c2"><span class="dot"></span><h4>Automation</h4><p>Workflows that scale</p></div>
-            <div class="sp-card c3"><span class="dot"></span><h4>Security</h4><p>Enterprise-grade</p></div>
-          </div>
-        </div>
-        <aside class="showcase-panel">
-          <div class="sp-head">
-            <span class="t"><span class="logo-mini"></span> Vizquo · Design DNA</span>
-            <span class="pulse"></span>
-          </div>
-          <div class="sp-score">
-            <div class="row"><span>Consistency score</span><b>92 / 100</b></div>
-            <div class="bar"><i></i></div>
-          </div>
-          <div class="sp-token"><span class="k"><span class="sw" style="background:#6e7bff"></span>Colors</span><span class="v">+12</span></div>
-          <div class="sp-token"><span class="k"><span class="sw" style="background:#a78bfa"></span>Type scale</span><span class="v">5 steps</span></div>
-          <div class="sp-token"><span class="k"><span class="sw" style="background:#3fe0c8"></span>Spacing</span><span class="v">8px grid</span></div>
-          <div class="sp-token"><span class="k"><span class="sw" style="background:#ffc857"></span>Radius</span><span class="v">10px</span></div>
-          <div class="sp-consistency"><span class="badge">✓ Cohesive</span> 3 minor inconsistencies found</div>
-        </aside>
-      </div>
-    </div>
-    <div class="float-chip fc1"><span class="ic">🎨</span> Colors extracted</div>
-    <div class="float-chip fc2"><span class="ic">⚡</span> Score 92/100</div>
-    <div class="float-chip fc3"><span class="ic">🧬</span> Type scale · 5 steps</div>
-  </div>
-</section>
-
-<!-- ============ MARQUEE ============ -->
-<div class="marquee-band">
-  <div class="marquee-label">Inspects what you build</div>
-  <div class="marquee" aria-hidden="true">
-    <div class="marquee-track">
-      <span class="mq-item"><span class="sq q1"></span>React</span>
-      <span class="mq-item"><span class="sq q2"></span>Vue</span>
-      <span class="mq-item"><span class="sq q3"></span>Next.js</span>
-      <span class="mq-item"><span class="sq q4"></span>Tailwind CSS</span>
-      <span class="mq-item"><span class="sq q5"></span>Angular</span>
-      <span class="mq-item"><span class="sq q1"></span>Svelte</span>
-      <span class="mq-item"><span class="sq q2"></span>Web Components</span>
-      <span class="mq-item"><span class="sq q3"></span>WordPress</span>
-      <span class="mq-item"><span class="sq q4"></span>Shopify</span>
-      <span class="mq-item"><span class="sq q5"></span>Astro</span>
-      <span class="mq-item"><span class="sq q1"></span>Bootstrap</span>
-      <span class="mq-item"><span class="sq q2"></span>CSS Modules</span>
-      <span class="mq-item"><span class="sq q3"></span>GSAP</span>
-      <span class="mq-item"><span class="sq q4"></span>Three.js</span>
-      <span class="mq-item"><span class="sq q5"></span>jQuery</span>
-      <span class="mq-item"><span class="sq q1"></span>React</span>
-      <span class="mq-item"><span class="sq q2"></span>Vue</span>
-      <span class="mq-item"><span class="sq q3"></span>Next.js</span>
-      <span class="mq-item"><span class="sq q4"></span>Tailwind CSS</span>
-      <span class="mq-item"><span class="sq q5"></span>Angular</span>
-      <span class="mq-item"><span class="sq q1"></span>Svelte</span>
-      <span class="mq-item"><span class="sq q2"></span>Web Components</span>
-      <span class="mq-item"><span class="sq q3"></span>WordPress</span>
-      <span class="mq-item"><span class="sq q4"></span>Shopify</span>
-      <span class="mq-item"><span class="sq q5"></span>Astro</span>
-      <span class="mq-item"><span class="sq q1"></span>Bootstrap</span>
-      <span class="mq-item"><span class="sq q2"></span>CSS Modules</span>
-      <span class="mq-item"><span class="sq q3"></span>GSAP</span>
-      <span class="mq-item"><span class="sq q4"></span>Three.js</span>
-      <span class="mq-item"><span class="sq q5"></span>jQuery</span>
-    </div>
-  </div>
-</div>
-
-<!-- ============ LIVE DEMO ============ -->
-<section class="demo-section" id="demo">
-  <div class="wrap">
-    <div class="demo-head">
-      <p class="kicker">Live demo</p>
-      <h2 class="reveal">This is a <span class="serif">real</span> Vizquo inspection — try it</h2>
-      <p class="lead reveal" data-delay="1">Hover any element of the mock page on the left. The inspector on the right extracts its design tokens live — exactly what the real extension does on any website.</p>
-    </div>      <div class="demo-wrap">
-      <div class="browser-frame reveal-l">
+    <!-- Live inspection demo — the product itself, above the fold -->
+    <div class="demo-wrap reveal" data-delay="4" id="demo">
+      <div class="browser-frame">
         <div class="browser-bar">
           <span class="b-dot r"></span><span class="b-dot y"></span><span class="b-dot g"></span>
-          <div class="b-url">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" role="img" aria-label="Secure connection"><title>Secure connection</title><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            acme.co
-          </div>
-          <span class="b-live">● LIVE</span>
+          <span class="b-url">🔒 acme.com — inspected by Vizquo</span>
+          <span class="b-live">LIVE</span>
         </div>
         <div class="mock-site inspect-zone" id="mockSite">
+          <div class="meas" aria-hidden="true"><span class="hair h-x"></span><span class="hair h-y"></span><span class="lab lx"></span><span class="lab ly"></span></div>
           <div class="mock-nav">
-            <div class="mock-logo">A</div>
-            <div class="m-links"><span class="m-link">Product</span><span class="m-link">Pricing</span><span class="m-link">Docs</span></div>
+            <span class="mock-logo">A</span>
+            <span class="m-links"><span class="m-link">Product</span><span class="m-link">Pricing</span><span class="m-link">Docs</span></span>
             <span class="mock-btn-sm">Sign in</span>
           </div>
           <div class="mock-hero">
-            <button class="i-item m-title" type="button" data-i="hero-title" aria-label="Inspect heading">Build products people love</button>
-            <button class="i-item m-sub" type="button" data-i="hero-sub" aria-label="Inspect paragraph">The fastest way to ship delightful software — loved by 12,000+ teams.</button>
-            <div>
-              <button class="mock-cta i-item" type="button" data-i="cta-btn" aria-label="Inspect button">Get started</button>
-              <button class="mock-badge i-item" type="button" data-i="badge" aria-label="Inspect badge">New · v3</button>
-            </div>
+            <button type="button" class="m-title i-item" data-i="hero-title">Build things people love</button>
+            <button type="button" class="m-sub i-item" data-i="hero-sub">A calmer way to ship software — designed for teams who care about the details.</button>
+            <button type="button" class="mock-cta i-item" data-i="cta-btn">Get started</button>
+            <span class="mock-badge i-item" data-i="badge">New · v2.0</span>
           </div>
           <div class="mock-cards">
-            <button class="mock-card d1 i-item" type="button" data-i="card" aria-label="Inspect card"><span class="dot"></span><h4>Analytics</h4><p>Real-time insights</p></button>
-            <button class="mock-card d2 i-item" type="button" data-i="card" aria-label="Inspect card"><span class="dot"></span><h4>Automation</h4><p>Workflows that scale</p></button>
-            <button class="mock-card d3 i-item" type="button" data-i="card" aria-label="Inspect card"><span class="dot"></span><h4>Security</h4><p>Enterprise-grade</p></button>
+            <button type="button" class="mock-card i-item" data-i="card"><span class="dot"></span><h4>Design tokens</h4><p>One source of truth for color, type, and space.</p></button>
+            <button type="button" class="mock-card i-item" data-i="card"><span class="dot"></span><h4>Components</h4><p>Reusable pieces with consistent behavior.</p></button>
+            <button type="button" class="mock-card i-item" data-i="card"><span class="dot"></span><h4>Guidelines</h4><p>Documented patterns your team can follow.</p></button>
           </div>
         </div>
       </div>
-      <div class="inspector reveal-r" data-delay="1" id="inspector" aria-live="polite">
-        <div class="insp-head">
-          <span class="insp-title"><span class="lock">🔒</span> Inspector</span>
-          <span class="pulse"></span>
-        </div>
-        <div class="insp-tabs">
-          <span class="insp-tab on">Computed</span>
-          <span class="insp-tab">Sources</span>
-          <span class="insp-tab">Box</span>
-        </div>
+      <div class="inspector" aria-live="polite">
+        <div class="insp-head"><span class="insp-title"><span class="lock">◉</span> Vizquo · element inspector</span><span class="pulse"></span></div>
         <div class="insp-path" id="inspPath">—</div>
         <div class="insp-body" id="inspRows"></div>
         <div class="insp-foot">
-          <span id="inspPos"></span>
+          <span id="inspPos">x:000 y:000</span>
           <span id="inspSrc">Vizquo · element inspector</span>
           <span class="conf" id="inspConf"></span>
         </div>
@@ -1193,139 +962,318 @@
   </div>
 </section>
 
+<!-- ============ TRUST STRIP ============ -->
+<section class="trust-band" aria-label="Trust">
+  <div class="wrap trust-grid">
+    <div class="trust-item"><span class="tk">FREE</span> No paywall, no ads</div>
+    <div class="trust-item"><span class="tk">LOCAL-FIRST</span> Runs in your browser</div>
+    <div class="trust-item"><span class="tk">NO TRACKING</span> Zero network calls by default</div>
+    <div class="trust-item"><span class="tk">NO ACCOUNT</span> Nothing to sign up for</div>
+  </div>
+</section>
+
+<!-- ============ PRODUCT REVEAL ============ -->
+<section class="reveal-band" id="product">
+  <div class="wrap">
+    <p class="kicker reveal">Product reveal</p>
+    <h2 class="reveal">Your browser already contains the <span class="accent">design system</span>. Vizquo reveals it.</h2>
+    <p class="lead reveal" data-delay="1">One scan reads a live page the way a design tool would — and reports exactly what it observed, with honest confidence labels.</p>
+    <div class="rv-values" id="rvValues">
+      <span class="rv" data-d="0"><span class="sq q1"></span><span class="v">COLORS</span></span>
+      <span class="rv" data-d="1"><span class="sq q2"></span><span class="v">TYPE STYLES</span></span>
+      <span class="rv" data-d="2"><span class="sq q3"></span><span class="v">SPACING</span></span>
+      <span class="rv" data-d="3"><span class="sq q4"></span><span class="v">RADIUS</span></span>
+      <span class="rv" data-d="4"><span class="sq q5"></span><span class="v">SHADOWS</span></span>
+      <span class="rv" data-d="5"><span class="sq q6"></span><span class="v">COMPONENTS</span></span>
+      <span class="rv" data-d="6"><span class="sq q7"></span><span class="v">ASSETS</span></span>
+    </div>
+    <p class="rv-honesty reveal" data-delay="2">Scans are bounded (up to 4,000 sampled elements) and always marked when truncated — Vizquo never claims it analyzed what it didn't.</p>
+    <div class="hero-stats reveal" data-delay="3">
+      <div class="stat"><div class="v"><span class="counter" data-count="100" data-suffix="%">0%</span></div><div class="l">Local-first — nothing leaves your browser</div></div>
+      <div class="stat"><div class="v"><span class="counter" data-count="7" data-suffix="">0</span></div><div class="l">Desktop browsers supported</div></div>
+      <div class="stat"><div class="v">0</div><div class="l">Network requests by default</div></div>
+      <div class="stat"><div class="v">250k</div><div class="l">Node pages scanned without freezing</div></div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ HOW IT WORKS ============ -->
-<section id="how">
+<section class="how-band" id="how">
   <div class="wrap">
-    <p class="kicker">How it works</p>
-    <h2 class="reveal">From install to insight in <span class="serif">4 steps</span></h2>
-    <p class="lead reveal" data-delay="1">No account. No sign-up. No learning curve — the panel guides you the whole way.</p>
-    <div class="steps-row">
-      <div class="step reveal"><span class="tagline">Step 01</span><span class="num">1</span><h3>Install</h3><p>Download the package for your browser and load it in about a minute — the setup guide below walks you through it.</p></div>
-      <div class="step reveal" data-delay="1"><span class="tagline">Step 02</span><span class="num">2</span><h3>Grant access</h3><p>Click "Grant access to this tab" on any page. Access is per-site and on demand — never installed globally.</p></div>
-      <div class="step reveal" data-delay="2"><span class="tagline">Step 03</span><span class="num">3</span><h3>Scan</h3><p>Hit "Scan page". Vizquo analyzes the live DOM and CSS, then extracts colors, type, spacing, components, and assets.</p></div>
-      <div class="step reveal" data-delay="3"><span class="tagline">Step 04</span><span class="num">4</span><h3>Inspect &amp; rebuild</h3><p>Dive into any element, grab code (React, Tailwind…), export tokens, screenshot, and save everything to your library.</p></div>
+    <div class="how-head">
+      <p class="kicker reveal">How it works</p>
+      <h2 class="reveal">One inspection session, <span class="accent">seven moves</span></h2>
+      <p class="lead reveal" data-delay="1">Vizquo walks the page the way you would — then hands you every observation as a structured answer.</p>
+    </div>
+    <div class="how-grid">
+      <div class="how-step reveal"><span class="n">01</span><h4>Inspect</h4><p>Point at any element. See its box, rules, and source.</p></div>
+      <div class="how-step reveal" data-delay="1"><span class="n">02</span><h4>Understand</h4><p>Tokens for color, type, space, radius, and shadows.</p></div>
+      <div class="how-step reveal" data-delay="2"><span class="n">03</span><h4>Extract</h4><p>Grab every image, SVG, icon, and font in seconds.</p></div>
+      <div class="how-step reveal" data-delay="3"><span class="n">04</span><h4>Analyze</h4><p>Consistency, contrast, responsive, and performance.</p></div>
+      <div class="how-step reveal" data-delay="4"><span class="n">05</span><h4>Experiment</h4><p>Live-edit styles, compare, and undo — temporarily.</p></div>
+      <div class="how-step reveal" data-delay="5"><span class="n">06</span><h4>Generate</h4><p>Turn what you see into React, CSS, or design tokens.</p></div>
+      <div class="how-step reveal" data-delay="6"><span class="n">07</span><h4>Explain</h4><p>Optional AI that reads only what you ask it to.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ============ FEATURES ============ -->
-<section id="features">
+<!-- ============ INSPECT ============ -->
+<section class="inspect-band" id="features">
   <div class="wrap">
-    <p class="kicker">Features</p>
-    <h2 class="reveal">Everything a design system, <span class="serif">extracted</span></h2>
-    <p class="lead reveal" data-delay="1">Works on any page — static sites, React, Vue, Next.js, Web Components, and heavy DOM. No site breaks Vizquo.</p>
-    <div class="grid">
-      <div class="glow-card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Design DNA"><title>Design DNA</title><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2a10 10 0 1 0 .01 0"/></svg></div><h3>Design DNA</h3><p>Automatic color roles, typographic hierarchy, spacing &amp; radius scales, and a consistency score with click-to-highlight.</p></div>
-      <div class="glow-card reveal" data-delay="1"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Element inspector"><title>Element inspector</title><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg></div><h3>Element inspector</h3><p>Computed styles, CSS cascade &amp; specificity, variable chains, box-model diagram, DOM tree — in Designer or Engineer mode.</p></div>
-      <div class="glow-card reveal" data-delay="2"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Asset extraction"><title>Asset extraction</title><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.35-4.35a2 2 0 0 0-2.83 0L5 19"/></svg></div><h3>Asset extraction</h3><p>Images, SVGs, icons, backgrounds, video posters — classified, deduped, and exportable as a ZIP.</p></div>
-      <div class="glow-card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Screenshot studio"><title>Screenshot studio</title><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><h3>Screenshot studio</h3><p>Viewport, element, full-page, and multi-selection captures — crisp at any screen density and zoom level.</p></div>
-      <div class="glow-card reveal" data-delay="1"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Code generation"><title>Code generation</title><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><h3>Code generation</h3><p>Turn any element into React, Vue, Svelte, HTML, or Tailwind. Export tokens to CSS, Figma, Style Dictionary, and more.</p></div>
-      <div class="glow-card reveal" data-delay="2"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Audits and more"><title>Audits and more</title><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><h3>Audits &amp; more</h3><p>WCAG contrast with exact math, accessibility findings, tech detection, and a responsive Time Machine.</p></div>
+    <p class="kicker reveal">Inspect</p>
+    <h2 class="reveal">Point at anything. <span class="accent">Understand everything.</span></h2>
+    <p class="lead reveal" data-delay="1">Every element answers with its measurements, typography, colors, spacing, CSS rules, and where they came from.</p>
+    <div class="meas-demo reveal" data-delay="2">
+      <div class="meas-window">
+        <div class="meas-page">
+          <div class="meas-card">
+            <span class="sel-frame" aria-hidden="true"></span>
+            <span class="ruler-x" aria-hidden="true"></span>
+            <span class="ruler-y" aria-hidden="true"></span>
+            <span class="m-label ml-el" aria-hidden="true"><span class="d">ELEMENT</span> div.hero-title</span>
+            <span class="m-label ml-w" aria-hidden="true">W 742px</span>
+            <span class="m-label ml-h" aria-hidden="true">H 184px</span>
+            <span class="tag">Hero title</span>
+            <h4>Build things people love</h4>
+            <p>Designed for teams who care about the details.</p>
+            <span class="btn">Get started</span>
+          </div>
+        </div>
+      </div>
+      <div class="meas-tokens">
+        <span class="token-chip"><span class="sw" style="background:#6e7bff"></span>COLOR <span class="v">#6E7BFF</span></span>
+        <span class="token-chip">FONT <span class="v">Inter / 800 / 48px</span></span>
+        <span class="token-chip">SPACING <span class="v">24px</span></span>
+        <span class="token-chip">RADIUS <span class="v">16px</span></span>
+        <span class="token-chip">SOURCE <span class="v">style.css:41</span></span>
+        <span class="token-chip conf detected">OBSERVED</span>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ============ SCREENSHOTS ============ -->
-<section class="demo-section" style="border-bottom:none;">
+<!-- ============ FEATURES BENTO ============ -->
+<section>
   <div class="wrap">
-    <p class="kicker">See the real thing</p>
-    <h2 class="reveal">Real screenshots, <span class="serif">real UI</span></h2>
-    <p class="lead reveal" data-delay="1">Captured from the actual extension analyzing a live page — exactly what you get.</p>
-    <div class="shots">
-      <div class="shot reveal"><div class="shot-img"><img src="../deploy-kit/screenshots/design-overview.png" alt="Vizquo Design overview after scanning a page"></div><div class="cap"><b>Design DNA</b> colors, type, spacing, consistency score<span class="shot-tag">Scan</span></div></div>
-      <div class="shot reveal" data-delay="1"><div class="shot-img"><img src="../deploy-kit/screenshots/inspector.png" alt="Vizquo element inspector with computed styles"></div><div class="cap"><b>Inspector</b> cascade, specificity, box model<span class="shot-tag">Inspect</span></div></div>
-      <div class="shot reveal" data-delay="2"><div class="shot-img"><img src="../deploy-kit/screenshots/assets.png" alt="Vizquo asset extractor with images and SVGs"></div><div class="cap"><b>Assets</b> images, SVGs, bulk ZIP export<span class="shot-tag">Extract</span></div></div>
+    <p class="kicker reveal">Features</p>
+    <h2 class="reveal">Everything a page knows, <span class="accent">organized</span></h2>
+    <p class="lead reveal" data-delay="1">Each capability shows the real product surface — with confidence labels that say whether a value was observed, derived, or inferred.</p>
+    <div class="bento">
+      <!-- Design system -->
+      <div class="bento-tile reveal">
+        <div class="bt-kicker"><span class="conf detected">OBSERVED</span> Design system</div>
+        <h3>Turn a page into a design system</h3>
+        <p>One scan extracts colors, type, spacing, radius, shadows, and recurring component patterns.</p>
+        <div class="bt-vis">
+          <div class="ds-swatches">
+            <span class="ds-swatch" style="background:#6e7bff">#6E7BFF</span>
+            <span class="ds-swatch" style="background:#10141f;color:rgba(255,255,255,.6)">#10141F</span>
+            <span class="ds-swatch" style="background:#3fe0c8;color:#0a1f1a">#3FE0C8</span>
+            <span class="ds-swatch" style="background:#a78bfa">#A78BFA</span>
+          </div>
+        </div>
+      </div>
+      <!-- Assets -->
+      <div class="bento-tile reveal" data-delay="1">
+        <div class="bt-kicker"><span class="conf detected">OBSERVED</span> Assets</div>
+        <h3>Find every visual asset in seconds</h3>
+        <p>Images, SVG, icons, fonts, video — classified by type with sources and dimensions. Failures are listed, never silently dropped.</p>
+        <div class="bt-vis">
+          <div class="asset-grid">
+            <span class="asset-cell im">🖼</span><span class="asset-cell sv">🦄</span><span class="asset-cell fn">Aa</span>
+            <span class="asset-cell im">🖼</span><span class="asset-cell sv">✦</span><span class="asset-cell vd">▶</span>
+            <span class="asset-cell fn">Aa</span><span class="asset-cell im">🖼</span>
+          </div>
+        </div>
+      </div>
+      <!-- Responsive -->
+      <div class="bento-tile reveal" data-delay="2">
+        <div class="bt-kicker"><span class="conf derived">DERIVED</span> Responsive</div>
+        <h3>See how the interface changes</h3>
+        <p>Breakpoints and container queries detected per element — with honest overflow findings.</p>
+        <div class="bt-vis">
+          <div class="bp-list">
+            <span class="bp-row"><span class="w">1440px</span><span class="bar"><i style="width:100%"></i></span><span class="tag">breakpoint</span></span>
+            <span class="bp-row"><span class="w">1024px</span><span class="bar"><i style="width:74%"></i></span><span class="tag">layout</span></span>
+            <span class="bp-row"><span class="w">768px</span><span class="bar"><i style="width:52%"></i></span><span class="tag">type</span></span>
+            <span class="bp-row"><span class="w">390px</span><span class="bar"><i style="width:26%"></i></span><span class="tag">container</span></span>
+          </div>
+        </div>
+      </div>
+      <!-- Analyze -->
+      <div class="bento-tile reveal" data-delay="3">
+        <div class="bt-kicker"><span class="conf inferred">INFERRED</span> Analyze</div>
+        <h3>Find what developers should fix</h3>
+        <p>Consistency, accessibility, performance, responsive, and asset health — heuristic scores, never presented as objective truth.</p>
+        <div class="bt-vis">
+          <div class="score-list">
+            <span class="score-row"><span class="name">Consistency</span><span class="bar"><i class="good" style="width:92%"></i></span><span class="num">92</span></span>
+            <span class="score-row"><span class="name">Accessibility</span><span class="bar"><i class="mid" style="width:84%"></i></span><span class="num">84</span></span>
+            <span class="score-row"><span class="name">Performance</span><span class="bar"><i class="mid" style="width:78%"></i></span><span class="num">78</span></span>
+            <span class="score-row"><span class="name">Responsive</span><span class="bar"><i class="good" style="width:91%"></i></span><span class="num">91</span></span>
+          </div>
+        </div>
+      </div>
+      <!-- Screenshot -->
+      <div class="bento-tile reveal" data-delay="1">
+        <div class="bt-kicker"><span class="conf detected">OBSERVED</span> Screenshot</div>
+        <h3>Capture the interface exactly as you see it</h3>
+        <p>Viewport, full-page, element, or selection captures — with exact scroll restoration.</p>
+        <div class="bt-vis"><div class="cap-frame"><span class="cap-sweep"></span></div></div>
+      </div>
+      <!-- Live edit -->
+      <div class="bento-tile reveal" data-delay="2">
+        <div class="bt-kicker"><span class="conf detected">OBSERVED</span> Live edit</div>
+        <h3>Change it. Compare it. Undo it.</h3>
+        <p>Temporary style edits that reset on reload — an instrument for experimentation, not mutation.</p>
+        <div class="bt-vis">
+          <div class="edit-row"><span class="prop">font-size:</span><span class="val">48px</span><span class="arrow">→</span><span class="val">56px</span><span class="arrow">→</span><span class="undo">undo</span><span class="arrow">→</span><span class="val">48px</span></div>
+        </div>
+      </div>
+      <!-- Code -->
+      <div class="bento-tile reveal" data-delay="3">
+        <div class="bt-kicker"><span class="conf derived">DERIVED</span> Code</div>
+        <h3>From interface to implementation</h3>
+        <p>Selected element → React, CSS, or design tokens. Generated code is never executed by Vizquo.</p>
+        <div class="bt-vis">
+          <div class="code-lines">
+            <span class="c-tag">&lt;button</span> <span class="c-tag">class</span>=<span class="c-str">"btn-primary"</span><span class="c-tag">&gt;</span>Get started<span class="c-tag">&lt;/button&gt;</span><br>
+            <span class="c-tag">.btn-primary</span> { color: <span class="c-num">#fff</span>; background: <span class="c-str">#6e7bff</span>; radius: <span class="c-num">10px</span>; }
+          </div>
+        </div>
+      </div>
+      <!-- Difference / Find instances -->
+      <div class="bento-tile wide reveal" data-delay="2">
+        <div class="bt-kicker"><span class="conf inferred">INFERRED</span> Find instances</div>
+        <h3>Understand why two buttons look different</h3>
+        <p>Select one element, and Vizquo finds every similar component on the page — highlighting near-duplicates and the exact style deltas between them. Recurring patterns become component definitions you can export.</p>
+        <div class="bt-vis">
+          <div class="edit-row"><span class="prop">.btn</span> <span class="arrow">×12 instances</span> <span class="val">2 variants</span> <span class="arrow">·</span> <span class="prop">padding:</span> <span class="val">12px vs 16px</span></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- ============ AI ============ -->
-<section id="ai">
+<section class="ai-band" id="ai">
   <div class="wrap">
-    <p class="kicker">Optional AI</p>
-    <h2 class="reveal">AI that explains design — <span class="serif">on your terms</span></h2>
-    <p class="lead reveal" data-delay="1">AI is <b style="color:var(--fg)">off by default</b> and never required. When you turn it on, you choose exactly where it runs — and nothing is sent until you confirm what's going.</p>      <div class="ai-layout">
-      <div class="ai-grid reveal-l">
-        <div class="ai-card reveal">
-          <span class="tag cloud">☁️ Cloud · bring your own key</span>
-          <h3>OpenRouter</h3>
-          <p>Free <code>:free</code> models by default. Paste your own API key in Settings → AI (free to create at openrouter.ai) — or none at all if you prefer local.</p>
-          <ul>
-            <li>Best for: quick answers with zero setup on your machine</li>
-            <li>Cost: free models by default; you control the key</li>
-            <li>Your key stays in your browser — used only by the extension</li>
-          </ul>
-        </div>
-        <div class="ai-card reveal" data-delay="1">
-          <span class="tag local">🖥️ Local · no key, no cloud</span>
-          <h3>Ollama</h3>
-          <p>Runs entirely on your machine via the free <b style="color:var(--fg)">Ollama</b> app — the strictest privacy option. Nothing ever leaves your computer.</p>
-          <ul>
-            <li>Best for: maximum privacy and fully offline AI</li>
-            <li>Cost: zero — no key, no account, no cloud</li>
-            <li>Setup: install Ollama, pull a model (e.g. llama3.2), pick it in Settings</li>
-          </ul>
+    <div class="ai-grid">
+      <div>
+        <p class="kicker reveal">Optional AI</p>
+        <h2 class="reveal">When you need context, <span class="accent">ask</span></h2>
+        <p class="lead reveal" data-delay="1">Core inspection works entirely without AI. Enable it and Vizquo explains only what you ask it to — nothing is sent until you confirm, and payloads are bounded and redacted.</p>
+        <div class="ai-providers reveal" data-delay="2">
+          <span class="ai-provider off">AI off by default</span>
+          <span class="ai-provider">OpenRouter · your key</span>
+          <span class="ai-provider">Ollama · local, no key</span>
         </div>
       </div>
-      <div class="chat-card reveal-r" data-delay="1">
-        <div class="chat-head">
-          <span class="logo-mini"></span> Vizquo AI
-          <span class="tag">PRIVACY GATE</span>
-        </div>
-        <div class="chat-body">
-          <div class="bubble q">Why does this button look pressed?</div>
-          <div class="bubble a" id="chatAnswer">
-            <div class="chat-answer">
-              <p>It's the <b>cta-button</b> element — a gradient fill with a 2px <span class="sw"></span>#6E7BFF → <span class="sw" style="background:#a78bfa"></span>#8B7BFF and a soft outer shadow give the raised look:</p>
-              <div class="hl">background: linear-gradient(120deg, #6E7BFF, #8B7BFF)<br>box-shadow: 0 8px 24px rgba(110,123,255,.35)</div>
-              <p>The shadow lives one layer below the element — that's the "pressed-in" depth. Traced to <code>style.css:56</code>.</p>
-            </div>
-          </div>
-          <div class="bubble q">What changed since my last scan?</div>
-          <div class="bubble a">
-            <div class="chat-answer">
-              <p>One drift: the accent color moved from <span class="sw"></span>#635BFF to <span class="sw"></span>#6E7BFF (Colors +1 −1), and the spacing scale gained a 12px step. Consistency held at 92 → 91.</p>
-            </div>
-          </div>
+      <div class="ai-card reveal" data-delay="2">
+        <div class="ai-bar">Why is this heading 48px? <span class="ai-badge">AI-GENERATED</span></div>
+        <div class="ai-body">
+          <p class="ai-q">div.hero-title · font-size: 48px</p>
+          <p class="ai-a">The heading inherits its size from the <span class="k">display-2</span> type token (48px / 800 weight / −0.03em tracking). It sits 24px above the subheading, matching the <span class="k">space-24</span> scale step used across the page's hero sections.</p>
         </div>
       </div>
-    </div>
-    <ul class="ai-list reveal">
-      <li><span class="tick">✓</span> "Why?" explanations — understand any element's look in plain language</li>
-      <li><span class="tick">✓</span> Design-system summaries — a readable tour of the page's visual language</li>
-      <li><span class="tick">✓</span> Diff narration — plain-English reports of how a design changed over time</li>
-      <li><span class="tick">✓</span> Audit-fix priorities — AI ranks accessibility findings by impact</li>
-    </ul>
-    <div class="consent-note reveal">
-      <span class="shield">🛡️</span>
-      <span><b style="color:var(--fg)">Consent first:</b> before the first request, Vizquo shows exactly what will be sent and requires your confirmation. Payloads are bounded and redacted (text ≤ 200 chars, sanitized HTML snippets) — input values and data attributes are never sent.</span>
     </div>
   </div>
 </section>
 
-<!-- ============ FREE ============ -->
-<section class="free-band" id="free">
+<!-- ============ PRIVACY / SECURITY ============ -->
+<section id="security">
   <div class="wrap">
-    <div class="free-card reveal-scale">
-      <div class="big"><span class="grad-text">Free forever.</span></div>
-      <p>Every feature — inspector, Design DNA, assets, screenshots, code generation, audits, library — is 100% free and local. No account. No trials. No upsells.</p>
-      <div class="free-perks">
-        <span class="free-perk"><span class="ok">✓</span> No account</span>
-        <span class="free-perk"><span class="ok">✓</span> No ads</span>
-        <span class="free-perk"><span class="ok">✓</span> No data collection</span>
-        <span class="free-perk"><span class="ok">✓</span> Open source (MIT)</span>
+    <div class="sec-grid">
+      <div>
+        <p class="kicker reveal">Privacy</p>
+        <h2 class="reveal">Your pages <span class="accent">stay yours</span></h2>
+        <div class="flow reveal" data-delay="1">
+          <span class="flow-node">WEB PAGE</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node local">VIZQUO</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">YOUR BROWSER</span>
+        </div>
+        <p class="flow-note reveal" data-delay="2">Nothing leaves. Scans, screenshots, history, and collections live only in your browser's local storage.</p>
+        <div class="check-list reveal" data-delay="3">
+          <div class="check-item"><span class="ck">✓</span> Local inspection, history, screenshots, and collections</div>
+          <div class="check-item"><span class="ck">✓</span> AI optional — and off by default</div>
+          <div class="check-item"><span class="ck">✓</span> No browsing-history tracking, ever</div>
+          <div class="check-item"><span class="ck">✓</span> Zero network requests until you enable AI</div>
+        </div>
       </div>
-      <a class="btn-primary" href="#download">⬇ Download Vizquo</a>
+      <div>
+        <p class="kicker reveal">Security</p>
+        <h2 class="reveal">Powerful enough to inspect the web. <span class="accent">Careful enough to leave it untouched.</span></h2>
+        <div class="reveal" data-delay="1">
+          <div class="guarantee"><span class="g-ic">◉</span><div><h4>Local-first by construction</h4><p>No server, no account, no telemetry. The extension ships keyless.</p></div></div>
+          <div class="guarantee"><span class="g-ic">⛔</span><div><h4>No CORS or SOP bypass</h4><p>Cross-origin iframes are reported as inaccessible — never faked.</p></div></div>
+          <div class="guarantee"><span class="g-ic">🛡</span><div><h4>Non-destructive inspection</h4><p>Live edits are temporary and reset on reload or navigation.</p></div></div>
+          <div class="guarantee"><span class="g-ic">🔑</span><div><h4>Credential isolation</h4><p>Page content is untrusted input; secrets never reach AI payloads.</p></div></div>
+          <div class="guarantee"><span class="g-ic">◳</span><div><h4>Honest limits</h4><p>Truncated scans and blocked resources are surfaced, never hidden.</p></div></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ============ DOWNLOAD ============ -->
-<section id="download">
+<!-- ============ PERSONAS ============ -->
+<section>
   <div class="wrap">
-    <p class="kicker">Download</p>
-    <h2 class="reveal">Pick your <span class="serif">browser</span></h2>
-    <p class="lead reveal" data-delay="1">Your browser is detected and highlighted below. Grab the right package and follow the setup guide — about a minute, no account needed.</p>
+    <p class="kicker reveal">Who it's for</p>
+    <h2 class="reveal">Built for people who <span class="accent">care about details</span></h2>
+    <div class="persona-grid">
+      <div class="persona reveal">
+        <div class="p-ic">🎨</div>
+        <h3>Designer</h3>
+        <p>Understand how interfaces are constructed — and why they look the way they do.</p>
+        <div class="p-flow">hover → <b>lock</b> → read tokens → <b>understand</b></div>
+      </div>
+      <div class="persona reveal" data-delay="1">
+        <div class="p-ic">👩‍💻</div>
+        <h3>Frontend Developer</h3>
+        <p>Inspect CSS, assets, responsive behavior, and structure without guessing.</p>
+        <div class="p-flow">scan → <b>extract</b> assets → <b>export</b> CSS</div>
+      </div>
+      <div class="persona reveal" data-delay="2">
+        <div class="p-ic">🧩</div>
+        <h3>Design Engineer</h3>
+        <p>Translate visual decisions into reusable systems with confidence labels.</p>
+        <div class="p-flow">element → <b>tokens</b> → React / CSS</div>
+      </div>
+      <div class="persona reveal" data-delay="3">
+        <div class="p-ic">📐</div>
+        <h3>Design System Team</h3>
+        <p>Discover patterns and inconsistencies across interfaces, then compare them.</p>
+        <div class="p-flow">scan 3 pages → <b>compare</b> → find drift</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRODUCT PROOF ============ -->
+<section class="proof-band">
+  <div class="wrap">
+    <p class="kicker reveal" style="text-align:center;justify-content:center">Product proof</p>
+    <h2 class="reveal" style="text-align:center">Every claim on this page is <span class="accent">measured, not marketed</span></h2>
+    <p class="lead reveal" data-delay="1" style="margin-left:auto;margin-right:auto;text-align:center">No fake testimonials, no invented statistics. Vizquo is hardened against the web's worst pages in a deterministic torture suite.</p>
+    <div class="proof-row reveal" data-delay="2">
+      <span class="proof-chip"><b>250k-node</b> pages scanned with honest truncation</span>
+      <span class="proof-chip"><b>4,000</b> element sample cap — bounded, never frozen</span>
+      <span class="proof-chip"><b>0</b> network requests by default</span>
+      <span class="proof-chip">Tested against <b>YouTube · Amazon · GitHub · Figma</b></span>
+      <span class="proof-chip">Hostile CSS, strict CSP, shadow DOM, iframes — <b>all handled</b></span>
+    </div>
+    <p class="proof-note reveal" data-delay="3">Source: <span class="mono">HARDENING_REPORT.md</span> — 24 torture scenarios, 400+ unit tests, 12 E2E specs, all deterministic.</p>
+  </div>
+</section>
+
+<!-- ============ DOWNLOAD / INSTALL ============ -->
+<section class="dl-section" id="install">
+  <div class="wrap">
+    <p class="kicker reveal">Install</p>
+    <h2 class="reveal">Add Vizquo to your browser — <span class="accent">free</span></h2>
+    <p class="lead reveal" data-delay="1">Your browser is detected and highlighted below. About a minute from here to your first inspection — no account needed.</p>
     <fieldset class="os-selector reveal">
       <legend class="os-label">You're on</legend>
       <div class="os-tabs">
@@ -1387,22 +1335,14 @@
       <div class="browser reveal" data-browser="mobile">
         <div class="logo">📱</div><h4>Mobile browsers</h4>
         <div class="ver">Android / iOS</div>
-        <div class="soon-note">Side-panel extensions aren't available on mobile yet — use any desktop browser.</div>
+        <div class="soon-note" style="font-size:12px;color:var(--vz-text-muted)">Side-panel extensions aren't available on mobile yet — use any desktop browser.</div>
       </div>
     </div>
     <div class="note-box reveal">
       <span class="ic">🏪</span>
       <span><b>Official stores are coming.</b> Once the Chrome Web Store, Edge Add-ons, and Firefox AMO listings are approved, installing becomes a one-click button. The manual ZIPs below work today for every desktop browser.</span>
     </div>
-  </div>
-</section>
 
-<!-- ============ SETUP GUIDE ============ -->
-<section id="install">
-  <div class="wrap">
-    <p class="kicker">Setup guide</p>
-    <h2 class="reveal">Your browser, <span class="serif">step by step</span></h2>
-    <p class="lead reveal" data-delay="1">After the download finishes, you're three small actions from using Vizquo.</p>
     <div class="pipeline reveal">
       <span class="pipe-step"><span class="n">1</span> Download ZIP</span>
       <span class="pipe-arrow">→</span>
@@ -1411,178 +1351,168 @@
       <span class="pipe-step"><span class="n">3</span> Load it in your browser</span>
     </div>
 
-    <details class="reveal" open>
-      <summary><span class="b-ic">🌐</span> Google Chrome <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner">
-        <ol>
-          <li>Download the <b>Chrome ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>). You get a folder named <code>vizquo-0.10.9-chrome</code>.</li>
-          <li>Open <code>chrome://extensions</code>.</li>
-          <li>Enable <b>Developer mode</b> (toggle, top-right).</li>
-          <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
-          <li>Pin Vizquo to the toolbar, open the side panel, and <b>grant access to a page</b> when prompted — done.</li>
-        </ol>
-        <div class="warn">⚠️ Chrome shows a "Disable developer mode extensions" warning for manual installs — expected and safe. One-click installs arrive with the Web Store listing.</div>
-      </div></div>
-    </details>
-
-    <details class="reveal">
-      <summary><span class="b-ic">🧭</span> Microsoft Edge <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner">
-        <ol>
-          <li>Download the <b>Chrome ZIP</b> (same package works) and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
-          <li>Open <code>edge://extensions</code>.</li>
-          <li>Enable <b>Developer mode</b> (left sidebar toggle).</li>
-          <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
-          <li>Pin Vizquo, open the side panel, grant access — done.</li>
-        </ol>
-      </div></div>
-    </details>
-
-    <details class="reveal">
-      <summary><span class="b-ic">🦁</span> Brave <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner">
-        <ol>
-          <li>Download the <b>Chrome ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
-          <li>Open <code>brave://extensions</code>.</li>
-          <li>Enable <b>Developer mode</b>.</li>
-          <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
-          <li>Pin Vizquo and grant access — done.</li>
-        </ol>
-      </div></div>
-    </details>
-
-    <details class="reveal">
-      <summary><span class="b-ic">⭕</span> Opera / Vivaldi / Arc (other Chromium) <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner">
-        <ol>
-          <li>Download the <b>Chrome ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
-          <li>Open your browser's extensions page: <code>opera://extensions</code> · <code>vivaldi://extensions</code> · <code>arc://extensions</code>.</li>
-          <li>Enable <b>Developer mode</b>.</li>
-          <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
-          <li>Pin Vizquo and grant access — done.</li>
-        </ol>
-      </div></div>
-    </details>
-
-    <details class="reveal">
-      <summary><span class="b-ic">🦊</span> Firefox <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner">
-        <ol>
-          <li>Download the <b>Firefox ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
-          <li>Open <code>about:debugging#/runtime/this-firefox</code> in Firefox.</li>
-          <li>Click <b>Load Temporary Add-on…</b> and select the <code>manifest.json</code> inside the unzipped folder.</li>
-          <li>Pin Vizquo and grant access — done.</li>
-        </ol>
-        <div class="warn">⚠️ Temporary add-ons reset when Firefox restarts — re-load it to keep using Vizquo. A permanent, one-click install comes with the AMO listing.</div>
-      </div></div>
-    </details>
-
-    <details class="reveal">
-      <summary><span class="b-ic">🔔</span> Safari <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner">
-        <p>Safari support needs a native macOS build (Apple's Xcode converter) plus the Apple Developer Program — it's on the roadmap.</p>
-        <p>👉 <a href="https://github.com/WebDclassified/vizquo/issues/new?title=Safari+support+vote" target="_blank" rel="noopener" style="color:var(--teal)"><b>Vote for Safari support</b></a> and you'll be notified when it ships. Meanwhile, use Chrome, Edge, or Firefox on macOS — Vizquo works identically there.</p>
-      </div></div>
-    </details>
-  </div>
-</section>
-
-<!-- ============ REQUIREMENTS ============ -->
-<section id="requirements">
-  <div class="wrap">
-    <p class="kicker">Requirements</p>
-    <h2 class="reveal">System <span class="serif">requirements</span></h2>
-    <p class="lead reveal" data-delay="1">Vizquo is a desktop-browser extension — it runs wherever your browser runs. Everything is local; there is no server side.</p>
-    <div class="table-wrap reveal">
-      <table>
-        <tr><th>Component</th><th>Requirement</th><th>Status</th></tr>
-        <tr><td>Chrome · Edge · Brave · Opera · Vivaldi · Arc</td><td>Chromium 110+ (Manifest V3)</td><td class="ok">✓ Supported</td></tr>
-        <tr><td>Firefox</td><td>Firefox 121+ (Manifest V3)</td><td class="ok">✓ Supported</td></tr>
-        <tr><td>Safari</td><td>macOS build (Xcode) + Apple Developer Program</td><td class="wip">◷ Coming soon</td></tr>
-        <tr data-os="win"><td>Windows</td><td>Windows 10+</td><td class="ok">✓ Supported</td></tr>
-        <tr data-os="mac"><td>macOS</td><td>macOS 12+</td><td class="ok">✓ Supported</td></tr>
-        <tr data-os="linux"><td>Linux</td><td>Any desktop distribution</td><td class="ok">✓ Supported</td></tr>
-        <tr><td>Mobile (Android / iOS)</td><td>—</td><td class="no">✗ Not yet</td></tr>
-        <tr><td>Account / sign-up</td><td>None — fully local</td><td class="ok">✓ None</td></tr>
-      </table>
+    <div class="setup-grid">
+      <div class="reveal">
+        <details class="setup" open>
+          <summary><span class="b-ic">🌐</span> Google Chrome <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner">
+            <ol>
+              <li>Download the <b>Chrome ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>). You get a folder named <code>vizquo-0.10.9-chrome</code>.</li>
+              <li>Open <code>chrome://extensions</code>.</li>
+              <li>Enable <b>Developer mode</b> (toggle, top-right).</li>
+              <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
+              <li>Pin Vizquo, open the side panel, and <b>grant access to a page</b> when prompted — done.</li>
+            </ol>
+            <div class="warn">⚠️ Chrome shows a "Disable developer mode extensions" warning for manual installs — expected and safe. One-click installs arrive with the Web Store listing.</div>
+          </div></div>
+        </details>
+        <details class="setup">
+          <summary><span class="b-ic">🧭</span> Microsoft Edge <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner">
+            <ol>
+              <li>Download the <b>Chrome ZIP</b> (same package works) and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
+              <li>Open <code>edge://extensions</code>.</li>
+              <li>Enable <b>Developer mode</b> (left sidebar toggle).</li>
+              <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
+              <li>Pin Vizquo, open the side panel, grant access — done.</li>
+            </ol>
+          </div></div>
+        </details>
+        <details class="setup">
+          <summary><span class="b-ic">🦊</span> Firefox <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner">
+            <ol>
+              <li>Download the <b>Firefox ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
+              <li>Open <code>about:debugging#/runtime/this-firefox</code> in Firefox.</li>
+              <li>Click <b>Load Temporary Add-on…</b> and select the <code>manifest.json</code> inside the unzipped folder.</li>
+              <li>Pin Vizquo and grant access — done.</li>
+            </ol>
+            <div class="warn">⚠️ Temporary add-ons reset when Firefox restarts — re-load it to keep using Vizquo. A permanent, one-click install comes with the AMO listing.</div>
+          </div></div>
+        </details>
+      </div>
+      <div class="reveal" data-delay="1">
+        <details class="setup">
+          <summary><span class="b-ic">🦁</span> Brave <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner">
+            <ol>
+              <li>Download the <b>Chrome ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
+              <li>Open <code>brave://extensions</code>.</li>
+              <li>Enable <b>Developer mode</b>.</li>
+              <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
+              <li>Pin Vizquo and grant access — done.</li>
+            </ol>
+          </div></div>
+        </details>
+        <details class="setup">
+          <summary><span class="b-ic">⭕</span> Opera / Vivaldi / Arc <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner">
+            <ol>
+              <li>Download the <b>Chrome ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>).</li>
+              <li>Open your browser's extensions page: <code>opera://extensions</code> · <code>vivaldi://extensions</code> · <code>arc://extensions</code>.</li>
+              <li>Enable <b>Developer mode</b>.</li>
+              <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
+              <li>Pin Vizquo and grant access — done.</li>
+            </ol>
+          </div></div>
+        </details>
+        <details class="setup">
+          <summary><span class="b-ic">🔔</span> Safari <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner">
+            <p>Safari support needs a native macOS build (Apple's Xcode converter) plus the Apple Developer Program — it's on the roadmap.</p>
+            <p>👉 <a href="https://github.com/WebDclassified/vizquo/issues/new?title=Safari+support+vote" target="_blank" rel="noopener" style="color:var(--vz-teal)"><b>Vote for Safari support</b></a> and you'll be notified when it ships. Meanwhile, use Chrome, Edge, or Firefox on macOS — Vizquo works identically there.</p>
+          </div></div>
+        </details>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Component</th><th>Requirement</th><th>Status</th></tr>
+            <tr><td>Chrome · Edge · Brave · Opera · Vivaldi · Arc</td><td>Chromium 110+ (MV3)</td><td class="ok">✓ Supported</td></tr>
+            <tr><td>Firefox</td><td>Firefox 121+ (MV3)</td><td class="ok">✓ Supported</td></tr>
+            <tr><td>Safari</td><td>macOS build (Xcode) + Apple Developer Program</td><td class="wip">◷ Coming soon</td></tr>
+            <tr data-os="win"><td>Windows</td><td>Windows 10+</td><td class="ok">✓ Supported</td></tr>
+            <tr data-os="mac"><td>macOS</td><td>macOS 12+</td><td class="ok">✓ Supported</td></tr>
+            <tr data-os="linux"><td>Linux</td><td>Any desktop distribution</td><td class="ok">✓ Supported</td></tr>
+            <tr><td>Mobile (Android / iOS)</td><td>—</td><td class="no">✗ Not yet</td></tr>
+            <tr><td>Account / sign-up</td><td>None — fully local</td><td class="ok">✓ None</td></tr>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- ============ FAQ ============ -->
-<section id="faq" class="demo-section" style="border-bottom:none;">
-  <div class="wrap faq">
-    <p class="kicker">FAQ</p>
-    <h2 class="reveal">Questions, <span class="serif">answered</span></h2>
-    <p class="lead reveal" data-delay="1">Everything users ask before installing.</p>
-
-    <details class="reveal">
-      <summary>Is Vizquo really free? <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner"><p>Yes. Every feature except AI is 100% free and local — no account, no ads, no data collection. AI is optional: the cloud option uses <b>free</b> models by default (you can bring your own key), and the local option (Ollama) costs nothing at all.</p></div></div>
-    </details>
-    <details class="reveal">
-      <summary>Is my data private? <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner"><p>Completely local by default. Scans, screenshots, and your library live only in your browser (IndexedDB). Vizquo makes <b>zero network requests</b> until you explicitly turn on AI — the UI loads no fonts, scripts, or analytics from anywhere. Site access is granted per-site, on demand.</p></div></div>
-    </details>
-    <details class="reveal">
-      <summary>Which browsers are supported? <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner"><p><b>Chrome, Edge, Brave, Opera, Vivaldi, and Arc</b> all use the same Chromium package. <b>Firefox</b> has its own package. <b>Safari</b> is coming soon — it requires a native macOS build and Apple's Developer Program. Mobile browsers aren't supported yet (side-panel extensions don't exist there).</p></div></div>
-    </details>
-    <details class="reveal">
-      <summary>How do I use the AI? <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner">
-        <p>1. Open Vizquo → <b>Settings</b> → <b>AI</b> → enable it.</p>
-        <p>2. Choose a provider: <b>OpenRouter</b> (paste your own free API key) or <b>Ollama</b> (local, no key — install the free Ollama app and pull a model like <code>llama3.2</code>).</p>
-        <p>3. Use the AI buttons: "Why?" on any locked element, "Explain the design system", "Narrate the diff", or "Prioritize fixes".</p>
-        <p>4. Before the first request, Vizquo shows exactly what will be sent — confirm, and you're set.</p>
-      </div></div>
-    </details>
-    <details class="reveal">
-      <summary>Why do I need my own AI key? Can't you bundle one? <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner"><p>Two reasons — security and fairness. A key embedded in a public extension could be extracted by anyone who downloads it and used to spend the author's credits (it also trips GitHub and store security scanners). So Vizquo ships <b>keyless by construction</b>: you bring your own key (free at <code>openrouter.ai</code>), or use Ollama and need no key at all.</p></div></div>
-    </details>
-    <details class="reveal">
-      <summary>Does AI ever see my passwords or form values? <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner"><p>No — by construction. Payloads are bounded (text ≤ 200 characters) and redacted: input values and <code>value</code>/<code>name</code>/<code>data-*</code> attributes are stripped before anything can be sent, and the consent gate shows you the exact payload first.</p></div></div>
-    </details>
-    <details class="reveal">
-      <summary>Why is install manual right now? <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner"><p>Browsers only allow one-click installs through their official stores, and Vizquo's store submissions are in progress. Until they're approved, the supported manual path is loading the ZIP (about 2 minutes). The page will switch to one-click buttons the moment each store approves.</p></div></div>
-    </details>
-    <details class="reveal">
-      <summary>Does it work on my phone? <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner"><p>Not yet — side-panel extensions don't exist on Android/iOS. Vizquo is a desktop-browser extension (Windows, macOS, Linux).</p></div></div>
-    </details>
-    <details class="reveal">
-      <summary>Can I uninstall or reset it? <span class="chev">▶</span></summary>
-      <div class="steps"><div class="steps-inner"><p>Anytime. Remove it from <code>chrome://extensions</code> or <code>about:addons</code>, and Settings has a "Reset everything" that wipes all local data back to a fresh install.</p></div></div>
-    </details>
+<section class="faq-band" id="resources">
+  <div class="wrap">
+    <p class="kicker reveal" style="text-align:center;justify-content:center">Resources &amp; FAQ</p>
+    <h2 class="reveal" style="text-align:center">Questions, <span class="accent">answered</span></h2>
+    <div class="faq-grid">
+      <div>
+        <details class="faq-item reveal">
+          <summary>Is Vizquo free? <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner"><p>Yes. Every feature except AI is 100% free and local — no account, no ads, no data collection. AI is optional: the cloud option uses free models by default (bring your own key), and the local option (Ollama) costs nothing at all.</p></div></div>
+        </details>
+        <details class="faq-item reveal">
+          <summary>Does it require an account? <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner"><p>No. There is no server, no login, and nothing to sign up for. Install, grant access to a page, and inspect.</p></div></div>
+        </details>
+        <details class="faq-item reveal">
+          <summary>Does it upload inspected pages? <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner"><p>No. Scans run entirely in your browser and stay in your browser. Vizquo makes <b>zero network requests</b> until you explicitly enable AI — the page loads no fonts, scripts, or analytics from anywhere.</p></div></div>
+        </details>
+        <details class="faq-item reveal">
+          <summary>What happens when a website blocks access? <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner"><p>Vizquo reports the limitation honestly — an inaccessible iframe, a CORS-restricted asset, or a blocked operation is surfaced with a clear reason. It never bypasses browser security, and it never pretends it inspected what it couldn't.</p></div></div>
+        </details>
+      </div>
+      <div>
+        <details class="faq-item reveal" data-delay="1">
+          <summary>Can it inspect cross-origin iframes? <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner"><p>No — and it says so. Cross-origin frames are reported as inaccessible rather than faked. Same-origin structure, shadow DOM, and the top document are all inspected normally.</p></div></div>
+        </details>
+        <details class="faq-item reveal" data-delay="1">
+          <summary>Does AI see my page? <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner"><p>Only what you ask it to, and only when you enable AI. Before the first request Vizquo shows exactly what will be sent — bounded text with input values and data attributes redacted. AI is off by default; every core feature works without it.</p></div></div>
+        </details>
+        <details class="faq-item reveal" data-delay="1">
+          <summary>Does live editing permanently modify the website? <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner"><p>No. Live edits are temporary, in-memory style changes with exact undo — they reset on reload or navigation and never touch the site's files.</p></div></div>
+        </details>
+        <details class="faq-item reveal" data-delay="1">
+          <summary>Which browsers are supported? <span class="chev">▶</span></summary>
+          <div class="steps"><div class="steps-inner"><p><b>Chrome, Edge, Brave, Opera, Vivaldi, and Arc</b> share one Chromium package. <b>Firefox</b> has its own. <b>Safari</b> needs a native macOS build and is coming soon. Mobile browsers aren't supported yet — side-panel extensions don't exist there.</p></div></div>
+        </details>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ============ FINAL CTA ============ -->
 <section class="cta-band" id="get">
+  <div class="cta-grid" aria-hidden="true"></div>
   <div class="wrap">
-    <p class="kicker reveal">Get started</p>
-    <h2 class="reveal">See the <span class="serif">design DNA</span> of the web</h2>
-    <p class="reveal" data-delay="1">Free forever, private by default, works on every modern desktop browser.</p>
-    <a class="btn-primary reveal" data-delay="2" href="#download">⬇ Download Vizquo</a>
+    <p class="cta-sub reveal">Inspect · Understand · Extract · Build</p>
+    <h2 class="reveal">See what the browser <span class="accent">already knows</span></h2>
+    <p class="lead reveal" data-delay="1" style="margin-left:auto;margin-right:auto">Free forever, local-first, no tracking — works on every modern desktop browser.</p>
+    <a class="btn-primary reveal" data-delay="2" href="#install">Add Vizquo — Free</a>
   </div>
 </section>
+</main>
 
+<!-- ============ FOOTER ============ -->
 <footer>
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a class="brand" href="#top"><span class="logo-wrap"><img src="../public/icon/128.png" alt="Vizquo logo"></span> Vizquo</a>
-        <p>The design-intelligence layer for your browser. Free, local-first, private by default.</p>
+        <a class="brand" href="#top"><img src="../public/icon/32.png" alt="Vizquo logo"> Vizquo</a>
+        <p>The visual inspection instrument for the web. Free, local-first, private by default.</p>
       </div>
       <div class="footer-col">
         <h5>Product</h5>
         <a href="#demo">Live demo</a>
         <a href="#features">Features</a>
         <a href="#ai">AI</a>
-        <a href="#download">Download</a>
+        <a href="#install">Install</a>
       </div>
       <div class="footer-col">
         <h5>Project</h5>
@@ -1595,7 +1525,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Vizquo · Created by <b style="color:var(--fg)">Prabhat Teotia</b> · Free &amp; open source (MIT)</span>
+      <span>© 2026 Vizquo · Created by <b style="color:var(--vz-text-primary)">Prabhat Teotia</b> · Free &amp; open source (MIT)</span>
       <span class="tag"><b>v0.10.9</b> · local-first · zero network requests by default</span>
     </div>
   </div>
@@ -1617,12 +1547,6 @@
 
 <button id="backTop" type="button" aria-label="Back to top">
   <svg class="back-ring" viewBox="0 0 46 46" aria-hidden="true">
-    <defs>
-      <linearGradient id="backRingGrad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#6e7bff"/>
-        <stop offset="1" stop-color="#3fe0c8"/>
-      </linearGradient>
-    </defs>
     <circle class="back-ring-track" cx="23" cy="23" r="19.5"/>
     <circle class="back-ring-fill" id="backRingFill" cx="23" cy="23" r="19.5" stroke-dasharray="122.5" stroke-dashoffset="122.5"/>
   </svg>
@@ -1644,14 +1568,12 @@
     else if (/Firefox\//.test(ua) && !/Seamonkey/.test(ua)) browser = 'firefox';
     else if (/Safari\//.test(ua) && !/Chrome\//.test(ua) && !/Chromium/.test(ua)) browser = 'safari';
     else if (/Chrome\//.test(ua) || /Chromium/.test(ua)) browser = 'chrome';
-    else browser = 'chrome'; // unknown Chromium default
+    else browser = 'chrome';
     if (isMobile) browser = 'mobile';
 
     if (window.navigator.brave && typeof window.navigator.brave.isBrave === 'function') {
       window.navigator.brave.isBrave().then((isBrave) => {
-        if (isBrave && browser === 'chrome') {
-          highlight('brave');
-        }
+        if (isBrave && browser === 'chrome') highlight('brave');
       });
     } else {
       highlight(browser);
@@ -1665,18 +1587,18 @@
       card.classList.add('detected');
       if (b === 'safari') {
         cta.textContent = '🔔 Safari: coming soon';
-        cta.setAttribute('href', '#download');
-        note.innerHTML = 'Safari is coming soon — <b>vote for it</b> below. Use Chrome, Edge, or Firefox on macOS today.';
+        cta.setAttribute('href', '#install');
+        note.textContent = 'Safari is coming soon — vote for it below. Use Chrome, Edge, or Firefox on macOS today.';
       } else if (b === 'mobile') {
         cta.textContent = '⬇ Desktop only for now';
-        cta.setAttribute('href', '#requirements');
+        cta.setAttribute('href', '#install');
         note.textContent = 'Mobile isn\u2019t supported yet — use a desktop Chromium browser or Firefox.';
       } else {
         const label = {
           chrome: 'Chrome', edge: 'Edge', firefox: 'Firefox', brave: 'Brave',
           opera: 'Opera', vivaldi: 'Vivaldi', arc: 'Arc'
         }[b] || 'a Chromium browser';
-        note.innerHTML = `Detected: <b>${label}</b> — your browser is highlighted below.`;
+        note.innerHTML = `Detected: <b>${label}</b> — Free · Local-first · No tracking`;
       }
     }
   })();
@@ -1699,9 +1621,7 @@
     try {
       const saved = localStorage.getItem('vizquo-os');
       if (saved === 'win' || saved === 'mac' || saved === 'linux') current = saved;
-    } catch (e) {
-      // storage unavailable — use detection only
-    }
+    } catch (e) { /* storage unavailable */ }
 
     function apply(os) {
       current = os;
@@ -1745,7 +1665,6 @@
       overlay.classList.add('show');
       overlay.classList.remove('done');
       fill.style.width = '0%';
-      // Move focus into the dialog for screen readers; Esc closes it.
       const card = overlay.querySelector('.dl-card');
       if (card) { card.setAttribute('tabindex', '-1'); card.focus({ preventScroll: true }); }
       const onKey = (ev) => {
@@ -1788,7 +1707,7 @@
       btn.addEventListener('click', (e) => {
         if (btn.classList.contains('busy')) return;
         const href = btn.getAttribute('href');
-        if (href?.indexOf('downloads/') !== 0) return; // only ZIPs animate
+        if (href?.indexOf('downloads/') !== 0) return;
         e.preventDefault();
         btn.classList.add('busy');
         start(btn, href);
@@ -1804,22 +1723,26 @@
     const srcEl = document.getElementById('inspSrc');
     const confEl = document.getElementById('inspConf');
     const posEl = document.getElementById('inspPos');
+    const zone = document.querySelector('.inspect-zone');
+    const meas = zone ? zone.querySelector('.meas') : null;
+    const measX = meas ? meas.querySelector('.lab.lx') : null;
+    const measY = meas ? meas.querySelector('.lab.ly') : null;
     if (!items.length || !rowsEl) return;
 
     const DATA = {
       'hero-title': {
-        name: 'h3.hero-title', src: 'style.css:41',
+        name: 'h1.hero-title', src: 'style.css:41',
         conf: '97%', rows: [
-          ['Font', 'Sora · 30px · 800'],
-          ['Color', '#10141F'],
-          ['Line-height', '1.12'],
+          ['Font', 'Inter · 48px · 800'],
+          ['Color', '#131725'],
+          ['Line-height', '1.1'],
           ['Letter-spacing', '-0.03em']
         ]
       },
       'hero-sub': {
         name: 'p.hero-sub', src: 'style.css:43',
         conf: '96%', rows: [
-          ['Font', 'Inter · 13.5px · 400'],
+          ['Font', 'Inter · 15px · 400'],
           ['Color', '#5B6472'],
           ['Line-height', '1.6']
         ]
@@ -1868,15 +1791,29 @@
       return `<span class="swatch" style="${style}" aria-hidden="true"></span>`;
     }
 
-    function render(cfg) {
+    function render(cfg, el) {
       pathEl.textContent = cfg.name;
       srcEl.textContent = `Traced to · ${cfg.src}`;
       confEl.textContent = `Confidence ${cfg.conf}`;
+      const r = el.getBoundingClientRect();
+      const rows = [
+        ['Width', `${Math.round(r.width)}px`],
+        ['Height', `${Math.round(r.height)}px`]
+      ].concat(cfg.rows);
       let html = '';
-      cfg.rows.forEach((r, i) => {
-        html += `<div class="insp-row" style="animation-delay:${i * 55}ms"><span class="k">${r[0]}</span><span class="val">${swatchFor(r[1])}${r[1]}</span></div>`;
+      rows.forEach((row, i) => {
+        html += `<div class="insp-row" style="animation-delay:${i * 55}ms"><span class="k">${row[0]}</span><span class="val">${swatchFor(row[1])}${row[1]}</span></div>`;
       });
       rowsEl.innerHTML = html;
+      if (meas && measX && measY) {
+        meas.style.left = `${r.left - zone.getBoundingClientRect().left}px`;
+        meas.style.top = `${r.top - zone.getBoundingClientRect().top}px`;
+        meas.style.width = `${r.width}px`;
+        meas.style.height = `${r.height}px`;
+        measX.textContent = `${Math.round(r.width)}px`;
+        measY.textContent = `${Math.round(r.height)}px`;
+        zone.classList.add('has-meas');
+      }
     }
 
     let pinned = null;
@@ -1885,7 +1822,7 @@
       if (pinned) pinned.classList.remove('is-pin');
       const cfg = DATA[el.getAttribute('data-i')];
       if (!cfg) return;
-      render(cfg);
+      render(cfg, el);
       if (pin) {
         pinned = el;
         el.classList.add('is-pin');
@@ -1893,10 +1830,32 @@
     }
 
     items.forEach((el) => {
-      el.addEventListener('mouseenter', () => { if (!pinned) setActive(el, false); });
-      el.addEventListener('mouseleave', () => { if (!pinned) { pathEl.textContent = '—'; rowsEl.innerHTML = ''; srcEl.textContent = 'Vizquo · element inspector'; confEl.textContent = ''; if (posEl) posEl.textContent = ''; } });
+      el.addEventListener('mouseenter', () => {
+        el.classList.add('is-hover');
+        if (!pinned) setActive(el, false);
+      });
+      el.addEventListener('mouseleave', () => {
+        el.classList.remove('is-hover');
+        if (!pinned) {
+          pathEl.textContent = '—';
+          rowsEl.innerHTML = '';
+          srcEl.textContent = 'Vizquo · element inspector';
+          confEl.textContent = '';
+          if (posEl) posEl.textContent = '';
+          if (zone && meas) zone.classList.remove('has-meas');
+        }
+      });
       el.addEventListener('click', () => {
-        if (pinned === el) { pinned = null; el.classList.remove('is-pin'); return; }
+        if (pinned === el) {
+          pinned = null;
+          el.classList.remove('is-pin');
+          pathEl.textContent = '—';
+          rowsEl.innerHTML = '';
+          srcEl.textContent = 'Vizquo · element inspector';
+          confEl.textContent = '';
+          if (zone && meas) zone.classList.remove('has-meas');
+          return;
+        }
         setActive(el, true);
       });
       el.addEventListener('keydown', (e) => {
@@ -1904,8 +1863,7 @@
       });
     });
 
-    // Live cursor coordinates — the "instrumentation" readout in the footer.
-    const zone = document.querySelector('.inspect-zone');
+    // Live cursor coordinates — the instrumentation readout.
     if (zone && posEl) {
       zone.addEventListener('mousemove', (e) => {
         const r = zone.getBoundingClientRect();
@@ -1916,7 +1874,7 @@
     }
   })();
 
-  // ================= Scroll FX: header, progress, reveal, glow, back-top =================
+  // ================= Scroll FX =================
   (function scrollFx() {
     const header = document.getElementById('siteHeader');
     const backTop = document.getElementById('backTop');
@@ -1949,12 +1907,34 @@
         if (en.isIntersecting) {
           en.target.classList.add('in');
           io.unobserve(en.target);
-          // After the entrance, hand transforms back to hover micro-interactions.
-          setTimeout(() => en.target.classList.add('settled'), 900);
         }
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
     els.forEach((el) => { io.observe(el); });
+  })();
+
+  // Product-reveal value chips emerge in sequence when scrolled into view.
+  (function revealValues() {
+    const chips = Array.prototype.slice.call(document.querySelectorAll('#rvValues .rv'));
+    if (!chips.length) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      chips.forEach((c) => { c.classList.add('in'); });
+      return;
+    }
+    if (!('IntersectionObserver' in window)) {
+      chips.forEach((c) => { c.classList.add('in'); });
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        io.unobserve(en.target);
+        chips.forEach((c, i) => {
+          window.setTimeout(() => { c.classList.add('in'); }, 220 + i * 140);
+        });
+      });
+    }, { threshold: 0.3 });
+    io.observe(document.getElementById('rvValues'));
   })();
 
   // ================= Animated counters =================
@@ -1970,7 +1950,7 @@
         const target = Number(el.dataset.count || 0);
         const suffix = el.dataset.suffix || '';
         if (reduce || target === 0) { el.textContent = `${target}${suffix}`; return; }
-        el.textContent = `0${suffix}`; // start the count-up from zero
+        el.textContent = `0${suffix}`;
         const dur = 1100;
         const t0 = performance.now();
         function frame(t) {
@@ -1986,9 +1966,6 @@
   })();
 
   // ================= Auto-cycling live demo =================
-  // When the demo section is in view and idle, cycle through the mock
-  // elements so the inspector looks alive without any input. User hover or
-  // click pauses the cycle; reduced-motion users get a static demo.
   (function autoDemo() {
     const items = Array.prototype.slice.call(document.querySelectorAll('.i-item'));
     const zone = document.getElementById('mockSite');
@@ -2016,18 +1993,9 @@
       if (timer) { window.clearInterval(timer); timer = 0; }
     }
 
-    zone.addEventListener('pointerenter', () => {
-      userDriven = true;
-      stop();
-    });
-    zone.addEventListener('pointerleave', () => {
-      userDriven = false;
-      start();
-    });
-    zone.addEventListener('click', () => {
-      userDriven = true;
-      stop();
-    }, true);
+    zone.addEventListener('pointerenter', () => { userDriven = true; stop(); });
+    zone.addEventListener('pointerleave', () => { userDriven = false; start(); });
+    zone.addEventListener('click', () => { userDriven = true; stop(); }, true);
 
     if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver((entries) => {
