@@ -37,7 +37,7 @@ Last full validation (all passed):
 |---|---|---|
 | Type check | `npm run compile` | ✅ clean |
 | Lint | `npm run lint` | ✅ **fully clean** (landing's pre-existing `!important`/descending-specificity warnings are now a documented rule override) |
-| Unit tests | `npm run test` | ✅ **396/396** |
+| Unit tests | `npm run test` | ✅ **400/400** |
 | Production build (Chrome MV3) | `npm run build` | ✅ keyless, 1.3 MB |
 | Firefox AMO-ready build | `npm run build:firefox:mv3` | ✅ |
 | E2E (Playwright, 13 tests) | `npm run test:e2e` | ✅ 12 pass, 1 honest skip (grant-dependent capture success) |
@@ -45,6 +45,7 @@ Last full validation (all passed):
 | Live probe (real sites) | `node scripts/probe-real-sites.mjs` | ✅ 19/19 — example.com, Wikipedia, MDN, HN |
 | Big-site verification (YouTube) | `node scripts/diag-youtube.mjs` | ✅ scan completes via main-thread fallback (~20 s) |
 | Landing smoke (3 engines) | `node scripts/check-landing-browsers.mjs` | ✅ chromium · firefox · webkit |
+| Torture suite (deterministic stress/security) | `npm run test:torture` | ✅ **14/14** (250k-node, mutation storm, CSP/SVG/iframe/SOP, live-edit race, secrets) |
 | Store ZIP | `npm run zip` | ✅ `vizquo-0.10.9-chrome.zip` |
 
 Manifest permissions (minimal, all used): `storage`, `sidePanel`, `downloads`,
@@ -419,7 +420,52 @@ the worker attempt being blocked, which now routes to the fallback instead of ha
 
 **How to verify:** `npm run test` (396/396) → `npm run build` → `npm run test:e2e` (12 pass + 1 honest skip) → `node scripts/check-landing-browsers.mjs` (3 engines).
 
-## 15. Recommended first tasks tomorrow
+## 15. Hardening mission (master-spec torture suite + identity fix)
+
+**Bug found + fixed by the torture suite** (the suite is what caught it):
+`buildSelector` produced an **ambiguous selector** for identical siblings
+(`#list > div.card` matched every card), so a selector round-trip silently
+resolved to the wrong element (§6 violation). Fixes in `engine/dom/ref.ts`:
+
+- **Unique selector generation** — identical siblings disambiguate
+  positionally (cheap, local, no document query — critical on huge flat
+  DOMs), and identical-ancestor collisions fall back to a bounded document
+  query climbing from the leaf until unique.
+- **Identity-agreement in `resolveRef`** — the element at the stored domPath
+  must still match the stored selector (element-vs-selector `matches()`, no
+  document walk); on disagreement the selector is tried and only accepted if
+  it lands at the stored path; otherwise null (STALE) is returned — never a
+  silently-wrong element. `inspectRef` already surfaces STALE honestly.
+
+Regression tests added (`tests/dom-ref.test.ts`): unique selectors for
+identical siblings/subtrees, makeRef round-trip under class changes, and
+path/selector disagreement → null.
+
+**Torture suite delivered** (`scripts/torture.mjs`, `npm run test:torture`,
+14 scenarios): huge-dom (250k), mutation-storm, element-replacement,
+shadow-dom, iframe-maze, csp-hostile (`script-src 'none'` → main-thread
+fallback), css-hostile (z-index max + pointer-events), live-edit-race,
+asset-monster (incl. honest 404/403 reporting), infinite-scroll (no silent
+cache reuse), virtualized-list (only observed DOM claimed), prompt-injection-
+secrets (no key in storage, AI optional, zero external requests),
+multi-tab-isolation, memory-soak (5 cycles, no error accumulation). Full
+matrix + evidence in TESTING.md. All 14 VERIFIED PASS.
+
+**Re-verification after the fix:** unit 400/400 · E2E 12 pass + 1 honest skip
+· torture 14/14 · real-site probe 19/19 · YouTube scan 19.5 s with the unique
+selector on real custom elements (`ytd-app:nth-of-type(1)`) · lint/compile
+clean · landing smoke 3/3.
+
+**Honest limitations (from the mission report):** closed/open shadow roots
+and cross-origin iframe content are correctly NOT claimed (document-scoped
+walk — verified by TOR-004/005); the overlay mounts under
+`z-index:2147483647 !important` (TOR-007) but page elements at the max
+z-index can still paint above it (browser semantics — the overlay is
+best-effort against hostile CSS); memory soak covers error-level
+stabilization, not CDP heap deltas (documented); full 500-iteration soak and
+Awwwards/WebGL corpus need a headed machine + network (NOT TESTED).
+
+## 16. Recommended first tasks tomorrow
 
 1. **Submit the 0.10.9 store packages (§6A)** — the release was cut
    (`npm run release -- 0.10.8 0.10.9`): packages are in

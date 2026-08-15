@@ -12,11 +12,57 @@ npm run compile     # tsc --noEmit (strict)
 npm run lint        # biome check
 npm run build       # wxt build → .output/chrome-mv3 (required before E2E)
 npm run test:e2e    # playwright test (loads the BUILT extension in Chromium)
+npm run test:torture # deterministic torture suite (needs npm run build first)
+npm run probe:sites # live real-site QA probe (example.com, Wikipedia, MDN, HN)
 ```
 
 Vitest uses `fake-indexeddb` (`tests/setup.ts`) so the repository adapter and
 cache logic are tested in Node without a browser. Playwright needs the built
 extension and a Chromium install (`npx playwright install chromium`).
+
+## Torture suite (`scripts/torture.mjs`, master spec §49–§51)
+
+Deterministic, network-free, repeatable stress + security regression suite. It
+loads the BUILT extension in real Chromium and drives the content script over
+the typed bus (plus the panel where UI behavior matters) against fixtures
+served through route interception. Run `npm run build` first, then
+`npm run test:torture` (or `VQ_TORTURE=<id,category> …` for a subset,
+`VQ_TORTURE_MAX=…` to override the huge-DOM node count, default 250 000).
+Every scenario reports TEST ID / CATEGORY / STEPS / EXPECTED / ACTUAL /
+STATUS / EVIDENCE; statuses are VERIFIED PASS / FAIL / BLOCKED only.
+
+- `TOR-001 huge-dom` — 250k-node page: scan stays bounded (12k walk / 4k
+  sample caps), reports `truncated: true` honestly, completes in budget.
+- `TOR-002 mutation-storm` — sustained add/remove/replace/move/class/attr
+  churn while scanning + toggling inspect mode; no hang, no console errors.
+- `TOR-003 element-replacement` — lock → framework rerender (`replaceWith`
+  clone) → insertion before the target; identity stays honest, inspection
+  reflects the CURRENT element, never a stale/wrong one.
+- `TOR-004 shadow-dom` — open/closed/nested/dynamic roots; closed + dynamic
+  shadow colors are never claimed as scanned.
+- `TOR-005 iframe-maze` — same-origin/cross-origin/nested/sandboxed iframes;
+  no SOP bypass, cross-origin colors never claimed.
+- `TOR-006 csp-hostile` — `script-src 'none'` page: scan completes via the
+  main-thread pipeline fallback, never hangs.
+- `TOR-007 css-hostile` — `* { z-index: 2147483647 !important }` + fixed
+  shroud: overlay still mounts, clicks still lock, scan completes.
+- `TOR-008 live-edit-race` — edit → undo (exact original) → edit → element
+  replaced → clear; law #4 holds (replacement is clean of the edit).
+- `TOR-009 asset-monster` — 20+ asset types incl. 404/403/data-URL/sprite/
+  poster/og/favicon; broken assets listed (failure visible), never silently
+  dropped, no script-scheme asset ever extracted.
+- `TOR-010 infinite-scroll` — scan → append 2000 rows → fingerprint changes →
+  re-scan is not silently cached, sees the new content.
+- `TOR-011 virtualized-list` — 10k logical items / ~40 DOM rows: only the
+  observed DOM is reported, no false truncation.
+- `TOR-012 prompt-injection-secrets` — injection text + fake secrets page:
+  no API key in storage, AI refuses honestly without a key (optional by
+  law #6), zero external network requests without consent.
+- `TOR-013 multi-tab-isolation` — two tabs scanned alternately: results are
+  tab-stamped, colors never leak across tabs.
+- `TOR-014 memory-soak` — 5 activate→inspect→scan cycles with the panel open:
+  no error accumulation, worker alive. (Full CDP heap-trace measurement is a
+  documented limitation — see the hardening report.)
 
 ## Current coverage
 

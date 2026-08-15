@@ -20,6 +20,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:torture": "node scripts/torture.mjs",
+    "probe:sites": "node scripts/probe-real-sites.mjs",
     "release": "node scripts/release-store.mjs",
     "promo": "node scripts/generate-promo-tile.mjs",
     "screenshots": "node scripts/capture-screenshots.mjs",
