@@ -392,6 +392,8 @@ the worker attempt being blocked, which now routes to the fallback instead of ha
 
 **Verification:** `node scripts/check-landing-browsers.mjs` → **all 3 engines pass** (hero, counters, demo rows, download overlay + Escape, burger, back-top, reduced-motion, zero console errors). Computed-style glass checks all pass (materials, blurs, edge light, fixed ambient, coordinate readout). Screenshots for eyeballing: OS temp dir `vizquo-landing/` (hero + features). Lint: zero NEW warnings vs baseline (the 20 `noImportantStyles`/`noDescendingSpecificity` warnings in this file are pre-existing).
 
+**Promo refresh (same glass theme):** `scripts/generate-promo-tile.mjs` now renders the v4 glass language — dark base `#08090e`, ambient radial fields (violet/teal/indigo) + top-left beam, edge-lit glass chips (inset highlight), translucent panel mock in the OG card, v4 accent values. Single dark theme by design — there is **no light/dark mode** anywhere in the landing/promo (the landing has no `prefers-color-scheme` handling; the only theme meta is the browser-chrome `theme-color`). Regenerate with `node scripts/generate-promo-tile.mjs` (writes `deploy-kit/promo/`; the OG card is the landing's `og:image`).
+
 ## 14. Files changed today (remaining-issues sweep — storage GC + timeline perf + lint) — in case you need to review or revert
 
 | File | What |

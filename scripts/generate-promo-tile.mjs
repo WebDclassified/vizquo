@@ -1,7 +1,10 @@
 /**
- * Store promo tile + OG social card generator — matches the premium landing
- * redesign: aurora gradient background, Space Grotesk wordmark, Instrument
- * Serif italic accents, glass feature chips, gradient accent line.
+ * Store promo tile + OG social card generator — matches the landing page's
+ * liquid-glass design (brand system v4): dark glass base, ambient radial
+ * color fields, Space Grotesk wordmark, Instrument Serif italic accents,
+ * edge-lit glass feature chips, translucent panel mock, gradient accent
+ * line. Single theme by design — the product's glass language is dark-only;
+ * there is no light variant.
  *
  * Outputs (into deploy-kit/promo/):
  *   - promo-440x280.png     Chrome Web Store small promotional tile (required)
@@ -45,20 +48,30 @@ const BRAND_MARK = `
 
 const BASE_CSS = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { background: #05060b; }
-  body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #f4f6fb; -webkit-font-smoothing: antialiased; }
+  html, body { background: #08090e; }
+  /* Ambient environment (v4): dark glass base + violet/teal/indigo color
+     fields + a soft top-left beam — same scene the landing + panel use. */
+  body {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #f5f7fa; -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(940px 640px at 6% -10%, rgba(122,106,255,.22), transparent 70%),
+      radial-gradient(780px 560px at 104% 106%, rgba(63,224,200,.12), transparent 70%),
+      radial-gradient(600px 460px at 84% -12%, rgba(90,102,230,.16), transparent 72%),
+      radial-gradient(560px 380px at 10% -4%, rgba(255,255,255,.05), transparent 78%);
+  }
   .aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
   .orb { position: absolute; border-radius: 50%; filter: blur(90px); }
-  .o1 { width: 660px; height: 660px; left: -280px; top: -340px; background: radial-gradient(circle, rgba(110,123,255,.52), transparent 65%); }
-  .o2 { width: 580px; height: 580px; right: -240px; top: -280px; background: radial-gradient(circle, rgba(63,224,200,.3), transparent 65%); }
-  .o3 { width: 500px; height: 500px; left: 30%; bottom: -360px; background: radial-gradient(circle, rgba(167,139,250,.32), transparent 65%); }
-  .o4 { width: 360px; height: 360px; right: 6%; bottom: -200px; background: radial-gradient(circle, rgba(255,200,87,.12), transparent 60%); }
+  .o1 { width: 660px; height: 660px; left: -280px; top: -340px; background: radial-gradient(circle, rgba(122,106,255,.4), transparent 65%); }
+  .o2 { width: 580px; height: 580px; right: -240px; top: -280px; background: radial-gradient(circle, rgba(63,224,200,.24), transparent 65%); }
+  .o3 { width: 500px; height: 500px; left: 30%; bottom: -360px; background: radial-gradient(circle, rgba(167,139,250,.26), transparent 65%); }
+  .o4 { width: 360px; height: 360px; right: 6%; bottom: -200px; background: radial-gradient(circle, rgba(231,183,91,.1), transparent 60%); }
   .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px); background-size: 56px 56px;
           -webkit-mask-image: radial-gradient(ellipse 82% 72% at 50% 6%, #000 18%, transparent 72%);
           mask-image: radial-gradient(ellipse 82% 72% at 50% 6%, #000 18%, transparent 72%); }
   .serif { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; }
   .grad-text { background: linear-gradient(120deg, #8b7bff, #a78bfa 45%, #3fe0c8 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); color: rgba(255,255,255,.82); border-radius: 999px; padding: 8px 15px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+  /* Glass chip: translucent fill + hairline border + top edge light. */
+  .chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.07); color: rgba(255,255,255,.84); border-radius: 999px; padding: 8px 15px; font-size: 11.5px; font-weight: 600; white-space: nowrap; box-shadow: inset 0 1px 0 rgba(255,255,255,.1); }
   .chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .accent-line { position: absolute; left: 0; right: 0; bottom: 0; height: 3.5px; background: linear-gradient(90deg, #6e7bff, #a78bfa, #3fe0c8); }
 `;
@@ -68,7 +81,7 @@ const SHELL = (body) =>
 
 /** 440×280 — required small promotional tile. */
 const SMALL_TILE = `
-<div style="width:440px;height:280px;border-radius:22px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;padding:0 30px;gap:20px;">
+<div style="width:440px;height:280px;border-radius:22px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;padding:0 30px;gap:20px;">
   <div class="aurora"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o4"></div></div>
   <div class="grid"></div>
   <div style="width:104px;height:104px;flex:0 0 auto;position:relative;">${BRAND_MARK}</div>
@@ -88,7 +101,7 @@ const SMALL_TILE = `
 
 /** 1400×560 — marquee promotional tile. */
 const MARQUEE = `
-<div style="width:1400px;height:560px;border-radius:32px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;padding:0 78px;gap:64px;">
+<div style="width:1400px;height:560px;border-radius:32px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;padding:0 78px;gap:64px;">
   <div class="aurora"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="orb o4"></div></div>
   <div class="grid"></div>
   <div style="width:200px;height:200px;flex:0 0 auto;position:relative;">${BRAND_MARK}</div>
@@ -103,8 +116,8 @@ const MARQUEE = `
         ['Element inspector', '#7fe9d6', 'rgba(63,224,200,.12)', 'rgba(63,224,200,.4)', '#3fe0c8'],
         ['Assets & SVG', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#a78bfa'],
         ['WCAG audits', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#4fd1ff'],
-        ['Code generation', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#ffc857'],
-        ['Free forever', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#3ecf8e'],
+        ['Code generation', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#e7b75b'],
+        ['Free forever', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#45d483'],
       ]
         .map(
           ([label, color, bg, border, dot]) =>
@@ -135,8 +148,8 @@ const OG_CARD = `
         ['Inspector', '#7fe9d6', 'rgba(63,224,200,.12)', 'rgba(63,224,200,.4)', '#3fe0c8'],
         ['Assets & SVG', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#a78bfa'],
         ['WCAG audits', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#4fd1ff'],
-        ['Optional AI', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#ffc857'],
-        ['Free forever', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#3ecf8e'],
+        ['Optional AI', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#e7b75b'],
+        ['Free forever', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#45d483'],
       ]
         .map(
           ([label, color, bg, border, dot]) =>
@@ -145,8 +158,8 @@ const OG_CARD = `
         .join('')}
     </div>
   </div>
-  <!-- Mini Vizquo panel mock -->
-  <div style="width:430px;flex:0 0 auto;border-radius:20px;border:1px solid rgba(255,255,255,.16);background:#0b0d16;box-shadow:0 30px 80px rgba(0,0,0,.55);overflow:hidden;position:relative;">
+  <!-- Mini Vizquo panel mock — standard glass material (translucent + edge light). -->
+  <div style="width:430px;flex:0 0 auto;border-radius:20px;border:1px solid rgba(255,255,255,.16);background:rgba(20,23,32,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 30px 80px rgba(0,0,0,.55);overflow:hidden;position:relative;">
     <div style="display:flex;align-items:center;gap:8px;padding:14px 18px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);">
       <span style="width:11px;height:11px;border-radius:50%;background:#ff5f57;"></span>
       <span style="width:11px;height:11px;border-radius:50%;background:#febc2e;"></span>
