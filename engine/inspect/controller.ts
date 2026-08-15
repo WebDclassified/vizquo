@@ -158,11 +158,14 @@ export class InspectController {
   }
 
   getLockedRef(): ElementRef | null {
-    return this.lockedEl ? makeRef(this.lockedEl) : null;
+    // Never claim a lock on an element that left the document (spec §7): the
+    // panel must see STALE/REMOVED, not a valid-looking ref that resolves to
+    // nothing (or — worse — to a different element via a reused selector).
+    return this.lockedEl && this.lockedEl.isConnected ? makeRef(this.lockedEl) : null;
   }
 
   getHoveredRef(): ElementRef | null {
-    return this.hoveredEl ? makeRef(this.hoveredEl) : null;
+    return this.hoveredEl && this.hoveredEl.isConnected ? makeRef(this.hoveredEl) : null;
   }
 
   getContextTarget(): ElementRef | null {
@@ -400,6 +403,7 @@ export class InspectController {
   // --- painting -----------------------------------------------------------
 
   private paintHover(el: Element): void {
+    if (!el.isConnected) return; // never paint a ghost hover outline
     const rect = rectOf(el);
     this.overlay.showHover(rect);
     if (this.options.measurements) {
@@ -412,6 +416,15 @@ export class InspectController {
 
   private paintLocked(): void {
     if (!this.lockedEl) return;
+    if (!this.lockedEl.isConnected) {
+      // The locked element left the document (SPA swap / DOM removal) — drop
+      // the lock and surface the loss honestly instead of painting a ghost
+      // outline over whatever happens to be at the stale coordinates (§7).
+      this.lockedEl = null;
+      this.overlay.hideBoxLayer();
+      void this.publishSelection(null);
+      return;
+    }
     const el = this.lockedEl;
     const rect = rectOf(el);
     const showBox =

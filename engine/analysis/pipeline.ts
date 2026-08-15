@@ -81,13 +81,58 @@ export function createAnalysisPipeline(): AnalysisPipeline {
       return `${s.ref.domPath.join(',')} ${s.tag} ${s.role ?? ''} ${s.isButton ? 1 : 0} ${s.isLink ? 1 : 0} ${s.classes.length} ${classes}`;
     });
 
+  /**
+   * Hash of EVERY field any analysis unit reads — the orchestrator's
+   * `cached`/`stale` flags must mean "identical analysis inputs", never just
+   * "same structure". A same-structure SPA re-render with new colors, fonts,
+   * assets, or a11y facts must be a cache MISS, not a silent reuse.
+   */
+  const fullSnapshotKey = (): string => {
+    const list = samples();
+    const assetList = snapshot?.assets ?? [];
+    const a11yList = snapshot?.a11y ?? [];
+    return hashStrings([
+      samplesKey(),
+      hashProjection(list, (s) =>
+        [
+          s.color,
+          s.backgroundColor,
+          s.borderColor,
+          s.opacity,
+          s.fontFamily,
+          s.fontSize,
+          s.fontWeight,
+          s.lineHeight,
+          s.letterSpacing,
+          s.textTransform,
+          s.margin,
+          s.padding,
+          s.gap,
+          s.borderRadius,
+          s.boxShadow,
+          s.backgroundImage,
+        ].join('|'),
+      ),
+      hashProjection(assetList, (a) =>
+        [a.url, a.type, a.source, a.alt ?? '', a.loading ?? '', (a.naturalDims ?? []).join('x')].join('|'),
+      ),
+      hashProjection(a11yList, (s) =>
+        `${s.ref.domPath.join(',')} ${s.text} ${s.alt ?? ''} ${s.ariaLabel ?? ''} ${s.color} ${s.backgroundColor}`,
+      ),
+      hashProjection(snapshot?.variables ?? [], (v) => `${v.name}=${v.value}`),
+      hashProjection(snapshot?.breakpoints ?? [], (b) => b.raw),
+      hashProjection(snapshot?.containerQueries ?? [], (c) => c.raw),
+      `${snapshot?.elementCount ?? 0} ${snapshot?.animationCount ?? 0} ${snapshot?.transitionCount ?? 0}`,
+    ]);
+  };
+
   return {
     setSnapshot(next: ScanSnapshot): { hash: string } {
       snapshot = next;
-      return { hash: samplesKey() };
+      return { hash: fullSnapshotKey() };
     },
     getSnapshotHash(): string {
-      return samplesKey();
+      return fullSnapshotKey();
     },
 
     analyzeColors(): ColorAnalysis {
@@ -97,8 +142,12 @@ export function createAnalysisPipeline(): AnalysisPipeline {
         [s.color, s.backgroundColor, s.borderColor, s.opacity].join(' '),
       );
       const clustered = colorMemo.compute(colorKey, () => clusterColors(list));
-      // Roles depend on element semantics (hints/buttons) too — full sample hash.
-      const roleKey = samplesKey();
+      // Roles depend on BOTH the clustered color values AND the element
+      // semantics (hints/buttons). Key on colorKey + structure: a same-
+      // structure re-render with different colors (SPA navigation) must
+      // recompute roles, never serve the previous page's colors as this
+      // page's (law: never silently reuse stale cache).
+      const roleKey = hashStrings([colorKey, samplesKey()]);
       const roles = roleMemo.compute(roleKey, () => classifyColorRoles(clustered.value, list));
       return { colors: roles.value, cached: clustered.cached && roles.cached };
     },

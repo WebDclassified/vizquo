@@ -912,6 +912,486 @@ scenario('TOR-014', 'memory-soak', async (context, ev) => {
 });
 
 /* ------------------------------------------------------------------------ */
+/* Extended fixtures                                                          */
+/* ------------------------------------------------------------------------ */
+
+/** huge-css: 10k+ rules, big variable sets, nesting, layers, queries. */
+function fixtureHugeCss() {
+  const rules = [];
+  for (let i = 0; i < 10000; i += 1) {
+    rules.push(`.r${i} { color: #${(i % 16).toString(16).padStart(2, '0')}${(i % 16).toString(16).padStart(2, '0')}${(i % 16).toString(16).padStart(2, '0')}; margin: ${i % 5}px; padding: 2px; }`);
+  }
+  const vars = [];
+  for (let i = 0; i < 400; i += 1) vars.push(`--v${i}: rgb(${i % 255}, ${(i * 3) % 255}, ${(i * 7) % 255});`);
+  return `<!doctype html><html><head><title>Torture huge-css</title>
+<style>
+  :root { ${vars.join(' ')} }
+  @layer base, theme, components;
+  @layer base { body { font-family: system-ui; } .card { border: 1px solid #ddd; border-radius: 8px; } }
+  @layer components { .btn { background: #635bff; color: white; } }
+  @media (min-width: 768px) { .resp { display: grid; grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .resp { grid-template-columns: repeat(3, 1fr); } }
+  @container (min-width: 300px) { .cq { color: rgb(1, 2, 3); } }
+  .fx { transform: rotate(45deg) scale(1.2); filter: blur(1px); backdrop-filter: blur(2px); contain: layout paint; content-visibility: auto; will-change: transform; }
+  ${rules.join('\n')}
+</style>
+</head><body>
+<div class="card"><h1 class="fx">Huge CSS page</h1><p style="color: var(--v12)">Variable-driven text.</p><button class="btn">Go</button></div>
+<div class="resp"><div class="cq">A</div><div class="cq">B</div><div class="cq">C</div></div>
+</body></html>`;
+}
+
+/** deep-dom: 1000 levels of nesting. */
+function fixtureDeepDom(depth) {
+  return `<!doctype html><html><head><title>Torture deep-dom</title></head><body>
+<script>
+  let el = document.body;
+  for (let i = 0; i < ${depth}; i += 1) {
+    const d = document.createElement('div');
+    d.dataset.depth = String(i);
+    d.className = 'deep';
+    el.appendChild(d);
+    el = d;
+  }
+  el.textContent = 'bottom';
+</script>
+</body></html>`;
+}
+
+/** svg-security: every hostile SVG construct, with a page canary. */
+const FIXTURE_SVG_SECURITY = `<!doctype html><html><head><title>Torture svg-security</title>
+<style>body { font-family: system-ui; }</style>
+</head><body>
+<!-- on* handlers + script + javascript: URLs + external refs + foreignObject -->
+<svg id="evil1" xmlns="http://www.w3.org/2000/svg" width="120" height="40">
+  <rect width="120" height="40" fill="#635bff"/>
+  <animate attributeName="opacity" values="1;0;1" dur="1s"
+    onbegin="window.__VQ_SVG_EXEC__=(window.__VQ_SVG_EXEC__||0)+1"/>
+  <set attributeName="x" to="1" begin="0s"
+    onbegin="window.__VQ_SVG_EXEC__=(window.__VQ_SVG_EXEC__||0)+1"/>
+  <image href="data:image/png;base64,AAAA" width="4" height="4"
+    onerror="window.__VQ_SVG_EXEC__=(window.__VQ_SVG_EXEC__||0)+1"/>
+</svg>
+<svg id="evil2" xmlns="http://www.w3.org/2000/svg" width="60" height="40">
+  <a href="javascript:window.__VQ_SVG_EXEC__=(window.__VQ_SVG_EXEC__||0)+1"><rect width="60" height="40" fill="red"/></a>
+  <script>window.__VQ_SVG_EXEC__=(window.__VQ_SVG_EXEC__||0)+1<\/script>
+</svg>
+<svg id="evil3" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
+  <use href="#self" xlink:href="#self"/>
+  <path id="self" d="M0 0 L40 0 L20 40 Z" fill="green"/>
+  <foreignObject width="40" height="40"><div xmlns="http://www.w3.org/1999/xhtml">html inside svg</div></foreignObject>
+</svg>
+<svg id="evil4" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
+  <path d="${'M0 0 L1 1 '.repeat(5000)}Z" fill="blue"/>
+</svg>
+<script>
+  window.__SVG_READY__ = true;
+</script>
+</body></html>`;
+
+/** animation-monster: thousands of animated + composited elements. */
+function fixtureAnimationMonster(count) {
+  return `<!doctype html><html><head><title>Torture animation</title>
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fade { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+  .a { animation: spin 2s linear infinite; will-change: transform; }
+  .b { animation: fade 1.4s ease-in-out infinite; }
+  .t { transition: all .3s ease; }
+  .cv { content-visibility: auto; contain: layout paint; }
+</style>
+</head><body>
+<script>
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < ${count}; i += 1) {
+    const d = document.createElement('div');
+    d.className = i % 3 === 0 ? 'a cv' : i % 3 === 1 ? 'b' : 't';
+    d.textContent = 'el ' + i;
+    frag.appendChild(d);
+  }
+  document.body.appendChild(frag);
+</script>
+</body></html>`;
+}
+
+/** webgl-monster: a real WebGL scene + a 2D canvas, both animated. */
+const FIXTURE_WEBGL = `<!doctype html><html><head><title>Torture webgl</title>
+<style>body { font-family: system-ui; } canvas { border: 1px solid #333; }</style>
+</head><body>
+<canvas id="gl" width="320" height="200"></canvas>
+<canvas id="c2d" width="320" height="200"></canvas>
+<script>
+  window.__WEBGL_STATUS__ = 'no-webgl';
+  const canvas = document.getElementById('gl');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (gl) {
+    window.__WEBGL_STATUS__ = 'webgl';
+    const vs = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vs, 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }');
+    gl.compileShader(vs);
+    const fs = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fs, 'precision mediump float; void main(){ gl_FragColor = vec4(0.4, 0.48, 1.0, 1.0); }');
+    gl.compileShader(fs);
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog); gl.useProgram(prog);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0.6, -0.6, -0.4, 0.6, -0.4]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'p');
+    gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    let angle = 0;
+    setInterval(() => {
+      angle += 0.02;
+      gl.clearColor(0.03, 0.03, 0.06, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }, 33);
+  }
+  const ctx = document.getElementById('c2d').getContext('2d');
+  let x = 0;
+  setInterval(() => {
+    x = (x + 2) % 320;
+    ctx.fillStyle = '#635bff';
+    ctx.clearRect(0, 0, 320, 200);
+    ctx.fillRect(x, 80, 30, 30);
+  }, 33);
+</script>
+</body></html>`;
+
+/** spa-race: SPA-style navigation with a full DOM swap. */
+function fixtureSpa(view) {
+  const body =
+    view === 'home'
+      ? '<div class="card" data-route="home"><h2>Home</h2><p style="color: rgb(200, 30, 30)">home content</p><button class="btn">home btn</button></div>'
+      : '<div class="card" data-route="settings"><h2>Settings</h2><p style="color: rgb(30, 30, 200)">settings content</p><button class="btn">save</button></div>';
+  return `<!doctype html><html><head><title>Torture spa</title>
+<style>body { font-family: system-ui; } .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 8px; } .btn { background: #635bff; color: #fff; border: 0; border-radius: 6px; padding: 6px 12px; }</style>
+</head><body id="app">${body}
+<script>
+  window.__navigate = () => {
+    history.pushState({ view: 'settings' }, '', '/settings');
+    document.getElementById('app').innerHTML = ${JSON.stringify(
+      '<div class="card" data-route="settings"><h2>Settings</h2><p style="color: rgb(30, 30, 200)">settings content</p><button class="btn">save</button></div>',
+    )};
+    return document.title = 'Settings';
+  };
+</script>
+</body></html>`;
+}
+
+/** screenshot-monster: a 100k px page. */
+function fixtureScreenshotMonster(rows) {
+  return `<!doctype html><html><head><title>Torture screenshot</title>
+<style>body { font-family: system-ui; margin: 0; } .row { height: 60px; border-bottom: 1px solid #eee; } .sticky { position: sticky; top: 0; background: #635bff; color: white; height: 40px; line-height: 40px; }</style>
+</head><body>
+<div class="sticky">sticky header</div>
+<script>
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < ${rows}; i += 1) {
+    const d = document.createElement('div');
+    d.className = 'row';
+    d.textContent = 'row ' + i;
+    frag.appendChild(d);
+  }
+  document.body.appendChild(frag);
+</script>
+</body></html>`;
+}
+
+/** responsive-monster: media + container queries + a fixed-width overflow. */
+const FIXTURE_RESPONSIVE = `<!doctype html><html><head><title>Torture responsive</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font-family: system-ui; margin: 0; }
+  .grid { display: grid; grid-template-columns: 1fr; }
+  @media (min-width: 375px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 768px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 1024px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+  @container (min-width: 200px) { .cq { color: rgb(1, 2, 3); } }
+  .wide { width: 700px; height: 40px; background: #635bff; }
+  .box { height: 60px; background: #eee; border: 1px solid #ccc; }
+</style>
+</head><body>
+<div class="grid"><div class="box">A</div><div class="box">B</div><div class="box">C</div><div class="box">D</div></div>
+<div class="wide">fixed 700px — overflows narrow viewports</div>
+<div class="cq">container-queried</div>
+</body></html>`;
+
+/** storage-isolation + lifecycle: page poisons its own storage, then removes
+ *  the element a ref points at. */
+const FIXTURE_STORAGE_ISOLATION = `<!doctype html><html><head><title>Torture storage</title>
+<style>body { font-family: system-ui; } #target { padding: 12px; background: #eee; }</style>
+</head><body>
+<div id="target">remove me</div>
+<script>
+  // The page tries to impersonate Vizquo's own storage keys in ITS storage.
+  localStorage.setItem('settings:aiApiKey', 'SK-POISONED-FROM-PAGE');
+  localStorage.setItem('vizquo:inspection', JSON.stringify({ poisoned: true }));
+  sessionStorage.setItem('settings:aiApiKey', 'SK-POISONED-SESSION');
+  window.__poison = () => { localStorage.setItem('settings:aiApiKey', 'SK-POISONED-2'); return 'poisoned'; };
+  window.__removeTarget = () => { document.getElementById('target').remove(); return 'removed'; };
+</script>
+</body></html>`;
+
+scenario('TOR-015', 'huge-css', async (context, ev) => {
+  const page = await newPage(context, '/huge-css.html', {
+    '/huge-css.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureHugeCss() }),
+  });
+  await page.waitForTimeout(600);
+  const tabId = await activeTabId();
+  const scan = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+  assert(scan.ok && scan.res.ok === true, scanMsg(scan), ev);
+  const i = scan.res.inspection;
+  assert(i.breakpoints.length >= 2, `media queries parsed (${i.breakpoints.length})`, ev);
+  assert(i.containerQueries.length >= 1, `container queries parsed (${i.containerQueries.length})`, ev);
+  // The engine bounds stylesheet parsing deliberately (8000 rules/sheet, 200
+  // declarations/rule) — the fixture's 400 vars in one :root rule yield the
+  // documented cap, and the scan stays honest about it.
+  assert(i.variables.length >= 200, `variable set extracted (${i.variables.length})`, ev);
+  assert(i.scannedElementCount > 0, 'content scanned', ev);
+  // Element inspection on the layer-nested + variable-driven card: cascade
+  // must resolve with the layered rules and the var chain intact.
+  const inspect = await bus(tabId, 'GET_ELEMENT_INSPECTION', {
+    ref: { selector: '.card', xpath: '', domPath: [] },
+  });
+  assert(inspect.ok && inspect.res.ok === true, 'inspection on layered page', ev);
+  const traces = inspect.res.inspection.traces ?? [];
+  assert(traces.length > 0, `cascade traces computed (${traces.length})`, ev);
+  ev.push(`rules=10000 vars=${i.variables.length} breakpoints=${i.breakpoints.length} cq=${i.containerQueries.length}`);
+  await page.close();
+});
+
+scenario('TOR-016', 'deep-dom', async (context, ev) => {
+  const depth = 1000;
+  const page = await newPage(context, '/deep.html', {
+    '/deep.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureDeepDom(depth) }),
+  });
+  await page.waitForTimeout(400);
+  const tabId = await activeTabId();
+  // The DOM-tree view must stay bounded (default max depth) — never a stack
+  // overflow on a 1000-deep tree.
+  const tree = await bus(tabId, 'GET_DOM_TREE', { maxDepth: 20, maxNodes: 500 });
+  assert(tree.ok && tree.res?.ok === true, `DOM tree built on ${depth}-deep DOM`, ev);
+  const scan = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+  assert(scan.ok && scan.res.ok === true, scanMsg(scan), ev);
+  assert(scan.res.inspection.scannedElementCount > 0, 'deep content scanned', ev);
+  ev.push(`depth=${depth} tree-nodes=${tree.res.nodes?.length}`);
+  await page.close();
+});
+
+scenario('TOR-017', 'svg-security', async (context, ev) => {
+  const page = await newPage(context, '/svg-security.html', {
+    '/svg-security.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_SVG_SECURITY }),
+  });
+  await page.waitForTimeout(600);
+  // Fixture validity: the hostile SMIL handlers really execute in the page.
+  const pageExec = await page.evaluate(() => window.__VQ_SVG_EXEC__ ?? 0);
+  assert(pageExec >= 1, `hostile SVG canary fires in the page (${pageExec}x)`, ev);
+  const tabId = await activeTabId();
+  const scan = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+  assert(scan.ok && scan.res.ok === true, scanMsg(scan), ev);
+  const assets = scan.res.inspection.assets ?? [];
+  const svgs = assets.filter((a) => a.type === 'svg');
+  assert(svgs.length >= 4, `hostile SVGs extracted (${svgs.length})`, ev);
+  // Extraction stores OBSERVED raw markup (LAW 1) — it must never execute
+  // anything itself; render-time sanitization strips handlers/scripts and is
+  // E2E-proven (hostile spec canary). The raw markup must be preserved for
+  // inspection, handlers included.
+  const raw = svgs.map((s) => s.svg?.content ?? '').join(' ');
+  assert(raw.includes('onbegin'), 'raw observed markup preserved for inspection', ev);
+  assert(raw.includes('javascript:'), 'javascript: URLs preserved as observed data', ev);
+  // The page canary must NOT have leaked into the extension's own contexts.
+  const extLeak = await worker.evaluate(() => (globalThis.__VQ_SVG_EXEC__ ?? 0));
+  assert(extLeak === 0, 'canary never reaches the extension worker', ev);
+  ev.push(`svgs=${svgs.length} page-exec=${pageExec}`);
+  await page.close();
+});
+
+scenario('TOR-018', 'animation-monster', async (context, ev) => {
+  const count = 3000;
+  const page = await newPage(context, '/animation.html', {
+    '/animation.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureAnimationMonster(count) }),
+  });
+  await page.waitForTimeout(600);
+  const tabId = await activeTabId();
+  const t0 = Date.now();
+  const scan = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+  const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+  assert(scan.ok && scan.res.ok === true, scanMsg(scan), ev);
+  const m = scan.res.inspection.metrics;
+  assert(m.animationCount > 1000, `animations counted (${m.animationCount})`, ev);
+  assert(m.transitionCount > 0, `transitions counted (${m.transitionCount})`, ev);
+  ev.push(`els=${count} anims=${m.animationCount} trans=${m.transitionCount} scan=${elapsed}s`);
+  await page.close();
+});
+
+scenario('TOR-019', 'webgl-monster', async (context, ev) => {
+  const page = await newPage(context, '/webgl.html', {
+    '/webgl.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_WEBGL }),
+  });
+  await page.waitForTimeout(800);
+  const glStatus = await page.evaluate(() => window.__WEBGL_STATUS__);
+  ev.push(`webgl-context=${glStatus}`);
+  const tabId = await activeTabId();
+  const scan = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+  assert(scan.ok && scan.res.ok === true, scanMsg(scan), ev);
+  assert(scan.res.inspection.scannedElementCount > 0, 'canvas page scanned', ev);
+  // Inspect the WebGL canvas element itself — a live GPU surface.
+  const inspect = await bus(tabId, 'GET_ELEMENT_INSPECTION', {
+    ref: { selector: '#gl', xpath: '', domPath: [] },
+  });
+  assert(inspect.ok && inspect.res.ok === true, 'WebGL canvas inspection', ev);
+  const size = await page.evaluate(() => document.getElementById('gl').width);
+  assert(size === 320, 'canvas intact after scan', ev);
+  // Keep the animation running for a moment — the page must stay responsive.
+  await page.waitForTimeout(1200);
+  assert(await page.evaluate(() => document.title) === 'Torture webgl', 'page responsive under GL load', ev);
+  await page.close();
+});
+
+scenario('TOR-020', 'spa-race', async (context, ev) => {
+  const page = await newPage(context, '/spa.html', {
+    '/spa.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureSpa('home') }),
+  });
+  const tabId = await activeTabId();
+  // Baseline: the extension must not mutate the host page.
+  const before = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    bodyBg: getComputedStyle(document.body).backgroundColor,
+    font: getComputedStyle(document.body).fontFamily,
+  }));
+  const scan1 = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+  assert(scan1.ok && scan1.res.ok === true, scanMsg(scan1, 'home scan'), ev);
+  const after = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    bodyBg: getComputedStyle(document.body).backgroundColor,
+    font: getComputedStyle(document.body).fontFamily,
+  }));
+  assert(
+    before.scrollWidth === after.scrollWidth && before.bodyBg === after.bodyBg && before.font === after.font,
+    'scan does not mutate the host page (layout/typography unchanged)',
+    ev,
+  );
+
+  // SPA navigation: pushState + innerHTML swap.
+  const navResult = await page.evaluate(() => window.__navigate());
+  await page.waitForTimeout(500);
+  const liveAfter = await page.evaluate(() => ({
+    route: document.querySelector('.card')?.dataset.route,
+    pColor: getComputedStyle(document.querySelector('p')).color,
+    appLen: document.getElementById('app').innerHTML.length,
+  }));
+  ev.push(`nav=${navResult} live-route=${liveAfter.route} live-color=${liveAfter.pColor}`);
+  const colors1 = (scan1.res.inspection.tokens?.colors ?? []).map((c) => c.value.hex);
+  const fp = await bus(tabId, 'GET_PAGE_FINGERPRINT', undefined);
+  const scan2 = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+  assert(scan2.ok && scan2.res.ok === true, scanMsg(scan2, 'settings scan'), ev);
+  const colors2 = (scan2.res.inspection.tokens?.colors ?? []).map((c) => c.value.hex);
+  assert(colors2.some((h) => h === '#1e1ec8'), `SPA content observed after nav (${colors2.slice(0, 6).join(',')})`, ev);
+  assert(!colors1.some((h) => h === '#1e1ec8'), 'pre-nav colors not silently kept', ev);
+  assert(scan2.res.inspection.cached === false, 're-scan after SPA nav is not cached', ev);
+  ev.push(`fp=${fp.res?.fingerprint?.slice(0, 8)} route1=home route2=settings`);
+  await page.close();
+});
+
+scenario('TOR-021', 'screenshot-monster', async (context, ev) => {
+  const rows = 1700; // ~102k px
+  const page = await newPage(context, '/long.html', {
+    '/long.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureScreenshotMonster(rows) }),
+  });
+  await page.waitForTimeout(400);
+  const tabId = await activeTabId();
+  const geo = await bus(tabId, 'GET_PAGE_GEOMETRY', undefined);
+  assert(geo.ok && geo.res?.scrollHeight >= 100_000, `geometry reports the long page (${geo.res?.scrollHeight}px)`, ev);
+  // Exact scroll round-trip: to a deep offset, then back to 0.
+  const target = geo.res.scrollHeight - 1000;
+  const scrolled = await bus(tabId, 'SCROLL_TO', { y: target });
+  assert(scrolled.ok && Math.abs(scrolled.res.y - target) < 1200, `scroll to ${target}px lands (${scrolled.res.y})`, ev);
+  const back = await bus(tabId, 'SCROLL_TO', { y: 0 });
+  assert(back.ok && back.res.y === 0, 'exact scroll restoration to top', ev);
+  // The sticky header must not be duplicated by any stitching logic — it is
+  // a single node (the capture itself needs a user gesture; geometry + scroll
+  // are the deterministic parts, capture is BLOCKED in automation).
+  const stickyCount = await page.evaluate(() => document.querySelectorAll('.sticky').length);
+  assert(stickyCount === 1, 'sticky header is a single node', ev);
+  ev.push(`height=${geo.res.scrollHeight} dpr=${geo.res.devicePixelRatio}`);
+  await page.close();
+});
+
+scenario('TOR-022', 'responsive-monster', async (context, ev) => {
+  const page = await newPage(context, '/responsive.html', {
+    '/responsive.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_RESPONSIVE }),
+  });
+  await page.waitForTimeout(400);
+  const tabId = await activeTabId();
+  // Time Machine needs the parsed breakpoints from a prior scan.
+  const scan = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+  assert(scan.ok && scan.res.ok === true, scanMsg(scan), ev);
+  assert(scan.res.inspection.breakpoints.length >= 3, 'breakpoints parsed', ev);
+  assert(scan.res.inspection.viewportMeta === true, 'viewport meta detected', ev);
+  // Probe the deterministic mapping at every canonical width.
+  for (const width of [320, 375, 768, 1024, 1440, 1920]) {
+    const tm = await bus(tabId, 'RUN_TIME_MACHINE', { width });
+    assert(tm.ok && tm.res?.ok === true, `time machine @${width}`, ev);
+    const active = tm.res.breakpoints.filter((b) => b.active).map((b) => b.raw);
+    if (width >= 1024) {
+      assert(active.some((r) => r.includes('1024px')), `1024 rule active @${width}`, ev);
+    } else if (width >= 768) {
+      assert(active.some((r) => r.includes('768px')), `768 rule active @${width}`, ev);
+    } else if (width >= 375) {
+      assert(active.some((r) => r.includes('375px')), `375 rule active @${width}`, ev);
+    }
+    if (width <= 375) {
+      // The 700px fixed element must overflow narrow viewports — honestly.
+      assert(tm.res.horizontalOverflow === true, `overflow detected @${width}`, ev);
+    }
+  }
+  ev.push('widths 320→1920 mapped, overflow detected ≤375');
+  await page.close();
+});
+
+scenario('TOR-023', 'storage-isolation', async (context, ev) => {
+  const page = await newPage(context, '/storage.html', {
+    '/storage.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_STORAGE_ISOLATION }),
+  });
+  const tabId = await activeTabId();
+  // The page poisons ITS OWN storage with Vizquo-looking keys — the extension
+  // must be completely unaffected (it never reads page storage).
+  const stored = await worker.evaluate(async () => {
+    const all = await chrome.storage.local.get(null);
+    return {
+      hasKey: typeof all['settings:aiApiKey'] === 'string' && all['settings:aiApiKey'].length > 0,
+      hasPoison: JSON.stringify(all).includes('SK-POISONED'),
+    };
+  });
+  assert(stored.hasKey === false && stored.hasPoison === false, 'page storage poisoning never reaches extension storage', ev);
+  // Lifecycle: a ref to a REMOVED element must surface STALE honestly — the
+  // inspect call fails with a clear error, never a wrong element.
+  await bus(tabId, 'SET_INSPECT_MODE', { enabled: true });
+  const lock = await bus(tabId, 'SELECT_ELEMENT', {
+    ref: { selector: '#target', xpath: '', domPath: [] },
+    flash: false,
+  });
+  assert(lock.ok && lock.res?.ok === true, 'locked #target', ev);
+  await page.evaluate(() => window.__removeTarget());
+  await page.waitForTimeout(400);
+  const inspect = await bus(tabId, 'GET_ELEMENT_INSPECTION', {
+    ref: { selector: '#target', xpath: '', domPath: [] },
+  });
+  assert(inspect.ok && inspect.res?.ok === false, 'removed element reports STALE (honest error)', ev);
+  assert(
+    (inspect.res.error ?? '').length > 0,
+    `stale error is actionable (${inspect.res.error?.slice(0, 60)})`,
+    ev,
+  );
+  // The live lock must also clear (the controller holds a live reference).
+  const state = await bus(tabId, 'GET_INSPECT_STATE', undefined);
+  assert(state.ok && (state.res?.locked ?? null) === null, 'live lock cleared after removal', ev);
+  await bus(tabId, 'SET_INSPECT_MODE', { enabled: false });
+  await page.close();
+});
+
+/* ------------------------------------------------------------------------ */
 /* Main                                                                      */
 /* ------------------------------------------------------------------------ */
 

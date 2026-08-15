@@ -37,7 +37,7 @@ Last full validation (all passed):
 |---|---|---|
 | Type check | `npm run compile` | ✅ clean |
 | Lint | `npm run lint` | ✅ **fully clean** (landing's pre-existing `!important`/descending-specificity warnings are now a documented rule override) |
-| Unit tests | `npm run test` | ✅ **400/400** |
+| Unit tests | `npm run test` | ✅ **402/402** |
 | Production build (Chrome MV3) | `npm run build` | ✅ keyless, 1.3 MB |
 | Firefox AMO-ready build | `npm run build:firefox:mv3` | ✅ |
 | E2E (Playwright, 13 tests) | `npm run test:e2e` | ✅ 12 pass, 1 honest skip (grant-dependent capture success) |
@@ -45,7 +45,7 @@ Last full validation (all passed):
 | Live probe (real sites) | `node scripts/probe-real-sites.mjs` | ✅ 19/19 — example.com, Wikipedia, MDN, HN |
 | Big-site verification (YouTube) | `node scripts/diag-youtube.mjs` | ✅ scan completes via main-thread fallback (~20 s) |
 | Landing smoke (3 engines) | `node scripts/check-landing-browsers.mjs` | ✅ chromium · firefox · webkit |
-| Torture suite (deterministic stress/security) | `npm run test:torture` | ✅ **14/14** (250k-node, mutation storm, CSP/SVG/iframe/SOP, live-edit race, secrets) |
+| Torture suite (deterministic stress/security) | `npm run test:torture` | ✅ **23/23** (huge-dom/css, deep-dom, mutation storm, shadow/iframe/SVG/CSP, spa-race, WebGL, responsive, secrets, storage isolation) |
 | Store ZIP | `npm run zip` | ✅ `vizquo-0.10.9-chrome.zip` |
 
 Manifest permissions (minimal, all used): `storage`, `sidePanel`, `downloads`,
@@ -451,19 +451,37 @@ secrets (no key in storage, AI optional, zero external requests),
 multi-tab-isolation, memory-soak (5 cycles, no error accumulation). Full
 matrix + evidence in TESTING.md. All 14 VERIFIED PASS.
 
-**Re-verification after the fix:** unit 400/400 · E2E 12 pass + 1 honest skip
-· torture 14/14 · real-site probe 19/19 · YouTube scan 19.5 s with the unique
-selector on real custom elements (`ytd-app:nth-of-type(1)`) · lint/compile
-clean · landing smoke 3/3.
+**Second pass — torture suite extended 14 → 23 scenarios** (huge-css,
+deep-dom, svg-security, animation-monster, webgl-monster, spa-race,
+screenshot-monster, responsive-monster, storage-isolation/lifecycle) and the
+real-site probe gained a **WebGL/WebGPU corpus** (Three.js, WebGL animation
+demo, WebGPU samples — 15/15). Two more real bugs caught and fixed:
+
+- **BUG-H-002 (P1, stale cache):** the L2 `roleMemo` was keyed on structure
+  only, though color roles depend on the color values — a same-structure SPA
+  re-render served the previous page's colors, and the orchestrator's
+  `cached` flag (structural hash) mislabeled the scan as cached. Fixed:
+  role key = colors + structure; `getSnapshotHash` now hashes EVERY field any
+  analysis unit reads (full-input hash). Regression: same-structure/
+  different-colors pipeline test.
+- **BUG-H-003 (P2, ghost state):** the controller reported a lock on a REMOVED
+  element. Fixed: `getLockedRef`/`getHoveredRef`/`paintLocked`/`paintHover`
+  check `isConnected` — state reads REMOVED, no ghost outline. Regression:
+  removed-element lock test.
+
+**Re-verification after the second pass:** unit 402/402 · E2E 12 pass + 1
+honest skip · torture 23/23 (twice) · real-site probe 19/19 + WebGL corpus
+15/15 · YouTube scan 19.5 s · lint/compile clean · landing smoke 3/3.
 
 **Honest limitations (from the mission report):** closed/open shadow roots
 and cross-origin iframe content are correctly NOT claimed (document-scoped
 walk — verified by TOR-004/005); the overlay mounts under
 `z-index:2147483647 !important` (TOR-007) but page elements at the max
-z-index can still paint above it (browser semantics — the overlay is
-best-effort against hostile CSS); memory soak covers error-level
-stabilization, not CDP heap deltas (documented); full 500-iteration soak and
-Awwwards/WebGL corpus need a headed machine + network (NOT TESTED).
+z-index can still paint above it (browser semantics — best-effort); memory
+soak covers error-level stabilization, not CDP heap deltas (documented);
+full 500-iteration soak and Awwwards/creative-WebGL sites (Lusion, Resn) need
+a headed GPU machine (NOT TESTED); screenshot pixel-capture needs a real user
+gesture (BLOCKED in automation — geometry/scroll verified).
 
 ## 16. Recommended first tasks tomorrow
 

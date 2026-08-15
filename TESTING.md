@@ -63,6 +63,34 @@ STATUS / EVIDENCE; statuses are VERIFIED PASS / FAIL / BLOCKED only.
 - `TOR-014 memory-soak` — 5 activate→inspect→scan cycles with the panel open:
   no error accumulation, worker alive. (Full CDP heap-trace measurement is a
   documented limitation — see the hardening report.)
+- `TOR-015 huge-css` — 10k rules, 400 variables, `@layer`, media + container
+  queries, transforms/filters/containment: parsed under the engine's
+  documented bounds (8k rules/sheet, 200 declarations/rule), cascade traces
+  computed on a layered page.
+- `TOR-016 deep-dom` — 1000 levels of nesting: bounded DOM tree, no stack
+  overflow, scan completes.
+- `TOR-017 svg-security` — `onbegin`/`onerror` handlers, inline `<script>`,
+  `javascript:` URLs, recursive `<use>`, `foreignObject`, 5k-point paths: the
+  canary fires in the page (4×) and never reaches the extension worker; raw
+  observed markup preserved; render-time sanitization E2E-proven.
+- `TOR-018 animation-monster` — 3000 animated/composited elements:
+  animation/transition counts honest, scan completes in 15.5 s.
+- `TOR-019 webgl-monster` — a live raw-WebGL scene + 2D canvas: real GL
+  context scanned and inspected, canvas intact, page responsive under GL load.
+- `TOR-020 spa-race` — pushState + `innerHTML` swap: the host page is never
+  mutated by a scan, SPA content is observed after nav, the re-scan is NOT
+  silently cached, and the L2 role memo cannot serve the previous page's
+  colors (regression for BUG-H-002).
+- `TOR-021 screenshot-monster` — 103 740 px page: honest geometry, exact
+  scroll round-trip + restoration, single sticky node. (Pixel capture needs a
+  user gesture — BLOCKED in automation, documented.)
+- `TOR-022 responsive-monster` — media + container queries + a fixed-width
+  overflow: Time Machine maps widths 320→1920, overflow honestly detected
+  ≤375, `viewportMeta` detected.
+- `TOR-023 storage-isolation + lifecycle` — page poisons its own
+  localStorage/sessionStorage with Vizquo-looking keys (inert — the extension
+  never reads page storage); a ref to a REMOVED element surfaces STALE with an
+  actionable error and the live lock clears (regression for BUG-H-003).
 
 ## Current coverage
 

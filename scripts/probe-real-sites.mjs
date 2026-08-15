@@ -26,6 +26,10 @@ const SITES = [
   { name: 'wikipedia', url: 'https://en.wikipedia.org/wiki/Design' },
   { name: 'MDN', url: 'https://developer.mozilla.org/en-US/' },
   { name: 'Hacker News', url: 'https://news.ycombinator.com/' },
+  // --- WebGL / GPU corpus (master spec §26) ---
+  { name: 'Three.js', url: 'https://threejs.org/examples/' },
+  { name: 'WebGL demo', url: 'https://threejs.org/examples/webgl_animation_keyframes.html' },
+  { name: 'WebGPU samples', url: 'https://webgpu.github.io/webgpu-samples/' },
 ];
 
 const { pass, fail, print } = makeReporter('PROBE (real sites)');

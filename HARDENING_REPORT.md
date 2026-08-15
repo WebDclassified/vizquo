@@ -18,6 +18,14 @@ gate re-run: **all green**.
 
 **Release decision: READY** (no release-blocking issues remain; see §20).
 
+**Extended (second pass):** the torture suite grew from 14 to **23 scenarios**
+(huge-css, deep-dom, svg-security, animation-monster, webgl-monster, spa-race,
+screenshot-monster, responsive-monster, storage-isolation/lifecycle) and it
+caught **two more real bugs** — a stale L2 color-role cache after same-
+structure SPA re-renders, and a controller that reported a lock on a REMOVED
+element. Both fixed with regression tests. The real-site probe gained a
+**WebGL/WebGPU corpus** (Three.js, a WebGL animation demo, WebGPU samples).
+
 ## 2. Environment
 
 | | |
@@ -95,6 +103,15 @@ selectors on real custom elements. **19/19 probe checks passed.**
 | TOR-012 | prompt-injection-secrets | no key in storage; AI honest-disabled; zero external requests |
 | TOR-013 | multi-tab-isolation | results tab-stamped; colors never cross tabs |
 | TOR-014 | memory-soak (5 cycles + panel) | no error accumulation; worker alive |
+| TOR-015 | huge-css (10k rules, 400 vars, layers, queries) | parsed under the documented bounds (8k rules/200 decl per rule), cascade traces computed |
+| TOR-016 | deep-dom (1000 levels) | DOM tree bounded, scan completes, no stack overflow |
+| TOR-017 | svg-security (handlers, scripts, javascript: URLs, recursion) | canary fires in page (4×), never reaches the extension; raw observed markup preserved |
+| TOR-018 | animation-monster (3000 animated/composited) | animation/transition counts honest, scan in 15.5 s |
+| TOR-019 | webgl-monster (live WebGL + 2D canvas) | real WebGL context scanned + inspected, canvas intact, page responsive |
+| TOR-020 | spa-race (pushState + DOM swap) | host page never mutated; SPA content observed; re-scan NOT cached after change; stale colors fixed |
+| TOR-021 | screenshot-monster (103 740 px page) | geometry honest, exact scroll round-trip + restoration, single sticky node |
+| TOR-022 | responsive-monster (media + container queries) | Time Machine maps 320→1920, overflow honestly detected ≤375 |
+| TOR-023 | storage-isolation + lifecycle | page storage poisoning inert; removed element → STALE surfaced, live lock cleared |
 
 ## 8. Performance results
 
@@ -154,12 +171,16 @@ kills animations, high-contrast forces solid materials (E2E Phase 9 spec).
 | ID | Title | Severity | Found by |
 |---|---|---|---|
 | BUG-H-001 | Ambiguous selector for identical siblings silently resolves to a different element | P1 (incorrect inspection data) | TOR-003 |
+| BUG-H-002 | Stale L2 color roles after same-structure re-render (SPA nav serves the previous page's colors) + `cached` flag mislabeled | P1 (incorrect inspection data; silent stale cache) | TOR-020 |
+| BUG-H-003 | Controller reports a lock on a REMOVED (detached) element | P2 (misleading state; ghost outline) | TOR-023 |
 
 ## 15. Bugs fixed
 
 | ID | Root cause | Fix | Regression test |
 |---|---|---|---|
 | BUG-H-001 | `buildSelector` returned `#list > div.card` for every sibling-identical card | Positional disambiguation in `buildSelector`; identity-agreement check in `resolveRef` (ambiguous → null/STALE) | `tests/dom-ref.test.ts` (+4) |
+| BUG-H-002 | `roleMemo` keyed on structure only, though roles depend on the color values; orchestrator `cached` flag used the structural hash | Role memo key = color values + structure; `getSnapshotHash` now covers every field any analysis unit reads (full-input hash) | `tests/analysis-pipeline.test.ts` (same-structure/different-colors) |
+| BUG-H-003 | `getLockedRef`/`getHoveredRef`/`paintLocked` didn't check `isConnected` | Disconnected lock → null (state reads REMOVED); `paintLocked` drops the ghost and clears the box layer; `paintHover` bails on detached elements | `tests/controller-lifecycle.test.ts` (removed-element lock) |
 
 ## 16. Remaining bugs
 
@@ -190,19 +211,21 @@ confirmed defects.
 |---|---|
 | `npm run compile` | ✅ clean |
 | `npm run lint` | ✅ 0 warnings |
-| `npm run test` | ✅ 400/400 |
+| `npm run test` | ✅ 402/402 (3 new regression tests) |
 | `npm run test:e2e` | ✅ 12 pass + 1 honest skip (grant-dependent) |
-| `npm run test:torture` | ✅ 14/14 |
-| `node scripts/probe-real-sites.mjs` | ✅ 19/19 (example.com, Wikipedia, MDN, HN) |
+| `npm run test:torture` | ✅ **23/23** (ran twice — deterministic) |
+| `node scripts/probe-real-sites.mjs` | ✅ 19/19 (example.com, Wikipedia, MDN, HN) + **15/15 WebGL/GPU corpus** (Three.js, WebGL animation demo, WebGPU samples) |
 | `node scripts/diag-youtube.mjs` | ✅ scan 19.5 s, zero panel errors |
 | `npm run check:landing` | ✅ chromium · firefox · webkit |
 
 ## 20. Release decision
 
-**READY** — no release-blocking issues remain. The one P1 defect found by the
-new torture suite is fixed, regression-tested, and re-verified end to end; the
-torture suite is now a permanent, runnable regression gate
-(`npm run test:torture`).
+**READY** — no release-blocking issues remain. The three defects found by the
+torture suite (ambiguous selectors, stale L2 color roles + mislabeled cache
+flag, ghost locks on removed elements) are all fixed, regression-tested, and
+re-verified end to end; the 23-scenario torture suite is now a permanent,
+runnable regression gate (`npm run test:torture`), and the real-site probe
+covers the WebGL/WebGPU corpus (`npm run probe:sites`).
 
 *This report follows the spec's status vocabulary: every row above is
 VERIFIED PASS, VERIFIED FAIL, NOT TESTED, or BLOCKED — never "probably

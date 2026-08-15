@@ -145,6 +145,26 @@ describe('inspect controller lifecycle (observer/listener hygiene)', () => {
     vi.useRealTimers();
   });
 
+  it('a lock on a REMOVED element is surfaced honestly (never a ghost ref)', () => {
+    const controller = new InspectController();
+    controller.enable();
+    const div = document.createElement('div');
+    div.id = 'gone';
+    document.body.appendChild(div);
+    expect(controller.selectRef(makeRef(div)).ok).toBe(true);
+    expect(controller.getLockedRef()).not.toBeNull();
+    // SPA-style removal: the element leaves the document.
+    div.remove();
+    // The state must NOT claim a valid-looking lock on a detached element.
+    expect(controller.getLockedRef()).toBeNull();
+    // getState is what the panel renders — it must read REMOVED, not VALID.
+    const state = controller.getState();
+    expect(state.enabled).toBe(true);
+    expect(state.locked).toBeNull();
+    controller.disable();
+    controller.destroy();
+  });
+
   it('disable() mid-flash cancels the pulse — no flash ghost on the fresh overlay', () => {
     vi.useFakeTimers();
     vi.spyOn(Element.prototype, 'scrollIntoView').mockImplementation(() => {});

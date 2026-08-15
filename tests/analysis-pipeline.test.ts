@@ -117,6 +117,37 @@ describe('createAnalysisPipeline (worker + main-thread fallback surface)', () =>
     expect(changed.colors.map((c) => c.value.hex)).toContain('#00ff00');
   });
 
+  it('recomputes color roles when colors change but structure is identical (SPA re-render)', () => {
+    const pipeline = createAnalysisPipeline();
+    // Same component tree (identical domPaths/tags/classes), different data.
+    const mk = (bg: string) => ({
+      tag: 'button',
+      isButton: true,
+      classes: ['btn'],
+      backgroundColor: bg,
+      ref: { selector: '#same', xpath: '/html/body/button', domPath: [1, 2, 0] },
+    });
+    pipeline.setSnapshot(
+      snapshot({
+        samples: [sample(mk('#635bff')), sample(mk('#e8e9ff'))],
+      }),
+    );
+    const first = pipeline.analyzeColors();
+    expect(first.cached).toBe(false);
+    expect(first.colors.map((c) => c.value.hex)).toContain('#635bff');
+
+    // SPA swap: the SAME structure now renders with a different brand color.
+    pipeline.setSnapshot(
+      snapshot({
+        samples: [sample(mk('#11aa55')), sample(mk('#e8e9ff'))],
+      }),
+    );
+    const second = pipeline.analyzeColors();
+    expect(second.cached).toBe(false);
+    expect(second.colors.map((c) => c.value.hex)).toContain('#11aa55');
+    expect(second.colors.map((c) => c.value.hex)).not.toContain('#635bff');
+  });
+
   it('supports the health probe and structural hash used by the orchestrator', () => {
     const pipeline = createAnalysisPipeline();
     const { hash } = pipeline.setSnapshot(snapshot());
