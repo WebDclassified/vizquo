@@ -10,6 +10,9 @@
  *   - Unpacked (--load-extension) extensions auto-accept optional host
  *     permissions in this harness, so the on-demand site grant completes
  *     without manual clicks (same flow as tests/e2e/hostile.spec.ts).
+ *   - The panel is pinned to the dark glass theme (`colorScheme: 'dark'` +
+ *     the default auto setting) — the product has one glass language, and
+ *     store screenshots must never come out light-themed.
  *   - Screenshots land at the panel's natural layout. Resize/crop to
  *     1280×800 or 640×400 before uploading to a store if needed.
  */
@@ -196,6 +199,9 @@ async function capture(panel, name, column) {
 const context = await chromium.launchPersistentContext('', {
   channel: 'chromium',
   headless: false,
+  // Force the OS dark scheme so the panel's auto theme resolves to the dark
+  // glass UI — screenshots must be single-theme (no light variant).
+  colorScheme: 'dark',
   args: [`--disable-extensions-except=${EXTENSION_PATH}`, `--load-extension=${EXTENSION_PATH}`],
 });
 
