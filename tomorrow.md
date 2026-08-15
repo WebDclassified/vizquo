@@ -483,7 +483,42 @@ full 500-iteration soak and Awwwards/creative-WebGL sites (Lusion, Resn) need
 a headed GPU machine (NOT TESTED); screenshot pixel-capture needs a real user
 gesture (BLOCKED in automation — geometry/scroll verified).
 
-## 16. Recommended first tasks tomorrow
+## 16. Real-site corpus + landing redesign (af26714)
+
+**Extension hardening (committed 98bd8fb):**
+- `ui/screens/sidepanel/connection.ts` — the connection card's retry chain was
+  4×1.5s ≈ 6s, so heavy pages whose `document_idle` injects late (YouTube,
+  Awwwards) sat on "Not connected" forever despite a working bus. Now backs
+  off across ~66s (`CONTENT_RETRY_SCHEDULE_MS`) and still terminates for
+  permanently unreachable tabs. Verified: YouTube + Awwwards connect in the
+  probe; 3-engine smoke green.
+- `scripts/torture.mjs` — **TOR-024 nightmare** (Tier-9 brutal page): dynamic
+  iframes created/destroyed, open+closed shadow roots cycled, WebGL1/2 +
+  WebGPU canvases, rAF + WAAPI + CSS animation, SPA route churn, media zoo
+  (GIF/AVIF/blob/data/svg-sprite). Suite now **24 scenarios, all PASS**.
+- `scripts/probe-real-sites.mjs` — tiered corpus (tiers 1–8 + core-15 + fast
+  CI set), honest login-wall/bot detection (title redirect, redirect host, or
+  password form on a sparse page — nav links like HN's "login" no longer
+  false-positive), and a deterministic 100k-DOM fixture member
+  (`huge-dom-fixture`). Run: `VQ_PROBE_SITES=corpus15 node scripts/probe-real-sites.mjs`.
+
+**Landing redesign (af26714):** `landing/index.html` fully rebuilt on the
+"See the web differently" inspection-instrument narrative per the premium
+SaaS spec — `--vz` token set (values matched to the extension palette), Inter
++ JetBrains Mono only, glass materials mirrored from the side panel, one
+accent, instrumentation as the differentiator (crosshairs, measurement
+rulers, token chips, confidence badges). New order: hero with the live demo
+above the fold → trust strip → product reveal (honest counters: 100% local,
+7 browsers) → 7-step narrative → inspect measurement section → features bento
+→ optional AI → privacy/security → personas → product proof (real torture-
+suite evidence) → install (browser/OS detection kept) → spec FAQ → final CTA
+→ footer. All functional hooks + smoke-test selectors preserved; `npm run
+check:landing` passes all 3 engines (hero, counters, demo, download overlay,
+burger, back-top, reduced motion, zero overflow at 1280/390); biome clean.
+The old `--vz`-themed de-flash note (§13) is superseded by this rebuild — the
+calm/no-decorative-motion stance is unchanged.
+
+## 17. Recommended first tasks tomorrow
 
 1. **Submit the 0.10.9 store packages (§6A)** — the release was cut
    (`npm run release -- 0.10.8 0.10.9`): packages are in
