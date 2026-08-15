@@ -6,7 +6,7 @@
  * inspection, DOM tree) are fetched on demand over the typed message bus.
  */
 import { STORAGE_KEYS } from '../../../../shared/constants';
-import { sendMessage } from '../../../../shared/messages';
+import { sendTabMessage } from '../../../../shared/messages';
 import { isForTab } from '../../../../shared/tab-isolation';
 import type { ElementRef, NavigateDirection, OverlayOptions } from '../../../../shared/types';
 import { notify } from '../../../stores/toast';
@@ -32,7 +32,7 @@ export async function setInspectMode(enabled: boolean): Promise<void> {
   setStore('enabled', enabled);
   if (tabId == null) return;
   try {
-    const result = await sendMessage('SET_INSPECT_MODE', { enabled }, tabId);
+    const result = await sendTabMessage(tabId, 'SET_INSPECT_MODE', { enabled });
     setStore('enabled', result.enabled);
   } catch {
     setStore('enabled', false);
@@ -53,7 +53,7 @@ export async function fetchInspection(ref: ElementRef | null): Promise<void> {
   }
   setStore('loading', true);
   try {
-    const result = await sendMessage('GET_ELEMENT_INSPECTION', { ref }, tabId);
+    const result = await sendTabMessage(tabId, 'GET_ELEMENT_INSPECTION', { ref });
     if (result.ok) {
       setStore('inspection', result.inspection);
     } else {
@@ -71,7 +71,7 @@ export async function fetchDomTree(): Promise<void> {
   setStore('domLoading', true);
   setStore('domError', null);
   try {
-    const result = await sendMessage('GET_DOM_TREE', { maxDepth: 14, maxNodes: 800 }, tabId);
+    const result = await sendTabMessage(tabId, 'GET_DOM_TREE', { maxDepth: 14, maxNodes: 800 });
     if (result.ok) {
       setStore('domTree', result.nodes);
       setStore('domTruncated', result.truncated);
@@ -88,7 +88,7 @@ export async function fetchDomTree(): Promise<void> {
 export async function selectElement(ref: ElementRef, opts?: { flash?: boolean }): Promise<void> {
   if (tabId == null) return;
   try {
-    await sendMessage('SELECT_ELEMENT', { ref, flash: opts?.flash }, tabId);
+    await sendTabMessage(tabId, 'SELECT_ELEMENT', { ref, flash: opts?.flash });
     setStore('lockedRef', ref);
     setStore('hoveredRef', ref);
     setStore('activeTab', 'overview');
@@ -101,7 +101,7 @@ export async function selectElement(ref: ElementRef, opts?: { flash?: boolean })
 export async function navigateElement(direction: NavigateDirection): Promise<void> {
   if (tabId == null) return;
   try {
-    const result = await sendMessage('NAVIGATE_ELEMENT', { direction }, tabId);
+    const result = await sendTabMessage(tabId, 'NAVIGATE_ELEMENT', { direction });
     if (result.ref) {
       setStore('lockedRef', result.ref);
       setStore('hoveredRef', result.ref);
@@ -141,7 +141,7 @@ export async function pushOverlayOptions(
     setStore('overlay', merged);
     if (tabId != null) {
       try {
-        await sendMessage('SET_OVERLAY_OPTIONS', merged, tabId);
+        await sendTabMessage(tabId, 'SET_OVERLAY_OPTIONS', merged);
       } catch {
         // Overlay options are best-effort when the page isn't connected.
       }

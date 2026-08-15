@@ -11,7 +11,7 @@
  * all), and only as a last resort does a single direct `tabs.query`.
  */
 import { browser } from 'wxt/browser';
-import { sendMessage } from '../../../shared/messages';
+import { sendMessage, sendTabMessage } from '../../../shared/messages';
 import { setUi, ui } from '../../stores/ui-store';
 import { setStore } from './inspector/inspector-store';
 
@@ -133,7 +133,7 @@ export async function setInspectModeFromCard(enabled: boolean): Promise<void> {
   const tabId = ui.connection.tabId;
   if (tabId == null) return;
   try {
-    const result = await sendMessage('SET_INSPECT_MODE', { enabled }, tabId);
+    const result = await sendTabMessage(tabId, 'SET_INSPECT_MODE', { enabled });
     setUi('connection', 'inspectModeEnabled', result.enabled);
     setStore('enabled', result.enabled);
   } catch {

@@ -15,33 +15,51 @@ import type { ElementRef } from '../../shared/types';
 
 const MAX_SELECTOR_CHAIN = 8;
 
-/** Short, safe class names only (ignores mangled/duplicated/host classes). */
+/** Short, safe class names only (ignores mangled/duplicated/host classes).
+ *  Tailwind v4 arbitrary-value classes (`@container`, `px-(--spacing)`, …)
+ *  are legal HTML class names and must be ESCAPED, not dropped — dropping
+ *  them loses the identity and keeping them raw breaks the selector. */
 function classPart(el: Element): string | null {
   const classes = Array.from(el.classList).filter(
     (c) => c.length > 0 && c.length <= 32 && !c.startsWith('_') && !c.includes(':'),
   );
   if (classes.length === 0) return null;
-  return classes.slice(0, 2).join('.');
+  return classes
+    .slice(0, 2)
+    .map((c) => escapeCssIdent(c))
+    .join('.');
 }
 
-/** Escape a CSS identifier for use inside a selector. */
+/**
+ * Escape a CSS identifier for use inside a selector (matches CSS.escape
+ * semantics): alphanumerics/underscore/hyphen/non-ASCII pass through, every
+ * other byte is hex-escaped, and the FIRST character may not be a digit or a
+ * dash followed by a digit (the CSS identifier grammar) — those are escaped
+ * too. `@container` → `\40 container`, `px-(--geist-page-margin)` →
+ * `px-\28 --geist-page-margin\29 `, `1x` → `\31 x`, `-z-10` stays clean.
+ */
 export function escapeCssIdent(name: string): string {
   if (/^[a-zA-Z_][a-zA-Z0-9_-]*$/.test(name)) return name;
-  // Escape each char that is not a valid identifier character.
+  const chars = Array.from(name);
   let out = '';
-  for (const ch of name) {
+  for (const [i, ch] of chars.entries()) {
     const code = ch.codePointAt(0) ?? 0;
-    if (
+    const isAlpha = (code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a);
+    const validChar =
+      isAlpha ||
       (code >= 0x30 && code <= 0x39) ||
-      (code >= 0x41 && code <= 0x5a) ||
-      (code >= 0x61 && code <= 0x7a) ||
       ch === '-' ||
       ch === '_' ||
-      code > 0x7f
-    ) {
-      out += ch;
-    } else {
+      code > 0x7f;
+    // CSS identifiers cannot START with a digit or a dash followed by a
+    // digit; a leading dash followed by anything else is fine (`-z-10`).
+    const badFirst =
+      i === 0 &&
+      (ch === '-' ? /^[0-9]/.test(chars[1] ?? '') : !isAlpha && ch !== '_' && !(code > 0x7f));
+    if (!validChar || badFirst) {
       out += `\\${code.toString(16)} `;
+    } else {
+      out += ch;
     }
   }
   return out;
@@ -148,7 +166,15 @@ export function buildSelector(el: Element): string {
   const needsQuery = steps.some((s) => !s.part.startsWith('#') && !s.part.includes(':nth-of-type'));
   if (needsQuery) {
     for (let i = steps.length - 1; i >= 0; i -= 1) {
-      if (document.querySelectorAll(selector).length <= 1) break;
+      let matches = 0;
+      try {
+        matches = document.querySelectorAll(selector).length;
+      } catch {
+        // Unparsable selector (hostile/edge class names) — fall back to the
+        // positional chain; never throw out of the selector builder.
+        break;
+      }
+      if (matches <= 1) break;
       const step = steps[i];
       if (!step || step.part.startsWith('#') || step.part.includes(':nth-of-type')) continue;
       steps[i] = {

@@ -7,7 +7,7 @@
  * and multi-selection also flow through this module.
  */
 import { INSPECTION_SCHEMA_VERSION, STORAGE_KEYS } from '../../../../shared/constants';
-import { sendMessage } from '../../../../shared/messages';
+import { sendMessage, sendTabMessage } from '../../../../shared/messages';
 import { isForTab } from '../../../../shared/tab-isolation';
 import type {
   ElementRef,
@@ -143,8 +143,10 @@ async function probeL3Cache(url: string): Promise<{
   entry: { data: Inspection; fingerprint: string } | null;
   fingerprint: string;
 }> {
+  const target = tabId;
+  if (target == null) return { entry: null, fingerprint: '' };
   try {
-    const result = await sendMessage('GET_PAGE_FINGERPRINT', undefined, tabId);
+    const result = await sendTabMessage(target, 'GET_PAGE_FINGERPRINT', undefined);
     const fingerprint = result.fingerprint;
     let entry: { data: Inspection; fingerprint: string } | null = null;
     try {
@@ -283,7 +285,7 @@ export async function scanPage(forceRescan = false): Promise<void> {
     technology: 'pending',
   });
   try {
-    const result = await sendMessage('SCAN_PAGE', undefined, tabId);
+    const result = await sendTabMessage(tabId, 'SCAN_PAGE', undefined);
     if (result.ok) {
       setAnalysis('inspection', result.inspection);
       setAnalysis('scanning', false);
@@ -308,7 +310,7 @@ export async function scanPage(forceRescan = false): Promise<void> {
 export async function findInstances(kind: FindInstancesKind, value: string): Promise<number> {
   if (tabId == null || !isScannableUrl(ui.connection.tabUrl)) return 0;
   try {
-    const result = await sendMessage('FIND_INSTANCES', { kind, value }, tabId);
+    const result = await sendTabMessage(tabId, 'FIND_INSTANCES', { kind, value });
     notify({
       title: `${result.count} instance${result.count === 1 ? '' : 's'} found`,
       description: result.truncated
@@ -327,7 +329,7 @@ export async function findInstances(kind: FindInstancesKind, value: string): Pro
 export async function highlightRefs(refs: ElementRef[], label: string): Promise<void> {
   if (tabId == null || !isScannableUrl(ui.connection.tabUrl) || refs.length === 0) return;
   try {
-    await sendMessage('HIGHLIGHT_REFS', { refs, label }, tabId);
+    await sendTabMessage(tabId, 'HIGHLIGHT_REFS', { refs, label });
   } catch {
     // Best-effort.
   }
@@ -336,7 +338,7 @@ export async function highlightRefs(refs: ElementRef[], label: string): Promise<
 export async function clearHighlights(): Promise<void> {
   if (tabId == null || !isScannableUrl(ui.connection.tabUrl)) return;
   try {
-    await sendMessage('CLEAR_HIGHLIGHTS', undefined, tabId);
+    await sendTabMessage(tabId, 'CLEAR_HIGHLIGHTS', undefined);
   } catch {
     // Best-effort.
   }
@@ -345,7 +347,7 @@ export async function clearHighlights(): Promise<void> {
 export async function findSimilar(ref: ElementRef): Promise<SimilarityResult[]> {
   if (tabId == null || !isScannableUrl(ui.connection.tabUrl)) return [];
   try {
-    const result = await sendMessage('FIND_SIMILAR', { ref }, tabId);
+    const result = await sendTabMessage(tabId, 'FIND_SIMILAR', { ref });
     notify({
       title: `${result.results.length} similar elements highlighted`,
       description: 'Structurally similar candidates, best first.',
@@ -361,7 +363,7 @@ export async function findSimilar(ref: ElementRef): Promise<SimilarityResult[]> 
 export async function fetchMultiSummary(): Promise<void> {
   if (tabId == null || !isScannableUrl(ui.connection.tabUrl)) return;
   try {
-    const summary = await sendMessage('GET_MULTI_SUMMARY', undefined, tabId);
+    const summary = await sendTabMessage(tabId, 'GET_MULTI_SUMMARY', undefined);
     setAnalysis('multiSummary', summary);
   } catch {
     setAnalysis('multiSummary', null);
@@ -371,7 +373,7 @@ export async function fetchMultiSummary(): Promise<void> {
 export async function clearMultiSelection(): Promise<void> {
   if (tabId == null || !isScannableUrl(ui.connection.tabUrl)) return;
   try {
-    await sendMessage('CLEAR_MULTI_SELECTION', undefined, tabId);
+    await sendTabMessage(tabId, 'CLEAR_MULTI_SELECTION', undefined);
   } catch {
     // Best-effort.
   }
@@ -385,7 +387,7 @@ export async function cancelScan(): Promise<void> {
   setAnalysis('scanError', 'Scan cancelled.');
   if (tabId == null) return;
   try {
-    await sendMessage('CANCEL_SCAN', undefined, tabId);
+    await sendTabMessage(tabId, 'CANCEL_SCAN', undefined);
   } catch {
     // Content script unreachable — the local state reset above already holds.
   }

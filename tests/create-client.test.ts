@@ -19,9 +19,22 @@ import { setUi, ui } from '../ui/stores/ui-store';
 
 const mocks = vi.hoisted(() => ({
   sendMessage: vi.fn(),
+  sendTabMessage: vi.fn(),
 }));
 
-vi.mock('../shared/messages', () => ({ sendMessage: mocks.sendMessage }));
+// The BUG-H-004 fix routes content-script sends (live edit, geometry, scroll)
+// through sendTabMessage(ui.connection.tabId, …); captureFullpage therefore
+// exercises BOTH paths. This mock mirrors the module's real exports.
+vi.mock('../shared/messages', () => ({
+  sendMessage: mocks.sendMessage,
+  sendTabMessage: mocks.sendTabMessage,
+}));
+
+/** Delegate sendTabMessage(tabId, type, data) into the sendMessage mock so
+ *  every assertion below stays on the `(type, data)` call shape. */
+function mirrorSendTabToSendMessage(): void {
+  mocks.sendTabMessage.mockImplementation((_tabId, type, data) => mocks.sendMessage(type, data));
+}
 // The only .tsx module in the import graph — Solid JSX isn't wired into
 // vitest, so stub it (notify is not what these tests assert).
 vi.mock('../ui/stores/toast', () => ({ notify: vi.fn() }));
@@ -58,6 +71,7 @@ function setWebTab(url = 'https://example.com/'): void {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mirrorSendTabToSendMessage();
   setWebTab();
   vi.stubGlobal('Image', FakeImage);
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(

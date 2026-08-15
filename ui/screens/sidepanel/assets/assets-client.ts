@@ -7,7 +7,7 @@
  */
 
 import { filenameForUrl } from '../../../../export/assets-zip';
-import { sendMessage } from '../../../../shared/messages';
+import { sendMessage, sendTabMessage } from '../../../../shared/messages';
 import type {
   Asset,
   ExportAssetRequest,
@@ -15,6 +15,7 @@ import type {
   FetchAssetSvgResult,
 } from '../../../../shared/types';
 import { notify } from '../../../stores/toast';
+import { ui } from '../../../stores/ui-store';
 
 /** Build the ZIP request list for the given assets. */
 export function toExportRequests(assets: Asset[]): ExportAssetRequest[] {
@@ -38,8 +39,11 @@ export async function exportAssets(assets: Asset[]): Promise<ExportAssetsResult 
 
 /** Fetch an SVG's source from the page (copy / download / convert actions). */
 export async function fetchAssetSvg(url: string): Promise<FetchAssetSvgResult> {
+  if (ui.connection.tabId == null) {
+    return { ok: false, error: 'The page did not answer. Grant site access and try again.' };
+  }
   try {
-    return await sendMessage('FETCH_ASSET_SVG', { url });
+    return await sendTabMessage(ui.connection.tabId, 'FETCH_ASSET_SVG', { url });
   } catch {
     return {
       ok: false,
@@ -50,9 +54,12 @@ export async function fetchAssetSvg(url: string): Promise<FetchAssetSvgResult> {
 
 /** Highlight an asset's element on the page. */
 export async function highlightAssetRefs(asset: Asset): Promise<void> {
-  if (!asset.ref) return;
+  if (!asset.ref || ui.connection.tabId == null) return;
   try {
-    await sendMessage('HIGHLIGHT_REFS', { refs: [asset.ref], label: asset.type });
+    await sendTabMessage(ui.connection.tabId, 'HIGHLIGHT_REFS', {
+      refs: [asset.ref],
+      label: asset.type,
+    });
     notify({
       title: 'Asset located on the page',
       description: 'Highlighted its element — press Esc to clear.',

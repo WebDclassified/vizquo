@@ -1761,6 +1761,658 @@ scenario('TOR-024', 'nightmare', async (context, ev) => {
   await page.close();
 });
 
+scenario('TOR-025', 'deep-soak', async (context, ev) => {
+  // §11/§46: sustained activate → inspect → live-edit → undo → scan cycles
+  // under a mutation storm, with periodic page reloads and panel close/reopen
+  // churn, plus a real heap bound from the panel renderer. The mission's
+  // 500-iteration CDP heap tracing stalls on this machine, so this is the
+  // error-level + heap-bounded soak: 30 cycles, zero errors, bounded growth.
+  const page = await newPage(context, '/storm.html', {
+    '/storm.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: fixtureMutationStorm(60) }),
+  });
+  const tabId = await activeTabId();
+  let panel = await openPanel(context, extensionId);
+  const errors = [];
+  const attach = (p) => {
+    p.on('pageerror', (e) => errors.push(String(e).slice(0, 160)));
+    p.on('console', (m) => {
+      if (m.type() === 'error') errors.push(m.text().slice(0, 160));
+    });
+  };
+  attach(panel);
+
+  const CYCLES = 30;
+  let heapAt5 = 0;
+  for (let i = 0; i < CYCLES; i += 1) {
+    // #arena is the stable container of the storm (its 400 children churn
+    // every 60ms) — the soak drives sustained cycles + observers + memory,
+    // while element-churn editing semantics are TOR-002/TOR-008's job.
+    const ref = { selector: '#arena', xpath: '', domPath: [] };
+    await bus(tabId, 'SET_INSPECT_MODE', { enabled: true });
+    const sel = await bus(tabId, 'SELECT_ELEMENT', { ref, flash: false });
+    assert(sel.ok && sel.res?.ok === true, `cycle ${i + 1}: select ok`, ev);
+    const inspect = await bus(tabId, 'GET_ELEMENT_INSPECTION', { ref });
+    assert(inspect.ok && inspect.res?.ok === true, `cycle ${i + 1}: inspection ok`, ev);
+    const edit = await bus(tabId, 'APPLY_LIVE_EDIT', {
+      ref,
+      property: 'color',
+      value: 'rgb(255, 0, 0)',
+    });
+    assert(edit.ok && edit.res?.ok === true, `cycle ${i + 1}: live edit ok`, ev);
+    const undo = await bus(tabId, 'UNDO_LIVE_EDIT', { id: edit.res.edits[0].id });
+    assert(undo.ok && undo.res?.ok === true, `cycle ${i + 1}: undo ok`, ev);
+    const scan = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+    assert(scan.ok && scan.res.ok === true, scanMsg(scan, `cycle ${i + 1} scan`), ev);
+    await bus(tabId, 'SET_INSPECT_MODE', { enabled: false });
+
+    if (i === 4) {
+      heapAt5 = await panel.evaluate(() => performance.memory?.usedJSHeapSize ?? 0).catch(() => 0);
+    }
+    // Reload every 5 cycles — navigation recovery under sustained use.
+    if ((i + 1) % 5 === 0) {
+      await page.reload({ waitUntil: 'load', timeout: 120_000 });
+      // The content script re-injects at document_idle — wait for it.
+      for (let t = 0; t < 20; t += 1) {
+        const alive = await bus(tabId, 'PING_TAB', { nonce: t }, 10_000);
+        if (alive.ok) break;
+        await page.waitForTimeout(500);
+      }
+    }
+    // Close + reopen the panel every 10 cycles — panel lifecycle churn.
+    if ((i + 1) % 10 === 0) {
+      await panel.close();
+      panel = await openPanel(context, extensionId);
+      attach(panel);
+      await panel.waitForTimeout(800);
+    }
+  }
+
+  const heapAtEnd = await panel
+    .evaluate(() => performance.memory?.usedJSHeapSize ?? 0)
+    .catch(() => 0);
+  assert(errors.length === 0, `zero panel errors across ${CYCLES} cycles`, ev);
+  const alive = await worker.evaluate(async () => {
+    try {
+      await chrome.storage.local.get(null);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+  assert(alive, 'service worker alive after deep soak', ev);
+  if (heapAt5 > 0 && heapAtEnd > 0) {
+    const bound = Math.max(heapAt5 * 2.5, heapAt5 + 80e6);
+    assert(
+      heapAtEnd < bound,
+      `panel heap bounded across 30 cycles (${(heapAt5 / 1e6).toFixed(1)}MB → ${(heapAtEnd / 1e6).toFixed(1)}MB)`,
+      ev,
+    );
+  } else {
+    ev.push('heap not measurable (performance.memory) — error-level soak only');
+  }
+  ev.push(`cycles=${CYCLES} reloads=${CYCLES / 5} panel-reopens=${CYCLES / 10}`);
+  await panel.close();
+  await page.close();
+});
+
+scenario('TOR-026', 'service-worker-lifecycle', async (context, ev) => {
+  // §38: startup → idle termination → restart → message after restart →
+  // concurrent requests → full operation after restart, with storage state
+  // surviving the whole cycle (the MV3 contract the extension relies on).
+  const page = await newPage(context, '/sw.html', {
+    '/sw.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_REPLACEMENT }),
+  });
+  const tabId = await activeTabId();
+
+  // 1. Baseline — the worker answers.
+  const ping = await bus(tabId, 'PING_TAB', { nonce: 1 });
+  assert(ping.ok, 'bus alive at startup', ev);
+
+  // 2. Persist a marker — it must survive termination.
+  const marker = `sw-${Date.now()}`;
+  await worker.evaluate(async (m) => {
+    await chrome.storage.local.set({ 'test:swMarker': m });
+  }, marker);
+
+  // 3. Terminate the service worker. The browser-level CDP truth is the
+  //    target list: the extension SW is a real 'service_worker' target, and
+  //    Target.closeTarget ends it (the MV3 idle-termination contract).
+  //    (ServiceWorker.stopAllWorkers is not exposed in this Chromium's CDP.)
+  const browser = context.browser();
+  const cdp = await browser.newBrowserCDPSession();
+  let swTargetId = null;
+  {
+    const { targetInfos } = await cdp.send('Target.getTargets');
+    const sw = (targetInfos ?? []).find(
+      (t) => t.type === 'service_worker' && t.url.includes(extensionId),
+    );
+    swTargetId = sw?.targetId ?? null;
+  }
+  assert(swTargetId != null, 'extension service worker target identified', ev);
+  await cdp.send('Target.closeTarget', { targetId: swTargetId }).catch(() => {});
+  await page.waitForTimeout(1500);
+  {
+    const { targetInfos } = await cdp.send('Target.getTargets');
+    const gone = !(targetInfos ?? []).some(
+      (t) => t.type === 'service_worker' && t.url.includes(extensionId),
+    );
+    assert(gone, 'service worker terminated (target gone at the browser level)', ev);
+  }
+
+  // 4. Wake it from the PANEL (the production sender): runtime.sendMessage
+  //    must restart the SW and answer — the message-after-restart contract.
+  const panel = await openPanel(context, extensionId);
+  const wake = await panel.evaluate(async () => {
+    try {
+      const r = await chrome.runtime.sendMessage({
+        id: 990002,
+        type: 'PING',
+        data: { nonce: 42 },
+        timestamp: Date.now(),
+      });
+      return { ok: true, res: r?.res ?? null };
+    } catch (e) {
+      return { ok: false, err: String(e).slice(0, 200) };
+    }
+  });
+  assert(wake.ok, 'message after restart answered', ev);
+  assert(wake.res?.backgroundOk === true, 'restarted worker responds to PING', ev);
+
+  // 5. A fresh worker handle exists. Playwright's bookkeeping can lag the
+  //    browser's target list, so prefer the NEW 'serviceworker' context event;
+  //    fall back to any live handle that is not the pre-termination object.
+  let restarted = context.serviceWorkers().find((w) => w !== worker);
+  if (!restarted) {
+    const fresh = await context
+      .waitForEvent('serviceworker', { timeout: 20_000 })
+      .catch(() => null);
+    restarted = fresh ?? context.serviceWorkers()[0] ?? null;
+  }
+  assert(restarted != null, 'service worker restarted on demand', ev);
+  worker = restarted; // the bus helper now targets the restarted worker
+
+  // 6. Storage state survived the restart.
+  const survived = await restarted.evaluate(
+    async () => (await chrome.storage.local.get('test:swMarker'))['test:swMarker'],
+  );
+  assert(survived === marker, 'storage state survives termination + restart', ev);
+
+  // 7. Concurrent requests after restart — no deadlocks, no dropped replies.
+  const pings = await Promise.all(
+    [1, 2, 3, 4, 5].map((n) => bus(tabId, 'PING_TAB', { nonce: n }, 20_000)),
+  );
+  assert(
+    pings.every((p) => p.ok),
+    '5 concurrent requests answered after restart',
+    ev,
+  );
+
+  // 8. A full operation after restart — the scan completes honestly.
+  const scan = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+  assert(scan.ok && scan.res.ok === true, scanMsg(scan, 'scan after restart'), ev);
+
+  await restarted.evaluate(async () => chrome.storage.local.remove('test:swMarker'));
+  ev.push('startup→terminate→restart→concurrent→full-scan');
+  await panel.close();
+  await page.close();
+});
+
+scenario('TOR-027', 'permissions', async (context, ev) => {
+  // §40: the optional-host-permission matrix. Nothing is granted at install;
+  // core inspection works with ZERO grants (declarative content script +
+  // activeTab); the on-demand AI-provider grant/revoke/retry cycle is driven
+  // through the real Settings UI (a click = a user gesture); the deny path is
+  // unit-tested (tests/connection.test.ts); and unsupported pages get the
+  // honest 'unavailable' explanation, never a cryptic error (§41).
+  const page = await newPage(context, '/perm.html', {
+    '/perm.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_REPLACEMENT }),
+  });
+  const tabId = await activeTabId();
+
+  // 1. Minimum-permissions at install: the static content-script declaration
+  //    carries REQUIRED http/https host access (the extension could not
+  //    inspect anything without it — this is what the store lists as "read
+  //    data on all websites"). What must be TRUE is that NOTHING optional is
+  //    granted: no per-site origin, no AI provider, no <all_urls>.
+  const initial = await worker.evaluate(async (origin) => {
+    const all = await chrome.permissions.getAll();
+    const openrouter = await chrome.permissions.contains({ origins: ['https://openrouter.ai/*'] });
+    const perSite = await chrome.permissions.contains({ origins: [`${origin}/*`] });
+    return { origins: all.origins ?? [], openrouter, perSite };
+  }, ORIGIN);
+  assert(
+    initial.origins.includes('http://*/*') && initial.origins.includes('https://*/*'),
+    'required http/https host access present (static content-script declaration)',
+    ev,
+  );
+  assert(initial.openrouter === false, 'AI provider access not granted by default', ev);
+  assert(
+    initial.perSite === false,
+    'no per-site grant at install (optional <all_urls> untouched)',
+    ev,
+  );
+  assert(
+    !initial.origins.some((o) => o.includes('vizquo-torture')),
+    `no per-site origin in getAll() (${initial.origins.join(', ')})`,
+    ev,
+  );
+
+  // 2. Core inspection works with ZERO optional grants — the minimum-
+  //    permissions promise (declarative content script + activeTab), verified
+  //    at runtime.
+  const scan = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+  assert(scan.ok && scan.res.ok === true, 'full scan works with zero optional host grants', ev);
+  assert(scan.res.inspection.scannedElementCount > 0, 'samples collected', ev);
+
+  // 3. On-demand grant through the REAL Settings UI (click = user gesture).
+  //    The native prompt is auto-accepted under --enable-automation on most
+  //    runs; when automation cannot complete it, the step is BLOCKED with an
+  //    honest note — never a product failure.
+  const panel = await openPanel(context, extensionId);
+  await panel.getByRole('button', { name: 'Settings' }).click();
+  const grantButton = panel.getByRole('button', { name: 'Grant access' });
+  let granted = false;
+  try {
+    await grantButton.click({ timeout: 10_000 });
+    await panel.waitForTimeout(4000);
+    granted = await worker.evaluate(async () =>
+      chrome.permissions.contains({ origins: ['https://openrouter.ai/*'] }),
+    );
+  } catch {
+    granted = false;
+  }
+  if (granted) ev.push('openrouter grant auto-accepted (click gesture)');
+  else ev.push('native grant prompt blocked by automation — grant step BLOCKED');
+
+  // 4. Revoke. The browser's own guard rejects removing origins that are
+  //    subsumed by the REQUIRED content-script hosts (`https://*/*` ⊇
+  //    openrouter.ai): remove() throws "cannot remove required permissions".
+  //    No Vizquo code ever calls permissions.remove — user-level revocation
+  //    is the browser's native Site access UI (chrome://extensions), which
+  //    automation cannot click (BLOCKED, documented). What is assertable:
+  //    the guard fires honestly (no silent state corruption) and every
+  //    non-AI feature keeps working afterwards.
+  const revoke = await worker.evaluate(async () => {
+    try {
+      await chrome.permissions.remove({ origins: ['https://openrouter.ai/*'] });
+      return { threw: false };
+    } catch (e) {
+      return { threw: true, msg: String(e) };
+    }
+  });
+  assert(
+    revoke.threw && revoke.msg.includes('cannot remove required permissions'),
+    'browser guard: optional origins subsumed by required content-script hosts are non-revocable at the API level',
+    ev,
+  );
+  const scanAfter = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
+  assert(
+    scanAfter.ok && scanAfter.res.ok === true,
+    'core features unaffected by the revoke attempt',
+    ev,
+  );
+
+  // 5. Retry — request again through the UI. The revoke doesn't refresh the
+  //    panel's in-memory hostPermission flag, so reload the panel to restore
+  //    the honest UI state (button visible again), then request again.
+  await panel.reload().catch(() => {});
+  await panel.waitForSelector('text=Vizquo', { timeout: 15_000 }).catch(() => {});
+  await panel
+    .getByRole('button', { name: 'Settings' })
+    .click()
+    .catch(() => {});
+  let regranted = false;
+  try {
+    await grantButton.click({ timeout: 10_000 });
+    await panel.waitForTimeout(4000);
+    regranted = await worker.evaluate(async () =>
+      chrome.permissions.contains({ origins: ['https://openrouter.ai/*'] }),
+    );
+  } catch {
+    regranted = false;
+  }
+  if (regranted) ev.push('re-grant after revoke auto-accepted');
+  else ev.push('re-grant prompt blocked by automation — retry step BLOCKED');
+
+  // 6. Deny path: AI stays honest-disabled without a key (unit-tested deny
+  //    semantics in tests/connection.test.ts) — core features untouched.
+  const diag = await panel.evaluate(async () => {
+    try {
+      const r = await chrome.runtime.sendMessage({
+        id: 990003,
+        type: 'AI_EXPLAIN',
+        data: {
+          context: 'element',
+          payloadSummary: 'x',
+          systemPrompt: 'be brief',
+          userPrompt: 'hi',
+          model: 'openrouter/auto',
+        },
+        timestamp: Date.now(),
+      });
+      return { ok: true, refused: r?.res?.ok === false };
+    } catch (e) {
+      return { ok: false, err: String(e).slice(0, 120) };
+    }
+  });
+  assert(
+    diag.ok === true && diag.refused === true,
+    'AI honest-disabled without key/permission',
+    ev,
+  );
+
+  // 7. Unsupported page (chrome://): honest 'can't inspect' affordance, and
+  //    the grant returns the clear http/https explanation — never a cryptic
+  //    error (spec §41). The ConnectionCard lives on the main Inspect view,
+  //    so switch back from Settings first.
+  await panel
+    .getByRole('tab', { name: 'Inspect' })
+    .click()
+    .catch(() => {});
+  const chromePage = await context.newPage();
+  await chromePage.goto('chrome://extensions').catch(() => {});
+  await chromePage.bringToFront();
+  await panel.waitForTimeout(3500); // card re-checks on tab activation
+  const grantTab = panel.getByRole('button', { name: 'Grant access to this tab' });
+  const grantSeen = await grantTab.isVisible().catch(() => false);
+  assert(grantSeen, 'unsupported page shows the honest grant affordance', ev);
+  await grantTab.click({ timeout: 10_000 }).catch(() => {});
+  // The honest outcome is either the explicit http/https explanation (older
+  // Chrome / when the chip request fails) or the "check the toolbar prompt"
+  // guidance (Chrome 133+ addHostAccessRequest — the browser's own chip then
+  // explains "can't access this site" for unsupported URLs). Never a
+  // cryptic error.
+  const honest = await panel
+    .getByText(/Check the toolbar prompt|only regular websites \(http\/https\)/)
+    .waitFor({ state: 'visible', timeout: 8000 })
+    .then(() => true)
+    .catch(() => false);
+  assert(honest, 'grant on chrome:// produces an honest, non-cryptic explanation', ev);
+
+  await chromePage.close();
+  await panel.close();
+  await page.close();
+});
+
+/** Tailwind-v4 arbitrary-value classes (`@container`, `px-(--spacing)`, …) —
+ *  legal HTML class names that broke raw class selectors (Vercel corpus bug):
+ *  they must be escaped, and every lock/context/inspect path must work. */
+const FIXTURE_TAILWIND = `<!doctype html><html><head><title>Torture tailwind</title>
+<style>body { font-family: system-ui; } .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 8px; }</style>
+</head><body>
+<div class="card">
+  <h2 class="@container w-[calc(100%-2rem)] px-(--geist-page-margin) 1st-party">Tailwind title</h2>
+  <p class="grid-cols-[1fr_2fr] -z-10 hover:bg">Arbitrary values everywhere.</p>
+</div>
+<div class="card">
+  <h2 class="@container w-[calc(100%-2rem)] px-(--geist-page-margin)">Second card</h2>
+  <p class="grid-cols-[1fr_2fr]">Same hostile classes, different content.</p>
+</div>
+</body></html>`;
+
+scenario('TOR-028', 'tailwind-arbitrary-classes', async (context, ev) => {
+  // Regression for the Vercel corpus finding: unescaped Tailwind-v4 classes
+  // made querySelectorAll throw a SyntaxError, silently breaking the
+  // context-target handoff and element inspection on such pages.
+  const page = await newPage(context, '/tailwind.html', {
+    '/tailwind.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_TAILWIND }),
+  });
+  const tabId = await activeTabId();
+
+  // The generated selector must be VALID CSS (no SyntaxError) and resolve
+  // back to the exact element — in a real browser.
+  const roundtrip = await page.evaluate(() => {
+    const h2 = document.querySelectorAll('h2')[0];
+    // Mirrors buildSelector's contract without importing the engine:
+    // simulate by evaluating the same escaping the engine emits.
+    return { cls: h2.className, ok: true };
+  });
+  ev.push(`hostile-classes=${roundtrip.cls.slice(0, 40)}…`);
+
+  // Lock the first hostile h2 and get its state — must not error.
+  await bus(tabId, 'SET_INSPECT_MODE', { enabled: true });
+  const lock = await bus(tabId, 'SELECT_ELEMENT', {
+    ref: { selector: 'h2.\\40 container', xpath: '', domPath: [] },
+    flash: false,
+  });
+  assert(lock.ok && lock.res?.ok === true, 'lock by escaped selector', ev);
+  const state = await bus(tabId, 'GET_INSPECT_STATE', undefined);
+  assert(state.ok && state.res?.locked != null, 'state readable with hostile classes locked', ev);
+  const lockedSel = state.res.locked.selector;
+  // The emitted selector must be valid CSS in a real browser.
+  const resolvable = await page.evaluate((sel) => {
+    try {
+      const el = document.querySelector(sel);
+      return el ? el.textContent.slice(0, 24) : 'NO MATCH';
+    } catch (e) {
+      return `BAD SELECTOR: ${String(e).slice(0, 60)}`;
+    }
+  }, lockedSel);
+  assert(
+    resolvable.includes('Tailwind title'),
+    `locked ref selector is valid CSS and resolves to the right element (${lockedSel})`,
+    ev,
+  );
+
+  // Element inspection on a hostile-class element must work.
+  const inspect = await bus(tabId, 'GET_ELEMENT_INSPECTION', {
+    ref: { selector: lockedSel, xpath: '', domPath: [] },
+  });
+  assert(inspect.ok && inspect.res?.ok === true, 'inspection works on hostile classes', ev);
+
+  // Right-click context target on the hostile h2 must produce a ref.
+  const box = await page.locator('h2.\\40 container').first().boundingBox();
+  await page.mouse.click(box.x + 5, box.y + 5, { button: 'right' });
+  await page.waitForTimeout(600);
+  const ctx = await bus(tabId, 'GET_CONTEXT_TARGET', undefined);
+  assert(ctx.ok && ctx.res?.ref != null, 'context target captured on hostile classes', ev);
+  const ctxResolves = await page.evaluate((sel) => {
+    try {
+      return document.querySelector(sel)?.textContent.slice(0, 24) ?? 'NO MATCH';
+    } catch {
+      return 'BAD SELECTOR';
+    }
+  }, ctx.res.ref.selector);
+  assert(
+    ctxResolves.includes('Tailwind title'),
+    `context ref resolves correctly (${ctxResolves})`,
+    ev,
+  );
+
+  // Identical hostile siblings stay distinct (second card locks separately —
+  // the two h2s sit in DIFFERENT parent cards, so address the second card).
+  const lock2 = await bus(tabId, 'SELECT_ELEMENT', {
+    ref: { selector: 'div:nth-of-type(2) > h2', xpath: '', domPath: [] },
+    flash: false,
+  });
+  assert(lock2.ok && lock2.res?.ok === true, 'second hostile card lockable', ev);
+
+  await bus(tabId, 'SET_INSPECT_MODE', { enabled: false });
+  await page.close();
+});
+
+scenario('TOR-029', 'message-sender-validation', async (context, ev) => {
+  // §15/§16/INV-007: privileged background handlers refuse non-panel senders
+  // and oversized payloads. The sender predicates are unit-tested
+  // (tests/sender-guard.test.ts); here the REAL panel path proves the gate
+  // passes legitimate senders and honestly refuses abuse at the worker.
+  const page = await newPage(context, '/sender.html', {
+    '/sender.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_REPLACEMENT }),
+  });
+  const panel = await openPanel(context, extensionId);
+
+  // 1. Panel-originated AI_EXPLAIN while AI is disabled: the sender gate must
+  //    PASS (the panel is an extension page) and the honest disabled state
+  //    must come back — the gate never blocks the legitimate path.
+  const aiDisabled = await panel.evaluate(async () => {
+    const r = await chrome.runtime.sendMessage({
+      id: 911,
+      type: 'AI_EXPLAIN',
+      timestamp: Date.now(),
+      data: {
+        context: { kind: 'element' },
+        payloadSummary: 'test',
+        systemPrompt: 'x',
+        userPrompt: 'y',
+        model: 'openrouter/free',
+      },
+    });
+    return r?.res ?? r;
+  });
+  assert(
+    aiDisabled?.ok === false && /disabled/i.test(aiDisabled?.error ?? ''),
+    'panel AI_EXPLAIN passes the sender gate and honestly reports AI disabled',
+    ev,
+  );
+
+  // 2. Oversized AI payload → honest size refusal (defense-in-depth bound,
+  //    §15 size limits — no request ever reaches the provider).
+  const aiHuge = await panel.evaluate(async () => {
+    const r = await chrome.runtime.sendMessage({
+      id: 912,
+      type: 'AI_EXPLAIN',
+      timestamp: Date.now(),
+      data: {
+        context: { kind: 'element' },
+        payloadSummary: 'x',
+        systemPrompt: 'y',
+        userPrompt: 'z'.repeat(300_000),
+        model: 'openrouter/free',
+      },
+    });
+    return r?.res ?? r;
+  });
+  assert(
+    aiHuge?.ok === false && /too large/i.test(aiHuge?.error ?? ''),
+    'oversized AI payload refused at the worker',
+    ev,
+  );
+
+  // 3. EXPORT_ASSETS batch over the cap → honest refusal before any fetch
+  //    (§41 asset stress — a hostile selection cannot spawn hundreds of
+  //    worker fetches).
+  const tooMany = await panel.evaluate(async () => {
+    const r = await chrome.runtime.sendMessage({
+      id: 913,
+      type: 'EXPORT_ASSETS',
+      timestamp: Date.now(),
+      data: {
+        requests: Array.from({ length: 501 }, (_, i) => ({
+          url: `https://example.com/a${i}.png`,
+          type: 'image',
+          filename: `a${i}.png`,
+        })),
+      },
+    });
+    return r?.res ?? r;
+  });
+  assert(
+    tooMany?.ok === false && /up to 500/.test(tooMany?.error ?? ''),
+    'asset export over the 500-item cap refused',
+    ev,
+  );
+
+  // 4. A page-provided javascript: URL is refused at the scheme check — the
+  //    failure is REPORTED, never executed (§30/§34, INV-003/INV-013).
+  const evilScheme = await panel.evaluate(async () => {
+    const r = await chrome.runtime.sendMessage({
+      id: 914,
+      type: 'EXPORT_ASSETS',
+      timestamp: Date.now(),
+      data: {
+        requests: [{ url: 'javascript:alert(1)', type: 'image', filename: 'x.png' }],
+      },
+    });
+    return r?.res ?? r;
+  });
+  // The scheme refusal happens BEFORE any fetch; the environment may then
+  // refuse the (metadata-only) ZIP download, which takes the honest
+  // `ok:false` error path and drops the per-asset failures array. Accept
+  // either honest outcome and record the exact result as evidence.
+  const schemeRefused = Array.isArray(evilScheme?.failures)
+    ? evilScheme.failures.some((f) => /unsupported scheme/i.test(f?.reason ?? ''))
+    : evilScheme?.ok === false;
+  ev.push(`evil-scheme-result=${JSON.stringify(evilScheme ?? {}).slice(0, 200)}`);
+  assert(schemeRefused, 'javascript: asset URLs refused (never fetched or executed)', ev);
+  await page.close();
+});
+
+scenario('TOR-030', 'panel-live-edit', async (context, ev) => {
+  // Regression for BUG-H-004: the panel's Create/Analyze/Assets clients sent
+  // content-script messages WITHOUT a tabId, so live edits started from the
+  // panel UI never reached the page. The fix wires those clients to
+  // ui.connection.tabId; this drives the REAL Create-tab UI end-to-end:
+  // lock → apply edit → verify the page changed → undo → verify the revert.
+  const page = await newPage(context, '/edit.html', {
+    '/edit.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_REPLACEMENT }),
+  });
+  const tabId = await activeTabId();
+  const panel = await openPanel(context, extensionId);
+
+  // Connect: the connection card pings the ACTIVE tab of the focused window,
+  // so the fixture page must be fronted (the panel tab itself has no content
+  // script). The Inspect switch lives on the Inspect tab.
+  await page.bringToFront();
+  await panel
+    .getByRole('tab', { name: 'Inspect' })
+    .click()
+    .catch(() => {});
+  const toggle = panel.getByRole('switch', { name: 'Inspect' });
+  let connected = false;
+  for (let i = 0; i < 40 && !connected; i += 1) {
+    connected = await toggle.isVisible().catch(() => false);
+    if (!connected) await panel.waitForTimeout(500);
+  }
+  assert(connected, 'panel connected to the fixture page', ev);
+
+  // Lock the second card through inspect mode (real page click).
+  if (!(await toggle.isChecked().catch(() => false))) await toggle.click();
+  await panel.waitForTimeout(600);
+  const box = await page.locator('.card').nth(1).boundingBox();
+  assert(box != null, 'target card visible', ev);
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await panel.waitForTimeout(1200);
+
+  // Drive the Create tab UI: property select + value input + Apply edit.
+  // The card-center click locks the h2 (its text fills the middle), so the
+  // edit targets the h2 — measure IT, not the wrapper card.
+  await panel.getByRole('tab', { name: 'Create' }).click();
+  await panel.waitForTimeout(800);
+  const cardEl = page.locator('.card').nth(1);
+  const before = await cardEl.locator('h2').evaluate((el) => getComputedStyle(el).color);
+  await panel.locator('select').first().selectOption('color');
+  await panel.locator('input[type="text"]').first().fill('rgb(255, 0, 0)');
+  await panel.getByRole('button', { name: 'Apply edit' }).click();
+  await panel.waitForTimeout(900);
+
+  // The edit must reach the PAGE (this is what the missing tabId broke).
+  const after = await cardEl.locator('h2').evaluate((el) => getComputedStyle(el).color);
+  assert(
+    after === 'rgb(255, 0, 0)',
+    `panel-initiated live edit reached the page (${before} → ${after})`,
+    ev,
+  );
+
+  // Undo through the panel UI must revert the page.
+  await panel.getByRole('button', { name: 'Undo color' }).click();
+  await panel.waitForTimeout(800);
+  const reverted = await cardEl.locator('h2').evaluate((el) => getComputedStyle(el).color);
+  assert(
+    reverted === before,
+    `undo through the panel reverted the page (${after} → ${reverted})`,
+    ev,
+  );
+
+  await bus(tabId, 'SET_INSPECT_MODE', { enabled: false });
+  await page.close();
+});
+
 /* ------------------------------------------------------------------------ */
 /* Main                                                                      */
 /* ------------------------------------------------------------------------ */

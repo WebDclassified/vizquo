@@ -302,11 +302,13 @@ describe('watchActiveTab + silent re-checks', () => {
     });
 
     await runConnectionCheck();
-    // 4 retries × 1.5s, then the chain stops on its own.
-    await vi.advanceTimersByTimeAsync(30_000);
+    // The bounded backoff chain runs 8 steps (1.5s → 20s, ~66.5s total), then
+    // stops on its own — heavy pages (YouTube, Awwwards) can inject their
+    // content script many seconds after activation (real-site QA fix).
+    await vi.advanceTimersByTimeAsync(80_000);
 
-    // 1 initial check + 4 silent retries — and no runaway loop beyond that.
-    expect(mocks.sendMessage).toHaveBeenCalledTimes(5);
+    // 1 initial check + 8 silent retries — and no runaway loop beyond that.
+    expect(mocks.sendMessage).toHaveBeenCalledTimes(9);
   });
 
   it('switching tabs syncs the inspector state and drops the old tab selection (real-site QA fix)', async () => {

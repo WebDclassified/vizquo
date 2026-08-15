@@ -9,6 +9,7 @@
  * mode) flows through storage events (STORAGE_KEYS in shared/constants.ts).
  */
 import { defineExtensionMessaging } from '@webext-core/messaging';
+import { browser } from 'wxt/browser';
 import type {
   AIExplainRequest,
   AIExplainResult,
@@ -161,3 +162,42 @@ export interface ProtocolMap {
 }
 
 export const { sendMessage, onMessage } = defineExtensionMessaging<ProtocolMap>();
+
+/**
+ * Send a message to a specific TAB through the promise-based polyfill path.
+ *
+ * @webext-core's tab-targeted sender uses the raw `chrome.tabs.sendMessage`
+ * CALLBACK form and never reads `chrome.runtime.lastError`, so any message
+ * racing a tab navigation/reload (e.g. the panel auto-loading an element's
+ * inspection while the user navigates a heavy page) leaves an *unchecked*
+ * lastError — Chrome then logs "listener indicated an asynchronous response…
+ * channel closed" into the sender's console. The polyfill consumes the error
+ * and rejects the promise instead, which the callers already handle. Same
+ * response contract as the library: `{ res | err }` from the content script
+ * is unwrapped, handler errors are rethrown.
+ */
+export async function sendTabMessage<Type extends keyof ProtocolMap>(
+  tabId: number,
+  type: Type,
+  data: Parameters<ProtocolMap[Type]>[0],
+): Promise<ReturnType<ProtocolMap[Type]>> {
+  const message = {
+    id: Math.floor(Math.random() * 1_000_000),
+    type,
+    data,
+    timestamp: Date.now(),
+  };
+  // The promise form rejects on runtime.lastError (tab gone, content script
+  // unloaded mid-navigation) instead of leaving it unchecked.
+  const response = (await browser.tabs.sendMessage(tabId, message)) as
+    | { res?: unknown; err?: unknown }
+    | undefined;
+  if (response?.err) {
+    const detail =
+      typeof response.err === 'string'
+        ? response.err
+        : ((response.err as { message?: string } | null)?.message ?? 'Message handler error.');
+    throw new Error(detail);
+  }
+  return response?.res as ReturnType<ProtocolMap[Type]>;
+}

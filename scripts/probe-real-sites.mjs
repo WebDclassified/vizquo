@@ -213,15 +213,32 @@ try {
 
       const tabId = await getTabId(context, 'https://*');
 
+      // --- Right-click context target (handoff without inspect mode). This
+      // runs BEFORE the lock: a lock CLICK can dismiss page widgets (e.g.
+      // YouTube's feed-nudge collapses the home grid to a 0-height body —
+      // page-side behavior, not an extension issue) and starve the picker.
+      // Right-clicks never navigate or collapse, so the pick is stable here.
+      const ctxOk = await contextTargetWorks(worker, page, tabId);
+      if (ctxOk) pass(`${tag} right-click context target captured`);
+      else fail(`${tag} right-click context target captured`);
+
       // --- Inspect mode + lock a real element.
       const locked = await lockRealElement(panel, page, worker, tabId);
       if (locked) pass(`${tag} inspect mode locked a real element`);
       else fail(`${tag} inspect mode locked a real element`);
 
-      // --- Right-click context target (handoff without inspect mode).
-      const ctxOk = await contextTargetWorks(worker, page, tabId);
-      if (ctxOk) pass(`${tag} right-click context target captured`);
-      else fail(`${tag} right-click context target captured`);
+      // --- Page-sanity recovery: if the lock click collapsed the page (body
+      // ~0 height), reload so the scan sees real content instead of an empty
+      // shell (the lock evidence above already stands).
+      const collapsed = await page
+        .evaluate(() => document.body.getBoundingClientRect().height < 100)
+        .catch(() => false);
+      if (collapsed) {
+        await page.reload({ waitUntil: 'load', timeout: 60_000 }).catch(() => {});
+        await page.bringToFront().catch(() => {});
+        await page.waitForTimeout(1200);
+        await waitForRealSiteConnection(panel, 60_000);
+      }
 
       // --- Full page scan (evidence: element count + extracted assets).
       const scanDone = await scanRealSite(panel);
@@ -413,21 +430,37 @@ async function lockRealElement(panel, page, worker, tabId) {
  *  inspect mode), losing the probe mid-flight. Samples a small grid; null if
  *  every sampled point sits on an interactive element. */
 async function findNonInteractivePoint(page, box) {
+  // 9×5 grid — creative sites wrap most text in <a> (Awwwards cards, Apple
+  // hero links), and the old 5×3 grid missed every gap. Only the TOPMOST
+  // element decides (the click lands on it — the extension never prevents
+  // default, so clicking through a link would navigate away mid-probe).
   const interactive = new Set(['a', 'button', 'input', 'select', 'textarea']);
-  for (let i = 1; i <= 5; i += 1) {
-    for (let j = 1; j <= 3; j += 1) {
-      const x = box.x + (box.width * i) / 6;
-      const y = box.y + (box.height * j) / 4;
-      const tag = await page
-        .evaluate(
-          ([px, py]) => {
-            const el = document.elementFromPoint(px, py);
-            return el?.tagName?.toLowerCase() ?? '';
-          },
-          [x, y],
-        )
-        .catch(() => '');
-      if (!interactive.has(tag)) return [x, y];
+  const tagAt = async (x, y) =>
+    page
+      .evaluate(
+        ([px, py]) => document.elementFromPoint(px, py)?.tagName?.toLowerCase() ?? '',
+        [x, y],
+      )
+      .catch(() => '');
+  const vp = await page.evaluate(() => ({ w: innerWidth, h: innerHeight })).catch(() => null);
+  // In-box 9×5 grid first — prefer a point inside the element under test.
+  for (let i = 1; i <= 9; i += 1) {
+    for (let j = 1; j <= 5; j += 1) {
+      const x = box.x + (box.width * i) / 10;
+      const y = box.y + (box.height * j) / 6;
+      if (vp && (y >= vp.h - 2 || x >= vp.w - 2)) continue; // off-viewport → no-op click
+      if (!interactive.has(await tagAt(x, y))) return [x, y];
+    }
+  }
+  // Viewport-wide fallback — creative heroes (Awwwards, Apple) wrap ALL box
+  // content in <a>; any non-interactive viewport point still locks fine.
+  if (vp && vp.w > 0 && vp.h > 0) {
+    for (let i = 1; i <= 12 && vp.w >= 4; i += 1) {
+      for (let j = 1; j <= 8 && vp.h >= 4; j += 1) {
+        const x = (vp.w * i) / 13;
+        const y = (vp.h * j) / 9;
+        if (!interactive.has(await tagAt(x, y))) return [x, y];
+      }
     }
   }
   return null;
@@ -452,13 +485,26 @@ async function pickClickTarget(page, selectors) {
     'div',
     'span',
   ];
+  const vp = await page.evaluate(() => ({ w: innerWidth, h: innerHeight })).catch(() => null);
   for (const sel of candidates) {
-    const box = await page
-      .locator(sel)
-      .first()
-      .boundingBox({ timeout: 2000 })
-      .catch(() => null);
-    if (box && box.width * box.height > 800 && box.x >= 0 && box.y >= 0) return box;
+    const loc = page.locator(sel).first();
+    // Scroll the candidate into view — a click below the fold silently no-ops
+    // (Playwright clicks viewport coords) and would fail the lock.
+    await loc.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => {});
+    const box = await loc.boundingBox({ timeout: 2000 }).catch(() => null);
+    if (!box) continue;
+    // Clamp the box to the visible viewport: a 5000px-tall root div aligns its
+    // TOP on scroll, so grid points near its top edge still fall off-screen.
+    let vis = box;
+    if (vp) {
+      const x0 = Math.max(box.x, 0);
+      const y0 = Math.max(box.y, 0);
+      const x1 = Math.min(box.x + box.width, vp.w);
+      const y1 = Math.min(box.y + box.height, vp.h);
+      if (x1 <= x0 || y1 <= y0) continue;
+      vis = { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
+    }
+    if (vis.width * vis.height > 800) return vis;
   }
   return null;
 }
@@ -501,28 +547,33 @@ async function isLocked(worker, tabId) {
     .catch(() => false);
 }
 
-/** Right-click the page and confirm GET_CONTEXT_TARGET returns a ref. */
+/** Right-click the page and confirm GET_CONTEXT_TARGET returns a ref.
+ *  Polls for a few seconds — heavy pages (YouTube, Awwwards) can lag the
+ *  event-to-state round-trip, and the 500ms single-shot flaked them. */
 async function contextTargetWorks(worker, page, tabId) {
   try {
     await page.bringToFront();
     const box = await pickClickTarget(page);
     if (!box) return false;
     await page.mouse.click(box.x + 20, box.y + 20, { button: 'right' });
-    await new Promise((r) => setTimeout(r, 500));
-    const result = await worker.evaluate(async (id) => {
-      try {
-        const r = await chrome.tabs.sendMessage(id, {
-          id: 905,
-          type: 'GET_CONTEXT_TARGET',
-          data: undefined,
-          timestamp: Date.now(),
-        });
-        return Boolean(r?.res?.ref);
-      } catch {
-        return false;
-      }
-    }, tabId);
-    return result;
+    for (let i = 0; i < 8; i += 1) {
+      await new Promise((r) => setTimeout(r, 500));
+      const result = await worker.evaluate(async (id) => {
+        try {
+          const r = await chrome.tabs.sendMessage(id, {
+            id: 905,
+            type: 'GET_CONTEXT_TARGET',
+            data: undefined,
+            timestamp: Date.now(),
+          });
+          return Boolean(r?.res?.ref);
+        } catch {
+          return false;
+        }
+      }, tabId);
+      if (result) return true;
+    }
+    return false;
   } catch {
     return false;
   }

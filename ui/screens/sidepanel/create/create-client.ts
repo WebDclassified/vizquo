@@ -4,7 +4,7 @@
  * viewport capture runs in the background (tab + host access); exports are
  * pure and generated here, downloaded through a Blob.
  */
-import { sendMessage } from '../../../../shared/messages';
+import { sendMessage, sendTabMessage } from '../../../../shared/messages';
 import type {
   CaptureResult,
   ElementRef,
@@ -44,36 +44,42 @@ export async function applyEdit(
   property: string,
   value: string,
 ): Promise<LiveEditResult> {
-  if (!webTabGuard()) return { ok: false, error: 'Not connected to a page.' };
+  if (!webTabGuard() || ui.connection.tabId == null)
+    return { ok: false, error: 'Not connected to a page.' };
   try {
-    return await sendMessage('APPLY_LIVE_EDIT', { ref, property, value });
+    return await sendTabMessage(ui.connection.tabId, 'APPLY_LIVE_EDIT', {
+      ref,
+      property,
+      value,
+    });
   } catch {
     return { ok: false, error: 'The page did not answer the edit request.' };
   }
 }
 
 export async function undoEdit(id: string): Promise<LiveEditResult> {
-  if (!webTabGuard()) return { ok: false, error: 'Not connected to a page.' };
+  if (!webTabGuard() || ui.connection.tabId == null)
+    return { ok: false, error: 'Not connected to a page.' };
   try {
-    return await sendMessage('UNDO_LIVE_EDIT', { id });
+    return await sendTabMessage(ui.connection.tabId, 'UNDO_LIVE_EDIT', { id });
   } catch {
     return { ok: false, error: 'The page did not answer the undo request.' };
   }
 }
 
 export async function clearEdits(): Promise<{ count: number }> {
-  if (!webTabGuard()) return { count: 0 };
+  if (!webTabGuard() || ui.connection.tabId == null) return { count: 0 };
   try {
-    return await sendMessage('CLEAR_LIVE_EDITS', undefined);
+    return await sendTabMessage(ui.connection.tabId, 'CLEAR_LIVE_EDITS', undefined);
   } catch {
     return { count: 0 };
   }
 }
 
 export async function getEdits(): Promise<LiveEdit[]> {
-  if (!webTabGuard()) return [];
+  if (!webTabGuard() || ui.connection.tabId == null) return [];
   try {
-    const result = await sendMessage('GET_LIVE_EDITS', undefined);
+    const result = await sendTabMessage(ui.connection.tabId, 'GET_LIVE_EDITS', undefined);
     return result.edits;
   } catch {
     return [];
@@ -131,12 +137,15 @@ export async function clearSavedLiveEdits(): Promise<void> {
 export async function restoreSavedLiveEdits(
   edits: LiveEdit[],
 ): Promise<{ ok: boolean; applied: number; failed: number }> {
-  if (!webTabGuard()) return { ok: false, applied: 0, failed: edits.length };
+  const target = ui.connection.tabId;
+  if (!webTabGuard() || target == null) {
+    return { ok: false, applied: 0, failed: edits.length };
+  }
   let applied = 0;
   let failed = 0;
   for (const edit of edits) {
     try {
-      const result = await sendMessage('APPLY_LIVE_EDIT', {
+      const result = await sendTabMessage(target, 'APPLY_LIVE_EDIT', {
         ref: edit.ref,
         property: edit.property,
         value: edit.value,
@@ -177,8 +186,13 @@ export async function getMultiSelectionBounds(): Promise<{
 } | null> {
   // Silent guard — the studio already explains the web-tab requirement.
   if (!isWebTab()) return null;
+  if (!isWebTab() || ui.connection.tabId == null) return null;
   try {
-    const result = await sendMessage('GET_MULTI_SELECTION_BOUNDS', undefined);
+    const result = await sendTabMessage(
+      ui.connection.tabId,
+      'GET_MULTI_SELECTION_BOUNDS',
+      undefined,
+    );
     return result.rect;
   } catch {
     return null;
@@ -187,9 +201,9 @@ export async function getMultiSelectionBounds(): Promise<{
 
 /** Page geometry for fullpage stitching. */
 export async function getPageGeometry(): Promise<PageGeometry | null> {
-  if (!webTabGuard()) return null;
+  if (!webTabGuard() || ui.connection.tabId == null) return null;
   try {
-    return await sendMessage('GET_PAGE_GEOMETRY', undefined);
+    return await sendTabMessage(ui.connection.tabId, 'GET_PAGE_GEOMETRY', undefined);
   } catch {
     return null;
   }
@@ -197,9 +211,9 @@ export async function getPageGeometry(): Promise<PageGeometry | null> {
 
 /** Scroll the page; returns the applied scrollY. */
 export async function scrollTo(y: number): Promise<number> {
-  if (!webTabGuard()) return 0;
+  if (!webTabGuard() || ui.connection.tabId == null) return 0;
   try {
-    const result = await sendMessage('SCROLL_TO', { y });
+    const result = await sendTabMessage(ui.connection.tabId, 'SCROLL_TO', { y });
     return result.y;
   } catch {
     return 0;
