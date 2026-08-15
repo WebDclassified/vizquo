@@ -25,7 +25,7 @@ WXT (web-extension toolkit, v0.21) · SolidJS · UnoCSS · TypeScript (strict) �
 Dexie/IndexedDB · Comlink worker · Vitest + Playwright · Biome
 
 ### Current version
-- `package.json` version: **0.10.8** ✅ (in sync with CHANGELOG).
+- `package.json` version: **0.10.9** ✅ (in sync with CHANGELOG).
 
 ---
 
@@ -45,7 +45,7 @@ Last full validation (all passed):
 | Live probe (real sites) | `node scripts/probe-real-sites.mjs` | ✅ 19/19 — example.com, Wikipedia, MDN, HN |
 | Big-site verification (YouTube) | `node scripts/diag-youtube.mjs` | ✅ scan completes via main-thread fallback (~20 s) |
 | Landing smoke (3 engines) | `node scripts/check-landing-browsers.mjs` | ✅ chromium · firefox · webkit |
-| Store ZIP | `npm run zip` | ✅ `vizquo-0.10.8-chrome.zip` |
+| Store ZIP | `npm run zip` | ✅ `vizquo-0.10.9-chrome.zip` |
 
 Manifest permissions (minimal, all used): `storage`, `sidePanel`, `downloads`,
 `contextMenus`, `activeTab`. No unused `scripting`/`offscreen` (WXT auto-adds
@@ -419,13 +419,15 @@ the worker attempt being blocked, which now routes to the fallback instead of ha
 
 ## 15. Recommended first tasks tomorrow
 
-1. **Cut the 0.10.9 release** — this fix (big-site scans) is the flagship-scan
-   repair: `npm run release -- 0.10.8 0.10.9`, then review the CHANGELOG entry
-   it inserts (summarize: CSP-proof analysis, YouTube scans complete).
+1. **Submit the 0.10.9 store packages (§6A)** — the release was cut
+   (`npm run release -- 0.10.8 0.10.9`): packages are in
+   `.output/release/vizquo-0.10.9/` (chrome/firefox/sources ZIPs + listing
+   kit), screenshots + promo tiles are regenerated at 0.10.9 (dark glass
+   theme), and the landing download ZIPs are staged at `landing/downloads/`.
+   The remaining steps are web-console uploads (Edge, Firefox AMO, Chrome
+   Web Store — keep the PEM key safe).
 2. **Human QA on the screenshot studio with a real toolbar click** (the one
    flow automation can't fully drive — `activeTab` needs a real user gesture)
    and the **Ruler** on a connected page.
-3. Re-run `npm run zip` after the bump (artifact should be current).
-4. Pick one from §6B (the AI timeline narration is the most "Vizquo" and
+3. Pick one from §6B (the AI timeline narration is the most "Vizquo" and
    cheapest).
-5. Then the store submissions (§6A) — they're account actions, not code.

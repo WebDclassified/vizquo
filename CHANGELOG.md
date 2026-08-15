@@ -2,6 +2,34 @@
 
 > Created by Prabhat Teotia
 
+## 0.10.9 — Liquid-glass UI, CSP-proof scans, storage + library hardening
+
+- **Liquid-glass redesign (brand system v4).** The side panel is now a real
+  material system — an ambient environment (violet/teal/indigo color fields,
+  a light beam, baked-in grain), four token-backed glass materials
+  (thin/standard/elevated/floating), edge-light rims, and backdrop blur only
+  where it is visible so dozens of surfaces stay compositing-cheap.
+  High-contrast (solid fills + blur removed) and reduced-motion are enforced
+  at the token level.
+- **Scans now complete on strict-CSP sites like YouTube.** The Design DNA
+  pipeline lives in one shared module used by both the Comlink worker and a
+  main-thread fallback; the orchestrator health-checks a freshly built worker
+  and falls back automatically when a page's CSP blocks the blob worker (the
+  old behaviour: every scan hung until the 90 s timeout). The DOM walk also
+  pre-filters hidden/collapsed subtrees, roughly halving big-site scan times.
+- **Landing page + store assets in the same glass language.** The site was
+  re-skinned to the panel's exact design system (palette, materials, radii,
+  motion) with a live coordinate readout in the demo inspector; the promo
+  tiles and social card were regenerated to match, and screenshots are
+  captured in the dark glass theme. One theme by design — no light/dark mode.
+- **Storage can no longer grow unboundedly.** Inspections are garbage-
+  collected to the newest 25 versions per URL (plus anything history still
+  references) on every history write; the version timeline renders from a
+  light metadata projection and fetches the full scan only when a version is
+  opened.
+- **Lint is fully clean and the landing smoke test is hermetic.** The
+  remaining landing warnings are now a documented rule override, and the
+  download-link check no longer makes outbound requests.
 
 ## 0.10.8 — Runtime error fixes, cache robustness, premium landing
 

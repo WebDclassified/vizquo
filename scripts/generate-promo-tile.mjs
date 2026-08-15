@@ -204,15 +204,18 @@ mkdirSync(OUT_DIR, { recursive: true });
 
 const browser = await chromium.launch();
 try {
+  // Chrome Web Store requires the promo tiles at EXACT pixel dimensions, so
+  // those render at 1x. The OG card keeps 2x (2400×1260 physical, 1200×630
+  // logical) — social platforms downscale fine and it stays retina-sharp.
   const jobs = [
-    { name: 'promo-440x280.png', body: SMALL_TILE, w: 440, h: 280, vw: 900, vh: 600 },
-    { name: 'marquee-1400x560.png', body: MARQUEE, w: 1400, h: 560, vw: 1600, vh: 700 },
-    { name: 'og-1200x630.png', body: OG_CARD, w: 1200, h: 630, vw: 1280, vh: 720 },
+    { name: 'promo-440x280.png', body: SMALL_TILE, w: 440, h: 280, vw: 900, vh: 600, dpr: 1 },
+    { name: 'marquee-1400x560.png', body: MARQUEE, w: 1400, h: 560, vw: 1600, vh: 700, dpr: 1 },
+    { name: 'og-1200x630.png', body: OG_CARD, w: 1200, h: 630, vw: 1280, vh: 720, dpr: 2 },
   ];
   for (const job of jobs) {
     const page = await browser.newPage({
       viewport: { width: job.vw, height: job.vh },
-      deviceScaleFactor: 2,
+      deviceScaleFactor: job.dpr,
     });
     await page.setContent(SHELL(job.body));
     await page.evaluate(() => document.fonts.ready);
