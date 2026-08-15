@@ -230,3 +230,65 @@ covers the WebGL/WebGPU corpus (`npm run probe:sites`).
 *This report follows the spec's status vocabulary: every row above is
 VERIFIED PASS, VERIFIED FAIL, NOT TESTED, or BLOCKED — never "probably
 works".*
+
+---
+
+# Third pass — Requirements.md full audit (2026-08-15, v0.10.9)
+
+## What was audited
+
+The complete master requirements document (Requirements.md, §§1–88) was read
+end-to-end and mapped against the implementation, with focus on the §83
+highest-priority risks.
+
+## Findings (all VERIFIED, per §83)
+
+| §83 risk | Verdict | Evidence |
+|---|---|---|
+| API-key storage boundary | **CLOSED** — key lives in extension-scoped IndexedDB; content scripts cannot open the extension's database; background reads it alone; debug bundle redacts it | architecture + TOR-012 + `release-store.mjs` secret scan |
+| Permission model | **CLOSED** — zero optional grants at install; core works with zero grants; on-demand grant/revoke/retry driven through the real UI | TOR-027 |
+| Message authorization | **HARDENED THIS PASS** — privileged handlers are panel-only (sender guard), content-script handlers require a tab, AI payloads capped at 256 KB, export batches capped at 500, asset URLs scheme-validated | `shared/sender-guard.ts` + `tests/sender-guard.test.ts` + TOR-029 |
+| Cache isolation | **CLOSED** — cache key = normalized URL + page fingerprint + schema version | `tests/fingerprint.test.ts` + TOR-010 |
+| AI prompt injection | **CLOSED** — page content is data, never instructions; bounded + redacted payloads | TOR-012 + `tests/ai.test.ts` |
+| Service-worker lifecycle | **CLOSED** — terminate/restart/queue-recovery proven at the browser level | TOR-026 |
+| Hostile-page resilience | **CLOSED** — hostile CSS/DOM/mutation/WebGL/WebGPU/SPA all bounded | TOR-002/007/018–022/024 |
+
+## Bugs found this pass
+
+| ID | Title | Severity | Found by | Fix | Regression |
+|---|---|---|---|---|---|
+| BUG-H-004 | Panel Create/Analyze/Assets clients sent content-script messages WITHOUT a tabId, so live edit, Time Machine, geometry and SVG-fetch from the panel UI never reached the page | **P1** (major feature unusable from the UI) | Manual panel-drive debug | Wired the clients to `ui.connection.tabId`; tab-targeted sends now go through `sendTabMessage` (polyfill path — also kills the "message channel closed" console noise on navigation races) | **TOR-030** (panel-UI live edit → page → undo) + `tests/create-client.test.ts` mock updated |
+| BUG-H-005 | Tailwind-v4 arbitrary-value classes (`@container`, `px-(--geist-page-margin)`) broke `querySelectorAll` with a SyntaxError — context-target/lock/inspect silently failed on such pages (found on Vercel) | **P1** (feature silently broken on Tailwind-v4 sites) | corpus15 Vercel probe | Escape CSS identifiers (leading digits, `@`), escape arbitrary-value parentheses | **TOR-028** + `tests/dom-ref.test.ts` (+9) |
+
+## New scenarios (TOR-024 → TOR-030)
+
+- TOR-024 nightmare (all churn at once), TOR-025 deep-soak (30 cycles, heap-bounded),
+  TOR-026 service-worker lifecycle, TOR-027 permissions, TOR-028 Tailwind arbitrary
+  classes, TOR-029 message-sender validation, TOR-030 panel-UI live edit.
+
+## Full gate (all executed this pass)
+
+| Gate | Result |
+|---|---|
+| `npm run compile` | ✅ clean |
+| `npm run lint` | ✅ 0 warnings |
+| `npm run test` | ✅ 49/49 files (incl. `sender-guard`, `dom-ref`, `connection` regression tests) |
+| `npm run test:torture` | ✅ **30/30** |
+| `node scripts/probe-extension.mjs` | ✅ 7/7 |
+| `node scripts/probe-extension-advanced.mjs` | ✅ 7/7 (1 honest SKIP: captureVisibleTab needs activeTab) |
+| `node scripts/probe-real-sites.mjs` (default) | ✅ 23/23 |
+| corpus15 live corpus | ✅ 55/56 — the only non-pass is Nike's geo-redirect (`www.nike.com` → `www.nike.in`), an honest BLOCKED by the site, not an extension defect |
+| Landing smoke (3 engines) | ✅ (unchanged this pass) |
+
+## New docs (Requirements §78)
+
+- `THREAT_MODEL.md` — assets, actors, surfaces, boundaries, INV-001…015 mapping.
+- `AI_PRIVACY.md` — payload bounding, key isolation, prompt-injection posture.
+- `SECURITY.md` / `TESTING.md` — updated with the sender-validation model and
+  TOR-024…030.
+
+## Release decision (this pass)
+
+**READY** — Requirements.md §83's seven highest-priority risks are closed with
+permanent regression tests; the full gate (unit 49/49, torture 30/30, probes
+23/23 + 7/7 + 7/7, corpus15 55/56 with one honest site-side BLOCK) passes.

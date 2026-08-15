@@ -91,6 +91,44 @@ STATUS / EVIDENCE; statuses are VERIFIED PASS / FAIL / BLOCKED only.
   localStorage/sessionStorage with Vizquo-looking keys (inert — the extension
   never reads page storage); a ref to a REMOVED element surfaces STALE with an
   actionable error and the live lock clears (regression for BUG-H-003).
+- `TOR-024 nightmare` — the Tier-9 combo: rAF + WAAPI + CSS animation, SPA
+  route churn, open/closed shadow roots cycled, dynamic same-/cross-origin
+  iframes created then destroyed, WebGL1/2 + WebGPU canvases, and a media zoo
+  (GIF/AVIF/blob/data/svg-sprite) all at once; the bus stays alive, the scan
+  completes bounded, closed-shadow and cross-origin colors are never claimed,
+  and the re-scan after a freeze is never silently cached.
+- `TOR-025 deep-soak` — 30 activate→select→inspect→live-edit→undo→scan cycles
+  under a 60 ms mutation storm with periodic reloads and panel close/reopen:
+  zero panel errors, worker alive, panel heap bounded (6.2 MB → 8.4 MB).
+- `TOR-026 service-worker-lifecycle` — terminate the SW via CDP
+  (`Target.closeTarget`), then: message-after-restart answered, restart on
+  demand, storage survives termination, 5 concurrent requests answered, full
+  scan after restart. (The `ServiceWorker.stopAllWorkers` CDP method does not
+  exist in this Chromium; `Target.closeTarget` on the SW target is the honest
+  equivalent.)
+- `TOR-027 permissions` — zero optional grants at install (only the static
+  content-script `http/https` host access), full scan works with ZERO grants,
+  the on-demand OpenRouter grant/revoke/retry cycle through the real Settings
+  UI (auto-accept is BLOCKED by automation where the native prompt wins),
+  `permissions.remove` for a subsumed origin throws the browser's own honest
+  guard, and `chrome://` pages get the honest grant affordance.
+- `TOR-028 tailwind-arbitrary-classes` — regression for the Vercel corpus
+  finding: Tailwind-v4 classes like `@container` / `px-(--geist-page-margin)`
+  made the unescaped selector throw a SyntaxError, breaking lock/inspect/
+  context-target on such pages. The escaped selector round-trips in a real
+  browser (regression for the `engine/dom/ref.ts` escaping fix).
+- `TOR-029 message-sender-validation` — the worker's privileged handlers
+  (AI_EXPLAIN, EXPORT_ASSETS, CAPTURE_VIEWPORT, OPEN_INSPECTOR_WINDOW) refuse
+  non-panel senders and oversized payloads (INV-007, §15/§16): panel AI stays
+  honest-disabled, a 300 KB AI payload is refused, a 501-asset export batch is
+  refused, and a `javascript:` asset URL is refused with an honest reason
+  (never fetched). Sender predicates are unit-tested in
+  `tests/sender-guard.test.ts`.
+- `TOR-030 panel-live-edit` — regression for BUG-H-004: the Create tab's live
+  edit now routes through `ui.connection.tabId` (the old code sent
+  content-script messages WITHOUT a tabId, so panel-initiated edits never
+  reached the page). Drives the real Create-tab UI: lock → apply `color` via
+  the panel → verified on the page → undo → verified reverted.
 
 ## Current coverage
 

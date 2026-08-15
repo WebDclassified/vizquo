@@ -47,6 +47,27 @@ Vizquo is an inspection tool, not a security-bypass tool.
   stripped, input values and data attributes excluded by construction. The
   privacy gate shows the exact `payloadSummary` before first send.
 
+## Message sender validation
+
+Chrome already guarantees `sender.id` is this extension and that web-page
+JavaScript cannot message the service worker directly — but defense in depth
+applies (Requirements §15/§16, INV-007):
+
+- **Privileged handlers are panel-only.** `AI_EXPLAIN`, `EXPORT_ASSETS`,
+  `CAPTURE_VIEWPORT`, and `OPEN_INSPECTOR_WINDOW` reject messages whose sender
+  is not an extension page (`shared/sender-guard.ts`). A compromised content
+  script — which runs inside a hostile page's document — cannot spend the
+  user's AI credits, trigger downloads, or open windows.
+- **Content-script handlers require a tab.** `INSPECT_STATE_CHANGED` and
+  `GET_CONTENT_TAB_ID` only accept senders with a `sender.tab`.
+- **Payload bounds.** AI requests are capped at 256 KB serialized; asset
+  export batches are capped at 500 requests; asset URLs must be
+  `http(s)/blob/data:`; filenames are re-sanitized at the worker boundary.
+  Refusals are honest errors, never silent no-ops.
+- The predicates are pure and unit-tested (`tests/sender-guard.test.ts`); the
+  real panel path + refusal paths run in the Chrome-based torture suite
+  (`TOR-029`).
+
 ## Permissions
 
 Minimum base permission set — `storage`, `sidePanel`, `downloads`,

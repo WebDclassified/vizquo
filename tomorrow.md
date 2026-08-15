@@ -518,7 +518,37 @@ burger, back-top, reduced motion, zero overflow at 1280/390); biome clean.
 The old `--vz`-themed de-flash note (§13) is superseded by this rebuild — the
 calm/no-decorative-motion stance is unchanged.
 
-## 17. Recommended first tasks tomorrow
+## 17. Requirements.md full audit (this pass)
+
+Read the complete master spec (Requirements.md, 2921 lines, §§1–88) and closed
+its §83 highest-priority risks:
+
+- **Message sender validation (INV-007, §15/16)** — NEW `shared/sender-guard.ts`
+  (pure, unit-tested 7 cases in `tests/sender-guard.test.ts`): privileged
+  background handlers (`AI_EXPLAIN`, `EXPORT_ASSETS`, `CAPTURE_VIEWPORT`,
+  `OPEN_INSPECTOR_WINDOW`) are panel-only; content-script handlers require
+  `sender.tab`; AI payloads capped 256 KB; export batches capped 500;
+  filenames re-sanitized at the worker boundary. **TOR-029** proves the panel
+  path + honest refusals in real Chrome.
+- **BUG-H-004 fixed + regression-tested** — panel Create/Analyze/Assets clients
+  sent content-script messages without a tabId (live edit / Time Machine /
+  geometry / SVG-fetch from the UI never reached the page). Wired to
+  `ui.connection.tabId`; tab-targeted sends go through `sendTabMessage`
+  (polyfill path, also eliminates the navigation-race "channel closed"
+  console noise). **TOR-030** drives the real Create-tab UI: lock → apply
+  color → verified on page → undo → verified revert.
+- **BUG-H-005 fixed** — Tailwind-v4 arbitrary-value classes broke
+  `querySelectorAll` with a SyntaxError (found on Vercel); `engine/dom/ref.ts`
+  now escapes them. **TOR-028** + `tests/dom-ref.test.ts` (+9).
+- **New docs** per §78: `THREAT_MODEL.md`, `AI_PRIVACY.md`; SECURITY.md +
+  TESTING.md updated (TOR-024…030 listed).
+
+Full gate this pass: compile ✅ · lint ✅ · unit **49/49 files** · torture
+**30/30** · probe-extension 7/7 · probe-extension-advanced 7/7 (1 honest SKIP
+— captureVisibleTab needs activeTab) · real-site default **23/23** · corpus15
+**55/56** (only non-pass: Nike geo-redirect → BLOCKED by the site, honest).
+
+## 18. Recommended first tasks tomorrow
 
 1. **Submit the 0.10.9 store packages (§6A)** — the release was cut
    (`npm run release -- 0.10.8 0.10.9`): packages are in
