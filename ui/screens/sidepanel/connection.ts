@@ -39,16 +39,20 @@ function scheduleRecheck(attempts = 6): void {
 /**
  * The content script injects at document_idle — a check that fires right
  * after tab activation can miss it by a fraction of a second, and nothing
- * else would ever re-check (the card then sits on "Grant access" forever
- * even though the page is fully connected — found by real-site QA). Bounded
- * silent retries pick the late-injecting content script up without a manual
- * Check click. One chain at a time; stops on success or after 4 attempts.
+ * else would ever re-check (the card then sits on "Not connected" forever
+ * even though the page is fully connected — found by real-site QA). On heavy
+ * pages (YouTube, Awwwards) document_idle can arrive many seconds after
+ * activation, so the retries back off to cover the slow case; a genuinely
+ * unreachable tab (chrome://, extension gone) stops the chain because its
+ * PING throws and runConnectionCheck's catch never re-arms it. One chain at
+ * a time; stops on success or when the schedule is exhausted (~66s).
  */
+const CONTENT_RETRY_SCHEDULE_MS = [1500, 2000, 3000, 5000, 8000, 12000, 15000, 20000];
 let contentRetryTimer: ReturnType<typeof setTimeout> | undefined;
 let contentRetryInFlight = false;
 
-function retryUntilContentScript(attemptsLeft = 4): void {
-  if (attemptsLeft <= 0) {
+function retryUntilContentScript(step = 0): void {
+  if (step >= CONTENT_RETRY_SCHEDULE_MS.length) {
     contentRetryTimer = undefined;
     return;
   }
@@ -61,9 +65,9 @@ function retryUntilContentScript(attemptsLeft = 4): void {
     void runConnectionCheck(true).then(() => {
       contentRetryInFlight = false;
       const ok = ui.connection.status === 'connected' && ui.connection.contentOk === true;
-      if (!ok) retryUntilContentScript(attemptsLeft - 1);
+      if (!ok) retryUntilContentScript(step + 1);
     });
-  }, 1500);
+  }, CONTENT_RETRY_SCHEDULE_MS[step] ?? 1500);
 }
 
 let lastConnectedTabId: number | undefined;

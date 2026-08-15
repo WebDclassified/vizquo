@@ -348,6 +348,126 @@ const FIXTURE_SECRETS = `<!doctype html><html><head><title>Torture secrets</titl
 </script>
 </body></html>`;
 
+/** Tier-9 nightmare: every brutal pattern at once — dynamic iframes that
+ *  are created then destroyed, shadow roots created/removed, WebGL2 + WebGPU
+ *  canvases, rAF + Web Animations API + CSS animations, SPA route cycles
+ *  (route → render → destroy → render → mutate → route), and a media zoo
+ *  (GIF/AVIF/blob/data assets). All deterministic, all self-contained. */
+function fixtureNightmare() {
+  return `<!doctype html><html><head><title>Torture nightmare</title>
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { width: 40px; height: 40px; background: #635bff; animation: spin 1s linear infinite; }
+  .fade { width: 40px; height: 40px; background: #7c3aed; transition: opacity .3s; }
+</style>
+</head><body>
+<div id="root">
+  <h1>Nightmare page</h1>
+  <div class="spin" data-k="spin"></div>
+  <div class="fade" data-k="fade"></div>
+  <canvas id="gl" width="80" height="80"></canvas>
+  <canvas id="gl2" width="80" height="80"></canvas>
+  <canvas id="gp" width="80" height="80"></canvas>
+  <div id="media"></div>
+  <div id="frames"></div>
+  <div id="shadow"></div>
+  <div id="app"></div>
+</div>
+<script>
+  // --- 1. WebGL / WebGL2 / WebGPU feature detection (real contexts).
+  window.__GL__ = {};
+  try { __GL__.gl = !!document.getElementById('gl').getContext('webgl'); } catch (e) { __GL__.gl = false; }
+  try { __GL__.gl2 = !!document.getElementById('gl2').getContext('webgl2'); } catch (e) { __GL__.gl2 = false; }
+  try { __GL__.gpu = !!navigator.gpu; } catch (e) { __GL__.gpu = false; }
+
+  // --- 2. rAF + Web Animations API churn.
+  let rafN = 0;
+  (function raf() { rafN += 1; requestAnimationFrame(raf); })();
+  document.querySelector('.fade').animate(
+    [{ opacity: 1 }, { opacity: 0.2 }],
+    { duration: 400, iterations: Infinity, direction: 'alternate' },
+  );
+
+  // --- Master pause so tests can freeze the storm for deterministic asserts.
+  let __PAUSE__ = false;
+  window.__setPaused = (v) => { __PAUSE__ = v; };
+
+  // --- 3. Shadow roots: created and removed on a timer (open + closed).
+  const shadowHost = document.getElementById('shadow');
+  let shadowN = 0;
+  setInterval(() => {
+    if (__PAUSE__) return;
+    shadowN += 1;
+    shadowHost.replaceChildren();
+    for (let i = 0; i < 3; i += 1) {
+      const h = document.createElement('div');
+      h.dataset.root = String(shadowN) + '-' + i;
+      const mode = i % 2 === 0 ? 'open' : 'closed';
+      const root = h.attachShadow({ mode });
+      const inner = document.createElement('div');
+      inner.style.color = 'rgb(' + (10 * i + 1) + ', 2, 3)';
+      inner.textContent = 'shadow ' + i;
+      root.appendChild(inner);
+      shadowHost.appendChild(h);
+    }
+  }, 700);
+
+  // --- 4. Iframes: same-origin + cross-origin, created then destroyed.
+  const frames = document.getElementById('frames');
+  let frameN = 0;
+  setInterval(() => {
+    if (__PAUSE__) return;
+    frameN += 1;
+    frames.replaceChildren();
+    const a = document.createElement('iframe');
+    a.src = '/frame.html?n=' + frameN;
+    const b = document.createElement('iframe');
+    b.src = 'http://vizquo-cross.test/frame.html?n=' + frameN;
+    frames.appendChild(a);
+    frames.appendChild(b);
+  }, 900);
+
+  // --- 5. SPA route cycles: render → destroy → mutate → render.
+  const app = document.getElementById('app');
+  let route = 0;
+  setInterval(() => {
+    if (__PAUSE__) return;
+    route += 1;
+    app.replaceChildren();
+    for (let i = 0; i < 12; i += 1) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.route = String(route);
+      card.style.color = route % 2 === 0 ? 'rgb(20, 20, 20)' : 'rgb(40, 40, 40)';
+      card.textContent = 'route ' + route + ' item ' + i;
+      app.appendChild(card);
+    }
+  }, 600);
+
+  // --- 6. Media zoo: GIF / AVIF / blob / data / SVG sprite assets.
+  const media = document.getElementById('media');
+  media.innerHTML =
+    '<img src="/anim.gif" width="12" height="12" alt="gif">' +
+    '<img src="/pic.avif" width="12" height="12" alt="avif">' +
+    '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" width="8" height="8" alt="data">' +
+    '<svg width="20" height="20"><use href="/sprite.svg#icon-star"></use></svg>';
+  fetch('/blob.bin').then((r) => r.blob()).then((blob) => {
+    const url = URL.createObjectURL(blob);
+    const img = document.createElement('img');
+    img.src = url; img.width = 10; img.height = 10; img.alt = 'blob';
+    media.appendChild(img);
+  });
+
+  window.__NIGHTMARE__ = { rafN: () => rafN, route: () => route, shadowN: () => shadowN, frameN: () => frameN };
+</script>
+</body></html>`;
+}
+
+/** Tiny fixture for the nightmare iframes (same-origin frame content). */
+const FIXTURE_FRAME = `<!doctype html><html><head><title>frame</title></head><body>
+<div style="color: rgb(5, 6, 7)">frame content</div>
+</body></html>`;
+
 const ONE_PX_PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
   'base64',
@@ -370,7 +490,9 @@ async function runScenario(context, { id, category, fn }) {
     const evidence = [];
     await fn(context, evidence);
     const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-    console.log(`   ${id} PASS in ${elapsed}s${evidence.length ? ` | ${evidence.join(' | ')}` : ''}`);
+    console.log(
+      `   ${id} PASS in ${elapsed}s${evidence.length ? ` | ${evidence.join(' | ')}` : ''}`,
+    );
     pass(`${id} (${category})${evidence.length ? ` — ${evidence.join('; ')}` : ''}`);
   } catch (e) {
     const elapsed = ((Date.now() - start) / 1000).toFixed(1);
@@ -398,7 +520,11 @@ async function newPage(context, path, routeTable) {
     const url = new URL(route.request().url());
     const handler = routeTable[url.pathname];
     if (handler) return handler(route, url);
-    return route.fulfill({ status: 200, contentType: 'text/html', body: '<html><body>default</body></html>' });
+    return route.fulfill({
+      status: 200,
+      contentType: 'text/html',
+      body: '<html><body>default</body></html>',
+    });
   });
   await context.route(`${CROSS_ORIGIN}/**`, (route) =>
     route.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_EVIL }),
@@ -415,7 +541,8 @@ async function newPage(context, path, routeTable) {
 scenario('TOR-001', 'huge-dom', async (context, ev) => {
   const nodes = HUGE_NODES;
   const page = await newPage(context, '/huge.html', {
-    '/huge.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureHugeDom(nodes) }),
+    '/huge.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: fixtureHugeDom(nodes) }),
   });
   const actualNodes = await page.evaluate(() => window.__NODES__);
   const tabId = await activeTabId();
@@ -425,11 +552,17 @@ scenario('TOR-001', 'huge-dom', async (context, ev) => {
   assert(scan.ok, `bus error: ${scan.err ?? 'no reply'}`, ev);
   assert(scan.res.ok === true, scanMsg(scan), ev);
   const i = scan.res.inspection;
-  assert(i.truncated === true, `must be honest about truncation (nodes=${actualNodes}, walked cap 12000)`, ev);
+  assert(
+    i.truncated === true,
+    `must be honest about truncation (nodes=${actualNodes}, walked cap 12000)`,
+    ev,
+  );
   assert(i.scannedElementCount <= 4000, `sample cap honored (${i.scannedElementCount})`, ev);
   assert(i.scannedElementCount > 0, 'samples actually collected', ev);
   assert(i.scanDurationMs > 0, 'duration measured', ev);
-  ev.push(`nodes=${actualNodes} sampled=${i.scannedElementCount} truncated=${i.truncated} scan=${elapsed}s`);
+  ev.push(
+    `nodes=${actualNodes} sampled=${i.scannedElementCount} truncated=${i.truncated} scan=${elapsed}s`,
+  );
   assert(elapsed < 180, `scan bounded in time (${elapsed}s)`, ev);
   // Panel still alive and responsive after the heavy scan.
   await page.evaluate(() => document.title);
@@ -440,7 +573,8 @@ scenario('TOR-002', 'mutation-storm', async (context, ev) => {
   // Moderate mutator so CDP stays usable; the hostile E2E covers the heavy
   // worker-only variant.
   const page = await newPage(context, '/storm.html', {
-    '/storm.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureMutationStorm(60) }),
+    '/storm.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: fixtureMutationStorm(60) }),
   });
   const tabId = await activeTabId();
   // Let the storm rage for a moment before scanning.
@@ -459,7 +593,8 @@ scenario('TOR-002', 'mutation-storm', async (context, ev) => {
 
 scenario('TOR-003', 'element-replacement', async (context, ev) => {
   const page = await newPage(context, '/replacement.html', {
-    '/replacement.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_REPLACEMENT }),
+    '/replacement.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_REPLACEMENT }),
   });
   const tabId = await activeTabId();
 
@@ -482,7 +617,11 @@ scenario('TOR-003', 'element-replacement', async (context, ev) => {
       return 'BAD SELECTOR';
     }
   }, lockedRef.selector);
-  assert(resolvesTo.includes('Card two'), `lock ref resolves to the right element (${resolvesTo})`, ev);
+  assert(
+    resolvesTo.includes('Card two'),
+    `lock ref resolves to the right element (${resolvesTo})`,
+    ev,
+  );
 
   // Framework-style rerender: replace the locked element with a fresh clone.
   const rerendered = await page.evaluate(() => window.__rerender());
@@ -500,7 +639,10 @@ scenario('TOR-003', 'element-replacement', async (context, ev) => {
     // that is the actual current card two (the replacement), not a ghost.
     const elInfo = await page.evaluate(() => {
       const mid = document.querySelectorAll('.card')[1];
-      return { connected: mid?.isConnected ?? false, text: mid?.querySelector('h2')?.textContent ?? '' };
+      return {
+        connected: mid?.isConnected ?? false,
+        text: mid?.querySelector('h2')?.textContent ?? '',
+      };
     });
     assert(elInfo.connected, 'replacement card is live', ev);
   } else {
@@ -529,7 +671,8 @@ scenario('TOR-003', 'element-replacement', async (context, ev) => {
 
 scenario('TOR-004', 'shadow-dom', async (context, ev) => {
   const page = await newPage(context, '/shadow.html', {
-    '/shadow.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_SHADOW }),
+    '/shadow.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_SHADOW }),
   });
   await page.waitForTimeout(400); // dynamic root
   const tabId = await activeTabId();
@@ -541,17 +684,24 @@ scenario('TOR-004', 'shadow-dom', async (context, ev) => {
   // the honest outcome. Same for open-shadow colors (not claimed).
   const colors = (i.tokens?.colors ?? []).map((c) => c.value.hex.toLowerCase());
   const claimed = colors.join(' ');
-  assert(!/000102|040506/.test(claimed), `closed/dynamic shadow colors never claimed (${claimed.slice(0, 80)})`, ev);
+  assert(
+    !/000102|040506/.test(claimed),
+    `closed/dynamic shadow colors never claimed (${claimed.slice(0, 80)})`,
+    ev,
+  );
   assert(i.scannedElementCount > 0, 'top-document content scanned', ev);
   await page.close();
 });
 
 scenario('TOR-005', 'iframe-maze', async (context, ev) => {
   const page = await newPage(context, '/maze.html', {
-    '/maze.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_IFRAMES }),
+    '/maze.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_IFRAMES }),
     '/same.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_SAME }),
-    '/nested.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_NESTED }),
-    '/sandbox.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_SANDBOX }),
+    '/nested.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_NESTED }),
+    '/sandbox.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_SANDBOX }),
   });
   await page.waitForTimeout(800);
   const tabId = await activeTabId();
@@ -562,7 +712,11 @@ scenario('TOR-005', 'iframe-maze', async (context, ev) => {
   // Cross-origin content must NEVER be claimed (SOP honest): its rgb(99,0,0)
   // must not appear. Same-origin iframe content also lives in another
   // document — not claimed either. Only the top document is analyzed.
-  assert(!colors.includes('630000'), `cross-origin color never claimed (${colors.slice(0, 80)})`, ev);
+  assert(
+    !colors.includes('630000'),
+    `cross-origin color never claimed (${colors.slice(0, 80)})`,
+    ev,
+  );
   assert(i.scannedElementCount > 0, 'top document scanned', ev);
   await page.close();
 });
@@ -589,7 +743,8 @@ scenario('TOR-006', 'csp-hostile', async (context, ev) => {
 
 scenario('TOR-007', 'css-hostile', async (context, ev) => {
   const page = await newPage(context, '/css-hostile.html', {
-    '/css-hostile.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_CSS_HOSTILE }),
+    '/css-hostile.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_CSS_HOSTILE }),
   });
   await page.waitForTimeout(800); // shroud present
   const tabId = await activeTabId();
@@ -603,7 +758,11 @@ scenario('TOR-007', 'css-hostile', async (context, ev) => {
     );
     return host ? { present: true, shadow: host.shadowRoot != null } : { present: false };
   });
-  assert(overlay.present, 'overlay host mounts despite z-index:2147483647 !important on every element', ev);
+  assert(
+    overlay.present,
+    'overlay host mounts despite z-index:2147483647 !important on every element',
+    ev,
+  );
 
   // Click the target card — the lock must still register through the overlay
   // (events are captured by the fixed host, not the page's shroud).
@@ -624,25 +783,38 @@ scenario('TOR-007', 'css-hostile', async (context, ev) => {
 
 scenario('TOR-008', 'live-edit-race', async (context, ev) => {
   const page = await newPage(context, '/live.html', {
-    '/live.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_LIVE_EDIT }),
+    '/live.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_LIVE_EDIT }),
   });
   const tabId = await activeTabId();
   const ref = { selector: '#target', xpath: '/html/body/div', domPath: [] };
 
-  const edit = await bus(tabId, 'APPLY_LIVE_EDIT', { ref, property: 'color', value: 'rgb(255, 0, 0)' });
+  const edit = await bus(tabId, 'APPLY_LIVE_EDIT', {
+    ref,
+    property: 'color',
+    value: 'rgb(255, 0, 0)',
+  });
   assert(edit.ok && edit.res?.ok === true, 'edit applied', ev);
-  const applied = await page.evaluate(() => getComputedStyle(document.getElementById('target')).color);
+  const applied = await page.evaluate(
+    () => getComputedStyle(document.getElementById('target')).color,
+  );
   assert(applied === 'rgb(255, 0, 0)', `edit visible on page (${applied})`, ev);
 
   // Undo → exact original value restored.
   const undo = await bus(tabId, 'UNDO_LIVE_EDIT', { id: edit.res.edits[0].id });
   assert(undo.ok && undo.res?.ok === true, 'undo accepted', ev);
-  const restored = await page.evaluate(() => getComputedStyle(document.getElementById('target')).color);
+  const restored = await page.evaluate(
+    () => getComputedStyle(document.getElementById('target')).color,
+  );
   assert(restored === 'rgb(10, 10, 10)', `undo restored the exact original (${restored})`, ev);
 
   // Edit again, then REPLACE the element — the edit must not survive (law #4)
   // and the session must handle the disconnect without crashing.
-  const edit2 = await bus(tabId, 'APPLY_LIVE_EDIT', { ref, property: 'color', value: 'rgb(0, 0, 255)' });
+  const edit2 = await bus(tabId, 'APPLY_LIVE_EDIT', {
+    ref,
+    property: 'color',
+    value: 'rgb(0, 0, 255)',
+  });
   assert(edit2.ok, 'second edit applied', ev);
   await page.evaluate(() => window.__replaceTarget());
   await page.waitForTimeout(300);
@@ -650,14 +822,21 @@ scenario('TOR-008', 'live-edit-race', async (context, ev) => {
   assert(list.ok, 'edit list readable after replacement', ev);
   const clear = await bus(tabId, 'CLEAR_LIVE_EDITS', undefined);
   assert(clear.ok, 'clear after replacement', ev);
-  const replacedColor = await page.evaluate(() => getComputedStyle(document.getElementById('target')).color);
-  assert(replacedColor !== 'rgb(0, 0, 255)', `replacement is clean of the edit (${replacedColor})`, ev);
+  const replacedColor = await page.evaluate(
+    () => getComputedStyle(document.getElementById('target')).color,
+  );
+  assert(
+    replacedColor !== 'rgb(0, 0, 255)',
+    `replacement is clean of the edit (${replacedColor})`,
+    ev,
+  );
   await page.close();
 });
 
 scenario('TOR-009', 'asset-monster', async (context, ev) => {
   const page = await newPage(context, '/assets.html', {
-    '/assets.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureAssets() }),
+    '/assets.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: fixtureAssets() }),
     '/img-0.png': (r) => r.fulfill({ status: 200, contentType: 'image/png', body: ONE_PX_PNG }),
     '/img-1.png': (r) => r.fulfill({ status: 200, contentType: 'image/png', body: ONE_PX_PNG }),
     '/img-2.png': (r) => r.fulfill({ status: 200, contentType: 'image/png', body: ONE_PX_PNG }),
@@ -666,16 +845,23 @@ scenario('TOR-009', 'asset-monster', async (context, ev) => {
     '/img-5.png': (r) => r.fulfill({ status: 200, contentType: 'image/png', body: ONE_PX_PNG }),
     '/pic-1.webp': (r) => r.fulfill({ status: 200, contentType: 'image/webp', body: ONE_PX_PNG }),
     '/pic-2.webp': (r) => r.fulfill({ status: 200, contentType: 'image/webp', body: ONE_PX_PNG }),
-    '/pic-fallback.png': (r) => r.fulfill({ status: 200, contentType: 'image/png', body: ONE_PX_PNG }),
+    '/pic-fallback.png': (r) =>
+      r.fulfill({ status: 200, contentType: 'image/png', body: ONE_PX_PNG }),
     '/broken-404.png': (r) => r.fulfill({ status: 404, contentType: 'text/plain', body: 'nope' }),
-    '/forbidden-403.png': (r) => r.fulfill({ status: 403, contentType: 'text/plain', body: 'nope' }),
-    '/favicon.ico': (r) => r.fulfill({ status: 200, contentType: 'image/x-icon', body: ONE_PX_PNG }),
+    '/forbidden-403.png': (r) =>
+      r.fulfill({ status: 403, contentType: 'text/plain', body: 'nope' }),
+    '/favicon.ico': (r) =>
+      r.fulfill({ status: 200, contentType: 'image/x-icon', body: ONE_PX_PNG }),
     '/og.png': (r) => r.fulfill({ status: 200, contentType: 'image/png', body: ONE_PX_PNG }),
     '/bg.jpg': (r) => r.fulfill({ status: 200, contentType: 'image/jpeg', body: ONE_PX_PNG }),
     '/poster.jpg': (r) => r.fulfill({ status: 200, contentType: 'image/jpeg', body: ONE_PX_PNG }),
     '/sound.mp3': (r) => r.fulfill({ status: 200, contentType: 'audio/mpeg', body: ONE_PX_PNG }),
     '/sprite.svg': (r) =>
-      r.fulfill({ status: 200, contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg"><symbol id="icon-heart" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 .01 0" fill="#635bff"/></symbol></svg>' }),
+      r.fulfill({
+        status: 200,
+        contentType: 'image/svg+xml',
+        body: '<svg xmlns="http://www.w3.org/2000/svg"><symbol id="icon-heart" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 .01 0" fill="#635bff"/></symbol></svg>',
+      }),
   });
   await page.waitForTimeout(800);
   const tabId = await activeTabId();
@@ -696,7 +882,8 @@ scenario('TOR-009', 'asset-monster', async (context, ev) => {
 
 scenario('TOR-010', 'infinite-scroll', async (context, ev) => {
   const page = await newPage(context, '/infinite.html', {
-    '/infinite.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_INFINITE }),
+    '/infinite.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_INFINITE }),
   });
   const tabId = await activeTabId();
   const scan1 = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
@@ -717,16 +904,23 @@ scenario('TOR-010', 'infinite-scroll', async (context, ev) => {
   const scan2 = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
   assert(scan2.ok && scan2.res.ok === true, scanMsg(scan2, 're-scan'), ev);
   const second = scan2.res.inspection;
-  assert(second.scannedElementCount >= first.scannedElementCount, 're-scan saw the appended content', ev);
+  assert(
+    second.scannedElementCount >= first.scannedElementCount,
+    're-scan saw the appended content',
+    ev,
+  );
   assert(second.cached === false, 're-scan after change is not silently cached', ev);
-  ev.push(`first=${first.scannedElementCount} second=${second.scannedElementCount} cached=${second.cached}`);
+  ev.push(
+    `first=${first.scannedElementCount} second=${second.scannedElementCount} cached=${second.cached}`,
+  );
   void fp3;
   await page.close();
 });
 
 scenario('TOR-011', 'virtualized-list', async (context, ev) => {
   const page = await newPage(context, '/virtualized.html', {
-    '/virtualized.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_VIRTUALIZED }),
+    '/virtualized.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_VIRTUALIZED }),
   });
   await page.waitForTimeout(400);
   const tabId = await activeTabId();
@@ -735,7 +929,11 @@ scenario('TOR-011', 'virtualized-list', async (context, ev) => {
   const i = scan.res.inspection;
   // Honesty law: only OBSERVED elements may be reported. 10k logical items
   // with ~40 rendered rows must not inflate the scan.
-  assert(i.scannedElementCount <= 120, `only observed DOM reported (${i.scannedElementCount} ≤ ~120)`, ev);
+  assert(
+    i.scannedElementCount <= 120,
+    `only observed DOM reported (${i.scannedElementCount} ≤ ~120)`,
+    ev,
+  );
   assert(i.truncated === false, 'no false truncation for a small DOM', ev);
   ev.push(`observed=${i.scannedElementCount}`);
   await page.close();
@@ -743,7 +941,8 @@ scenario('TOR-011', 'virtualized-list', async (context, ev) => {
 
 scenario('TOR-012', 'prompt-injection-secrets', async (context, ev) => {
   const page = await newPage(context, '/secrets.html', {
-    '/secrets.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_SECRETS }),
+    '/secrets.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_SECRETS }),
     '/pixel.png': (r) => r.fulfill({ status: 200, contentType: 'image/png', body: ONE_PX_PNG }),
   });
   await page.waitForTimeout(400);
@@ -830,9 +1029,15 @@ scenario('TOR-013', 'multi-tab-isolation', async (context, ev) => {
   const bHtml = mk('b', 'rgb(10, 10, 200)', 'Tab B');
   await context.route(`${ORIGIN}/**`, (route) => {
     const p = new URL(route.request().url()).pathname;
-    if (p === '/tab-a.html') return route.fulfill({ status: 200, contentType: 'text/html', body: aHtml });
-    if (p === '/tab-b.html') return route.fulfill({ status: 200, contentType: 'text/html', body: bHtml });
-    return route.fulfill({ status: 200, contentType: 'text/html', body: '<html><body>default</body></html>' });
+    if (p === '/tab-a.html')
+      return route.fulfill({ status: 200, contentType: 'text/html', body: aHtml });
+    if (p === '/tab-b.html')
+      return route.fulfill({ status: 200, contentType: 'text/html', body: bHtml });
+    return route.fulfill({
+      status: 200,
+      contentType: 'text/html',
+      body: '<html><body>default</body></html>',
+    });
   });
   const pageA = await context.newPage();
   await pageA.goto(`${ORIGIN}/tab-a.html`, { waitUntil: 'load' });
@@ -860,14 +1065,17 @@ scenario('TOR-013', 'multi-tab-isolation', async (context, ev) => {
     `tab A colors never leak into tab B results (${colorsB.slice(0, 6).join(', ')})`,
     ev,
   );
-  ev.push(`A=${scanA.res.inspection.page.url.slice(-12)} B=${scanB.res.inspection.page.url.slice(-12)}`);
+  ev.push(
+    `A=${scanA.res.inspection.page.url.slice(-12)} B=${scanB.res.inspection.page.url.slice(-12)}`,
+  );
   await pageA.close();
   await pageB.close();
 });
 
 scenario('TOR-014', 'memory-soak', async (context, ev) => {
   const page = await newPage(context, '/replacement.html', {
-    '/replacement.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_REPLACEMENT }),
+    '/replacement.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_REPLACEMENT }),
   });
   const tabId = await activeTabId();
   const panel = await openPanel(context, extensionId);
@@ -919,10 +1127,13 @@ scenario('TOR-014', 'memory-soak', async (context, ev) => {
 function fixtureHugeCss() {
   const rules = [];
   for (let i = 0; i < 10000; i += 1) {
-    rules.push(`.r${i} { color: #${(i % 16).toString(16).padStart(2, '0')}${(i % 16).toString(16).padStart(2, '0')}${(i % 16).toString(16).padStart(2, '0')}; margin: ${i % 5}px; padding: 2px; }`);
+    rules.push(
+      `.r${i} { color: #${(i % 16).toString(16).padStart(2, '0')}${(i % 16).toString(16).padStart(2, '0')}${(i % 16).toString(16).padStart(2, '0')}; margin: ${i % 5}px; padding: 2px; }`,
+    );
   }
   const vars = [];
-  for (let i = 0; i < 400; i += 1) vars.push(`--v${i}: rgb(${i % 255}, ${(i * 3) % 255}, ${(i * 7) % 255});`);
+  for (let i = 0; i < 400; i += 1)
+    vars.push(`--v${i}: rgb(${i % 255}, ${(i * 3) % 255}, ${(i * 7) % 255});`);
   return `<!doctype html><html><head><title>Torture huge-css</title>
 <style>
   :root { ${vars.join(' ')} }
@@ -974,7 +1185,7 @@ const FIXTURE_SVG_SECURITY = `<!doctype html><html><head><title>Torture svg-secu
 </svg>
 <svg id="evil2" xmlns="http://www.w3.org/2000/svg" width="60" height="40">
   <a href="javascript:window.__VQ_SVG_EXEC__=(window.__VQ_SVG_EXEC__||0)+1"><rect width="60" height="40" fill="red"/></a>
-  <script>window.__VQ_SVG_EXEC__=(window.__VQ_SVG_EXEC__||0)+1<\/script>
+  <script>window.__VQ_SVG_EXEC__=(window.__VQ_SVG_EXEC__||0)+1</script>
 </svg>
 <svg id="evil3" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
   <use href="#self" xlink:href="#self"/>
@@ -1135,7 +1346,8 @@ const FIXTURE_STORAGE_ISOLATION = `<!doctype html><html><head><title>Torture sto
 
 scenario('TOR-015', 'huge-css', async (context, ev) => {
   const page = await newPage(context, '/huge-css.html', {
-    '/huge-css.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureHugeCss() }),
+    '/huge-css.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: fixtureHugeCss() }),
   });
   await page.waitForTimeout(600);
   const tabId = await activeTabId();
@@ -1143,7 +1355,11 @@ scenario('TOR-015', 'huge-css', async (context, ev) => {
   assert(scan.ok && scan.res.ok === true, scanMsg(scan), ev);
   const i = scan.res.inspection;
   assert(i.breakpoints.length >= 2, `media queries parsed (${i.breakpoints.length})`, ev);
-  assert(i.containerQueries.length >= 1, `container queries parsed (${i.containerQueries.length})`, ev);
+  assert(
+    i.containerQueries.length >= 1,
+    `container queries parsed (${i.containerQueries.length})`,
+    ev,
+  );
   // The engine bounds stylesheet parsing deliberately (8000 rules/sheet, 200
   // declarations/rule) — the fixture's 400 vars in one :root rule yield the
   // documented cap, and the scan stays honest about it.
@@ -1157,14 +1373,17 @@ scenario('TOR-015', 'huge-css', async (context, ev) => {
   assert(inspect.ok && inspect.res.ok === true, 'inspection on layered page', ev);
   const traces = inspect.res.inspection.traces ?? [];
   assert(traces.length > 0, `cascade traces computed (${traces.length})`, ev);
-  ev.push(`rules=10000 vars=${i.variables.length} breakpoints=${i.breakpoints.length} cq=${i.containerQueries.length}`);
+  ev.push(
+    `rules=10000 vars=${i.variables.length} breakpoints=${i.breakpoints.length} cq=${i.containerQueries.length}`,
+  );
   await page.close();
 });
 
 scenario('TOR-016', 'deep-dom', async (context, ev) => {
   const depth = 1000;
   const page = await newPage(context, '/deep.html', {
-    '/deep.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureDeepDom(depth) }),
+    '/deep.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: fixtureDeepDom(depth) }),
   });
   await page.waitForTimeout(400);
   const tabId = await activeTabId();
@@ -1181,7 +1400,8 @@ scenario('TOR-016', 'deep-dom', async (context, ev) => {
 
 scenario('TOR-017', 'svg-security', async (context, ev) => {
   const page = await newPage(context, '/svg-security.html', {
-    '/svg-security.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_SVG_SECURITY }),
+    '/svg-security.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_SVG_SECURITY }),
   });
   await page.waitForTimeout(600);
   // Fixture validity: the hostile SMIL handlers really execute in the page.
@@ -1201,7 +1421,7 @@ scenario('TOR-017', 'svg-security', async (context, ev) => {
   assert(raw.includes('onbegin'), 'raw observed markup preserved for inspection', ev);
   assert(raw.includes('javascript:'), 'javascript: URLs preserved as observed data', ev);
   // The page canary must NOT have leaked into the extension's own contexts.
-  const extLeak = await worker.evaluate(() => (globalThis.__VQ_SVG_EXEC__ ?? 0));
+  const extLeak = await worker.evaluate(() => globalThis.__VQ_SVG_EXEC__ ?? 0);
   assert(extLeak === 0, 'canary never reaches the extension worker', ev);
   ev.push(`svgs=${svgs.length} page-exec=${pageExec}`);
   await page.close();
@@ -1210,7 +1430,8 @@ scenario('TOR-017', 'svg-security', async (context, ev) => {
 scenario('TOR-018', 'animation-monster', async (context, ev) => {
   const count = 3000;
   const page = await newPage(context, '/animation.html', {
-    '/animation.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureAnimationMonster(count) }),
+    '/animation.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: fixtureAnimationMonster(count) }),
   });
   await page.waitForTimeout(600);
   const tabId = await activeTabId();
@@ -1245,13 +1466,18 @@ scenario('TOR-019', 'webgl-monster', async (context, ev) => {
   assert(size === 320, 'canvas intact after scan', ev);
   // Keep the animation running for a moment — the page must stay responsive.
   await page.waitForTimeout(1200);
-  assert(await page.evaluate(() => document.title) === 'Torture webgl', 'page responsive under GL load', ev);
+  assert(
+    (await page.evaluate(() => document.title)) === 'Torture webgl',
+    'page responsive under GL load',
+    ev,
+  );
   await page.close();
 });
 
 scenario('TOR-020', 'spa-race', async (context, ev) => {
   const page = await newPage(context, '/spa.html', {
-    '/spa.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureSpa('home') }),
+    '/spa.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: fixtureSpa('home') }),
   });
   const tabId = await activeTabId();
   // Baseline: the extension must not mutate the host page.
@@ -1268,7 +1494,9 @@ scenario('TOR-020', 'spa-race', async (context, ev) => {
     font: getComputedStyle(document.body).fontFamily,
   }));
   assert(
-    before.scrollWidth === after.scrollWidth && before.bodyBg === after.bodyBg && before.font === after.font,
+    before.scrollWidth === after.scrollWidth &&
+      before.bodyBg === after.bodyBg &&
+      before.font === after.font,
     'scan does not mutate the host page (layout/typography unchanged)',
     ev,
   );
@@ -1287,7 +1515,11 @@ scenario('TOR-020', 'spa-race', async (context, ev) => {
   const scan2 = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
   assert(scan2.ok && scan2.res.ok === true, scanMsg(scan2, 'settings scan'), ev);
   const colors2 = (scan2.res.inspection.tokens?.colors ?? []).map((c) => c.value.hex);
-  assert(colors2.some((h) => h === '#1e1ec8'), `SPA content observed after nav (${colors2.slice(0, 6).join(',')})`, ev);
+  assert(
+    colors2.some((h) => h === '#1e1ec8'),
+    `SPA content observed after nav (${colors2.slice(0, 6).join(',')})`,
+    ev,
+  );
   assert(!colors1.some((h) => h === '#1e1ec8'), 'pre-nav colors not silently kept', ev);
   assert(scan2.res.inspection.cached === false, 're-scan after SPA nav is not cached', ev);
   ev.push(`fp=${fp.res?.fingerprint?.slice(0, 8)} route1=home route2=settings`);
@@ -1297,16 +1529,25 @@ scenario('TOR-020', 'spa-race', async (context, ev) => {
 scenario('TOR-021', 'screenshot-monster', async (context, ev) => {
   const rows = 1700; // ~102k px
   const page = await newPage(context, '/long.html', {
-    '/long.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: fixtureScreenshotMonster(rows) }),
+    '/long.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: fixtureScreenshotMonster(rows) }),
   });
   await page.waitForTimeout(400);
   const tabId = await activeTabId();
   const geo = await bus(tabId, 'GET_PAGE_GEOMETRY', undefined);
-  assert(geo.ok && geo.res?.scrollHeight >= 100_000, `geometry reports the long page (${geo.res?.scrollHeight}px)`, ev);
+  assert(
+    geo.ok && geo.res?.scrollHeight >= 100_000,
+    `geometry reports the long page (${geo.res?.scrollHeight}px)`,
+    ev,
+  );
   // Exact scroll round-trip: to a deep offset, then back to 0.
   const target = geo.res.scrollHeight - 1000;
   const scrolled = await bus(tabId, 'SCROLL_TO', { y: target });
-  assert(scrolled.ok && Math.abs(scrolled.res.y - target) < 1200, `scroll to ${target}px lands (${scrolled.res.y})`, ev);
+  assert(
+    scrolled.ok && Math.abs(scrolled.res.y - target) < 1200,
+    `scroll to ${target}px lands (${scrolled.res.y})`,
+    ev,
+  );
   const back = await bus(tabId, 'SCROLL_TO', { y: 0 });
   assert(back.ok && back.res.y === 0, 'exact scroll restoration to top', ev);
   // The sticky header must not be duplicated by any stitching logic — it is
@@ -1320,7 +1561,8 @@ scenario('TOR-021', 'screenshot-monster', async (context, ev) => {
 
 scenario('TOR-022', 'responsive-monster', async (context, ev) => {
   const page = await newPage(context, '/responsive.html', {
-    '/responsive.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_RESPONSIVE }),
+    '/responsive.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_RESPONSIVE }),
   });
   await page.waitForTimeout(400);
   const tabId = await activeTabId();
@@ -1335,11 +1577,23 @@ scenario('TOR-022', 'responsive-monster', async (context, ev) => {
     assert(tm.ok && tm.res?.ok === true, `time machine @${width}`, ev);
     const active = tm.res.breakpoints.filter((b) => b.active).map((b) => b.raw);
     if (width >= 1024) {
-      assert(active.some((r) => r.includes('1024px')), `1024 rule active @${width}`, ev);
+      assert(
+        active.some((r) => r.includes('1024px')),
+        `1024 rule active @${width}`,
+        ev,
+      );
     } else if (width >= 768) {
-      assert(active.some((r) => r.includes('768px')), `768 rule active @${width}`, ev);
+      assert(
+        active.some((r) => r.includes('768px')),
+        `768 rule active @${width}`,
+        ev,
+      );
     } else if (width >= 375) {
-      assert(active.some((r) => r.includes('375px')), `375 rule active @${width}`, ev);
+      assert(
+        active.some((r) => r.includes('375px')),
+        `375 rule active @${width}`,
+        ev,
+      );
     }
     if (width <= 375) {
       // The 700px fixed element must overflow narrow viewports — honestly.
@@ -1352,7 +1606,8 @@ scenario('TOR-022', 'responsive-monster', async (context, ev) => {
 
 scenario('TOR-023', 'storage-isolation', async (context, ev) => {
   const page = await newPage(context, '/storage.html', {
-    '/storage.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_STORAGE_ISOLATION }),
+    '/storage.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_STORAGE_ISOLATION }),
   });
   const tabId = await activeTabId();
   // The page poisons ITS OWN storage with Vizquo-looking keys — the extension
@@ -1364,7 +1619,11 @@ scenario('TOR-023', 'storage-isolation', async (context, ev) => {
       hasPoison: JSON.stringify(all).includes('SK-POISONED'),
     };
   });
-  assert(stored.hasKey === false && stored.hasPoison === false, 'page storage poisoning never reaches extension storage', ev);
+  assert(
+    stored.hasKey === false && stored.hasPoison === false,
+    'page storage poisoning never reaches extension storage',
+    ev,
+  );
   // Lifecycle: a ref to a REMOVED element must surface STALE honestly — the
   // inspect call fails with a clear error, never a wrong element.
   await bus(tabId, 'SET_INSPECT_MODE', { enabled: true });
@@ -1378,7 +1637,11 @@ scenario('TOR-023', 'storage-isolation', async (context, ev) => {
   const inspect = await bus(tabId, 'GET_ELEMENT_INSPECTION', {
     ref: { selector: '#target', xpath: '', domPath: [] },
   });
-  assert(inspect.ok && inspect.res?.ok === false, 'removed element reports STALE (honest error)', ev);
+  assert(
+    inspect.ok && inspect.res?.ok === false,
+    'removed element reports STALE (honest error)',
+    ev,
+  );
   assert(
     (inspect.res.error ?? '').length > 0,
     `stale error is actionable (${inspect.res.error?.slice(0, 60)})`,
@@ -1391,6 +1654,113 @@ scenario('TOR-023', 'storage-isolation', async (context, ev) => {
   await page.close();
 });
 
+scenario('TOR-024', 'nightmare', async (context, ev) => {
+  // Tier-9 brutal page: EVERYTHING churns at once — dynamic iframes that are
+  // created then destroyed (same- + cross-origin), open/closed shadow roots
+  // cycled every 700ms, WebGL1/WebGL2 + WebGPU canvases, rAF + WAAPI + CSS
+  // animation, SPA route cycles every 600ms, and a media zoo (GIF/AVIF/
+  // blob/data/svg-sprite). The extension must survive the combination.
+  const page = await newPage(context, '/nightmare.html', {
+    '/nightmare.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: fixtureNightmare() }),
+    '/frame.html': (r) => r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_FRAME }),
+    '/anim.gif': (r) => r.fulfill({ status: 200, contentType: 'image/gif', body: ONE_PX_PNG }),
+    '/pic.avif': (r) => r.fulfill({ status: 200, contentType: 'image/avif', body: ONE_PX_PNG }),
+    '/sprite.svg': (r) =>
+      r.fulfill({
+        status: 200,
+        contentType: 'image/svg+xml',
+        body: '<svg xmlns="http://www.w3.org/2000/svg"><symbol id="icon-star" viewBox="0 0 24 24"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8l-6-4.6h7.6z" fill="#7c3aed"/></symbol></svg>',
+      }),
+    '/blob.bin': (r) =>
+      r.fulfill({
+        status: 200,
+        contentType: 'application/octet-stream',
+        body: Buffer.from('blob-bytes'),
+      }),
+    '/pixel.png': (r) => r.fulfill({ status: 200, contentType: 'image/png', body: ONE_PX_PNG }),
+  });
+  const tabId = await activeTabId();
+
+  // Let the storm rage. Every counter must advance — the page is alive and
+  // the GPU/iframe/shadow/route machinery is genuinely running.
+  await page.waitForTimeout(3500);
+  const storm = await page.evaluate(() => ({
+    raf: window.__NIGHTMARE__.rafN(),
+    route: window.__NIGHTMARE__.route(),
+    shadow: window.__NIGHTMARE__.shadowN(),
+    frame: window.__NIGHTMARE__.frameN(),
+    gl: window.__GL__.gl,
+    gl2: window.__GL__.gl2,
+    gpuDetected: typeof window.__GL__.gpu === 'boolean',
+    blobImg: Boolean(document.querySelector('img[alt="blob"]')),
+  }));
+  assert(
+    storm.raf > 0 && storm.route > 2 && storm.shadow > 2 && storm.frame > 2,
+    'storm is running (rAF+SPA+shadow+iframe churn)',
+    ev,
+  );
+  assert(storm.gl === true, 'WebGL1 context live under the storm', ev);
+  assert(storm.gl2 === true, 'WebGL2 context live under the storm', ev);
+  assert(storm.gpuDetected === true, 'WebGPU feature-detected (no crash on navigator.gpu)', ev);
+  assert(storm.blobImg === true, 'blob: URL image created page-side', ev);
+  ev.push(
+    `raf=${storm.raf} route=${storm.route} shadow=${storm.shadow} frame=${storm.frame} gl=${storm.gl} gl2=${storm.gl2}`,
+  );
+
+  // The extension's bus must still answer — the storm must not kill it.
+  const ping = await bus(tabId, 'PING_TAB', { nonce: 7 }, 15_000);
+  assert(ping.ok, 'content-script bus alive under the storm', ev);
+
+  // Scan 1 — under the full storm: bounded, honest, no wrong-tab results.
+  const t0 = Date.now();
+  const scan = await bus(tabId, 'SCAN_PAGE', undefined, 180_000);
+  const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+  assert(scan.ok && scan.res.ok === true, scanMsg(scan, 'scan under nightmare'), ev);
+  const i = scan.res.inspection;
+  assert(i.scannedElementCount > 0, 'nightmare content sampled', ev);
+  assert(elapsed < 150, `bounded under the storm (${elapsed}s)`, ev);
+  const colors = (i.tokens?.colors ?? []).map((c) => c.value.hex.toLowerCase()).join(' ');
+  // Honesty under churn: closed-shadow internals rgb(11,2,3) and cross-origin
+  // iframe rgb(99,0,0) must NEVER be claimed — even mid-churn.
+  assert(
+    !colors.includes('0b0203'),
+    `closed-shadow color never claimed under churn (${colors.slice(0, 90)})`,
+    ev,
+  );
+  assert(
+    !colors.includes('630000'),
+    `cross-origin color never claimed under churn (${colors.slice(0, 90)})`,
+    ev,
+  );
+  const urls = (i.assets ?? []).map((a) => a.url).join(' ');
+  assert(urls.includes('/anim.gif'), 'GIF asset extracted', ev);
+  assert(urls.includes('/pic.avif'), 'AVIF asset extracted', ev);
+  assert(urls.includes('/sprite.svg'), 'SVG <use> sprite asset extracted', ev);
+  assert(urls.includes('data:image/png'), 'data URL asset extracted', ev);
+  ev.push(`els=${i.scannedElementCount} assets=${(i.assets ?? []).length} scan=${elapsed}s`);
+
+  // Freeze the storm, let the DOM settle, re-scan — the frozen route's color
+  // must be reported EXACTLY (no stale previous-route colors — the §37 race
+  // guard), and the re-scan must not be silently cached.
+  await page.evaluate(() => window.__setPaused(true));
+  await page.waitForTimeout(600);
+  const routeParity = await page.evaluate(() => window.__NIGHTMARE__.route() % 2);
+  const scan2 = await bus(tabId, 'SCAN_PAGE', undefined, 180_000);
+  assert(scan2.ok && scan2.res.ok === true, scanMsg(scan2, 're-scan after freeze'), ev);
+  assert(scan2.res.inspection.cached === false, 're-scan after churn is never silently cached', ev);
+  const colors2 = (scan2.res.inspection.tokens?.colors ?? [])
+    .map((c) => c.value.hex.toLowerCase())
+    .join(' ');
+  const expect = routeParity === 0 ? '141414' : '282828';
+  const stale = routeParity === 0 ? '282828' : '141414';
+  assert(colors2.includes(expect), `frozen route color present (#${expect})`, ev);
+  assert(!colors2.includes(stale), `stale previous-route color absent (#${stale})`, ev);
+  ev.push(`frozen-route=${expect}`);
+
+  await page.close();
+});
+
 /* ------------------------------------------------------------------------ */
 /* Main                                                                      */
 /* ------------------------------------------------------------------------ */
@@ -1400,14 +1770,18 @@ try {
   worker = context.serviceWorkers()[0];
   extensionId = new URL(worker.url()).host;
   pass(`extension loaded (id ${extensionId.slice(0, 8)}…)`);
-  pass(`environment: ${process.platform} · node ${process.version} · fixture max ${HUGE_NODES} nodes`);
+  pass(
+    `environment: ${process.platform} · node ${process.version} · fixture max ${HUGE_NODES} nodes`,
+  );
 
   const toRun =
     selected.length > 0
       ? scenarios.filter((s) => selected.includes(s.id) || selected.includes(s.category))
       : scenarios;
   if (toRun.length === 0) {
-    console.error(`VQ_TORTURE matched no scenarios. Known: ${scenarios.map((s) => s.id).join(', ')}`);
+    console.error(
+      `VQ_TORTURE matched no scenarios. Known: ${scenarios.map((s) => s.id).join(', ')}`,
+    );
     process.exit(2);
   }
   for (const s of toRun) {
