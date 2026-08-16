@@ -38,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       # Jekyll keeps the .md files (privacy policy, README) rendered as HTML —
       # identical to the current branch-based deploy. Without it, flipping the
       # Pages source would serve them as raw text.
