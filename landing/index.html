@@ -15,6 +15,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://webdclassified.github.io/vizquo/deploy-kit/promo/og-1200x630.png">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" href="../public/icon/32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -179,8 +180,8 @@
     box-shadow: var(--edge-light), 0 14px 44px rgba(0,0,0,.45);
   }
   .nav { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 20px; }
-  .brand { display: flex; align-items: center; }
-  .brand img { height: 22px; width: auto; mix-blend-mode: screen; }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 18px; letter-spacing: -0.02em; }
+  .brand img { width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 0 0 1px var(--vz-accent-border), 0 4px 14px rgba(62,142,103,.32); }
   .nav-links { display: flex; align-items: center; gap: 26px; font-size: 14px; font-weight: 500; color: var(--vz-text-secondary); }
   .nav-links a { position: relative; transition: color .15s ease; }
   .nav-links a::after {
@@ -220,7 +221,8 @@
   /* Compact nav on small phones — brand, CTA and burger must fit 320px */
   @media (max-width: 560px) {
     .nav { gap: 10px; }
-    .brand img { height: 19px; }
+    .brand { font-size: 16px; gap: 8px; }
+    .brand img { width: 26px; height: 26px; }
     .nav-cta { padding: 8px 13px; font-size: 12.5px; }
     .cta-free { display: none; }
     .nav-burger { width: 38px; height: 38px; }
@@ -1086,7 +1088,7 @@
 <!-- ============ HEADER ============ -->
 <header id="siteHeader">
   <div class="wrap nav">
-    <a class="brand" href="#top"><img src="../deploy-kit/brand/artwork/horizontal-logo.png" alt="Vizquo — see beyond the surface"></a>
+    <a class="brand" href="#top"><img src="../public/icon/32.png" alt="Vizquo logo"> Vizquo</a>
     <nav class="nav-links" id="navLinks" aria-label="Primary">
       <a href="#product">Product</a>
       <a href="#how">How it works</a>
@@ -1306,30 +1308,44 @@
     </div>
     <div class="bento">
       <!-- Design system -->
-      <div class="bento-tile reveal">
+      <div class="bento-tile wide reveal">
         <div class="bt-kicker"><span class="conf detected">OBSERVED</span> Design system</div>
         <h3>Turn a page into a design system</h3>
-        <p>One scan extracts colors, type, spacing, radius, shadows, and recurring component patterns.</p>
+        <p>One scan extracts colors, type, spacing, radius, shadows, and recurring component patterns — then shows you exactly what it observed.</p>
         <div class="bt-vis">
           <div class="ds-swatches">
-            <span class="ds-swatch" style="background:#3E8E67">#C9A96E</span>
+            <span class="ds-swatch" style="background:#3E8E67">#3E8E67</span>
             <span class="ds-swatch" style="background:#11151A;color:rgba(255,255,255,.6)">#10141F</span>
-            <span class="ds-swatch" style="background:#6FCF97;color:#08110C">#54C99B</span>
-            <span class="ds-swatch" style="background:#63B98C">#E6CF9A</span>
+            <span class="ds-swatch" style="background:#6FCF97;color:#08110C">#6FCF97</span>
+            <span class="ds-swatch" style="background:#63B98C;color:#08110C">#63B98C</span>
+          </div>
+        </div>
+      </div>
+      <!-- Design tokens -->
+      <div class="bento-tile reveal" data-delay="1">
+        <div class="bt-kicker"><span class="conf detected">OBSERVED</span> Design tokens</div>
+        <h3>Copy the system, not the pixels</h3>
+        <p>Every value becomes a named token — color, type, space, radius, shadow — ready for your own design system.</p>
+        <div class="bt-vis">
+          <div class="edit-row">
+            <span class="prop">--vz-accent</span> <span class="arrow">=</span> <span class="val">#3E8E67</span>
+            <span class="prop">--space-md</span> <span class="arrow">=</span> <span class="val">16px</span>
+            <span class="prop">--radius-lg</span> <span class="arrow">=</span> <span class="val">16px</span>
+            <span class="prop">--font-head</span> <span class="arrow">=</span> <span class="val">Inter 800</span>
           </div>
         </div>
       </div>
       <!-- Difference / Find instances -->
-      <div class="bento-tile wide reveal" data-delay="1">
+      <div class="bento-tile reveal" data-delay="2">
         <div class="bt-kicker"><span class="conf inferred">INFERRED</span> Find instances</div>
         <h3>Understand why two buttons look different</h3>
-        <p>Select one element, and Vizquo finds every similar component on the page — highlighting near-duplicates and the exact style deltas between them. Recurring patterns become component definitions you can export.</p>
+        <p>Select one element, and Vizquo finds every similar component on the page — highlighting near-duplicates and the exact style deltas between them.</p>
         <div class="bt-vis">
           <div class="edit-row"><span class="prop">.btn</span> <span class="arrow">×12 instances</span> <span class="val">2 variants</span> <span class="arrow">·</span> <span class="prop">padding:</span> <span class="val">12px vs 16px</span></div>
         </div>
       </div>
       <!-- Code -->
-      <div class="bento-tile reveal" data-delay="2">
+      <div class="bento-tile wide reveal" data-delay="3">
         <div class="bt-kicker"><span class="conf derived">DERIVED</span> Code</div>
         <h3>From interface to implementation</h3>
         <p>Selected element → React, CSS, or design tokens. Generated code is never executed by Vizquo.</p>
@@ -1798,7 +1814,7 @@
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a class="brand" href="#top"><img src="../deploy-kit/brand/artwork/horizontal-logo.png" alt="Vizquo — see beyond the surface"></a>
+        <a class="brand" href="#top"><img src="../public/icon/32.png" alt="Vizquo logo"> Vizquo</a>
         <p>The visual inspection instrument for the web. Free, local-first, private by default.</p>
       </div>
       <div class="footer-col">
