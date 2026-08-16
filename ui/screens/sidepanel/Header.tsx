@@ -1,17 +1,11 @@
-import { Command, Keyboard, Moon, Settings, Sparkles, Sun, SunMoon } from 'lucide-solid';
+import { Command, Keyboard, Moon, Power, Settings, Sun, SunMoon } from 'lucide-solid';
 import { SETTING_KEYS, type ThemeId } from '../../../shared/constants';
 import { IconButton } from '../../components/IconButton';
 import { Logo } from '../../components/Logo';
 import { persist } from '../../stores/persisted-store';
 import { notify } from '../../stores/toast';
-import {
-  openCheatsheet,
-  openPalette,
-  openWhatsNew,
-  setActivePanel,
-  setTheme,
-  ui,
-} from '../../stores/ui-store';
+import { openCheatsheet, openPalette, setActivePanel, setTheme, ui } from '../../stores/ui-store';
+import { stopSession } from './session-client';
 
 function nextTheme(theme: ThemeId): ThemeId {
   if (theme === 'light') return 'dark';
@@ -54,10 +48,10 @@ export function Header() {
           onClick={openCheatsheet}
         />
         <IconButton
-          icon={Sparkles}
-          label="What's new"
-          tooltip="What's new"
-          onClick={openWhatsNew}
+          icon={Power}
+          label="Stop Vizquo"
+          tooltip="Stop Vizquo — restores the page (clears highlights and edits)"
+          onClick={() => void stopSession()}
         />
         <IconButton
           icon={ThemeGlyph}

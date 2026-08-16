@@ -172,6 +172,12 @@ export class IndexedDbRepository implements VizquoRepository {
     return this.db.cache.toArray();
   }
 
+  async listInspectionCacheEntries(): Promise<CacheEntry[]> {
+    // `kind` is indexed — a targeted query avoids pulling every cached
+    // screenshot/blob (multi-MB data URLs) just to probe one inspection.
+    return this.db.cache.where('kind').equals('inspection').toArray();
+  }
+
   async clearCache(): Promise<void> {
     await this.db.cache.clear();
   }

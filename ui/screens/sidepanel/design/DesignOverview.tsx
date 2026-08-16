@@ -196,7 +196,7 @@ export function DesignOverview() {
     <Panel
       id="overview"
       title="Page overview"
-      subtitle={`${inspection()?.page.title || inspection()?.page.url || 'This page'} — scanned in ${(inspection()?.scanDurationMs ?? 0) / 1000}s`}
+      subtitle={`${inspection()?.page.title || inspection()?.page.url || 'This page'} — scanned in ${((inspection()?.scanDurationMs ?? 0) / 1000).toFixed(2)}s`}
       actions={
         <Show when={analysis.cached || analysis.stale}>
           <Badge

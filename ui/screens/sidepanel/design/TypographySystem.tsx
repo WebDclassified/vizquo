@@ -143,15 +143,15 @@ export function TypographySystem() {
                 <div class="flex items-start gap-2.5 rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg)] px-2.5 py-2 transition-colors hover:border-[var(--vq-border-strong)]">
                   <div class="min-w-[84px] shrink-0 pt-0.5">
                     <ConfidenceBadge
-                      level={style.confidence.level}
-                      score={style.confidence.score}
+                      level={style.confidence?.level}
+                      score={style.confidence?.score}
                       class="[&>span]:text-[9px]"
                     />
                   </div>
                   <div class="min-w-0 flex-1">
                     <div class="flex items-baseline gap-1.5">
                       <span class="shrink-0 text-[10px] font-semibold tracking-wider text-[var(--vq-fg-muted)] uppercase">
-                        {TYPE_ROLE_META[style.role].label}
+                        {TYPE_ROLE_META[style.role]?.label ?? style.role}
                       </span>
                       <span class="truncate text-[12.5px] font-medium text-[var(--vq-fg)]">
                         {style.family}

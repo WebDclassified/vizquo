@@ -35,6 +35,7 @@ export async function loadPersistedSettings(): Promise<void> {
       aiConsentGiven,
       aiOllamaBaseUrl,
       aiOllamaModel,
+      aiCustomBaseUrl,
     ] = await Promise.all([
       repository.getSetting<ThemeId>(SETTING_KEYS.theme),
       repository.getSetting<UiMode>(SETTING_KEYS.uiMode),
@@ -49,6 +50,7 @@ export async function loadPersistedSettings(): Promise<void> {
       repository.getSetting<boolean>(SETTING_KEYS.aiConsentGiven),
       repository.getSetting<string>(SETTING_KEYS.aiOllamaBaseUrl),
       repository.getSetting<string>(SETTING_KEYS.aiOllamaModel),
+      repository.getSetting<string>(SETTING_KEYS.aiCustomBaseUrl),
     ]);
 
     const completed = onboarding === 'completed';
@@ -75,6 +77,7 @@ export async function loadPersistedSettings(): Promise<void> {
         hostPermission: false,
         ollamaBaseUrl: aiOllamaBaseUrl ?? DEFAULT_OLLAMA_BASE_URL,
         ollamaModel: aiOllamaModel ?? DEFAULT_OLLAMA_MODEL,
+        customBaseUrl: aiCustomBaseUrl ?? '',
       },
     });
   } catch {

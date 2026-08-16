@@ -14,10 +14,17 @@ interface ConfidenceBadgeProps {
   class?: string;
 }
 
-/** Product law #2: every non-directly-observed value is tagged with its level. */
+/** Product law #2: every non-directly-observed value is tagged with its level.
+ *  Defensive by contract: an inspection served from an older cache/history can
+ *  carry tokens without a confidence field — that must render as "Unknown",
+ *  never crash the panel (the error boundary's #1 page-data trigger). */
 export function ConfidenceBadge(props: ConfidenceBadgeProps) {
-  const meta = CONFIDENCE_META[props.level];
-  const score = props.score != null ? Math.round(props.score * 100) : null;
+  const meta = CONFIDENCE_META[props.level] ?? {
+    label: 'Unknown',
+    tone: 'neutral' as const,
+  };
+  const score =
+    props.score != null && Number.isFinite(props.score) ? Math.round(props.score * 100) : null;
   return (
     <Badge
       tone={meta.tone}

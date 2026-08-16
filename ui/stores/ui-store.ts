@@ -56,6 +56,8 @@ export interface AiUiState {
   /* ---- Phase 9: Ollama (local, keyless) ---- */
   ollamaBaseUrl: string;
   ollamaModel: string;
+  /* ---- Custom (OpenAI-compatible) provider ---- */
+  customBaseUrl: string;
 }
 
 interface UIState {
@@ -74,6 +76,10 @@ interface UIState {
   /** Post-update "What's new" tour — walks the user through what changed. */
   whatsNewTour: { visible: boolean; step: number; done: boolean };
   ai: AiUiState;
+  /** True after the user ends the inspection session (Stop button): the page
+   *  was restored (inspect mode off, highlights/edits cleared) and the panel
+   *  shows the paused screen until Resume. */
+  stopped: boolean;
 }
 
 const [ui, setUi] = createStore<UIState>({
@@ -100,7 +106,9 @@ const [ui, setUi] = createStore<UIState>({
     hostPermission: false,
     ollamaBaseUrl: DEFAULT_OLLAMA_BASE_URL,
     ollamaModel: DEFAULT_OLLAMA_MODEL,
+    customBaseUrl: '',
   },
+  stopped: false,
 });
 
 export { setUi, ui };
@@ -117,6 +125,7 @@ export const startWhatsNewTour = () =>
 export const closeWhatsNewTour = () =>
   setUi('whatsNewTour', { visible: false, step: 0, done: true });
 export const setActivePanel = (panel: PanelId) => setUi('activePanel', panel);
+export const setStopped = (stopped: boolean) => setUi('stopped', stopped);
 export const setTheme = (theme: ThemeId) => setUi('theme', theme);
 export const setUiMode = (mode: UiMode) => setUi('uiMode', mode);
 export const toggleUiMode = () =>

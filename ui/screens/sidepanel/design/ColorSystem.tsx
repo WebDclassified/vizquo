@@ -58,13 +58,13 @@ function ColorCard(props: { token: ColorToken; favorite: boolean; onToggleFavori
         aria-label={`Copy color ${hex()}`}
         onClick={() => void copyValue()}
         class="h-8 w-8 shrink-0 rounded-[var(--vq-radius-sm)] border border-black/10 font-mono text-[9px] font-semibold shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]"
-        style={{ background: hex(), color: text() }}
+        style={{ background: hex() ?? '#000000', color: text() }}
       >
         {copied() ? (
           <Check class="mx-auto size-3.5" />
-        ) : (
+        ) : hex() ? (
           <span class="uppercase">{hex().slice(1)}</span>
-        )}
+        ) : null}
       </button>
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-1.5">
@@ -117,7 +117,7 @@ function ColorCard(props: { token: ColorToken; favorite: boolean; onToggleFavori
             <ScanSearch class="size-3.5" />
           </button>
         </div>
-        <ConfidenceBadge level={token().confidence.level} score={token().confidence.score} />
+        <ConfidenceBadge level={token().confidence?.level} score={token().confidence?.score} />
       </div>
     </div>
   );

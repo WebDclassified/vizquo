@@ -14,11 +14,10 @@
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/utils/define-background';
 import { resolveApiKey } from '../ai/config';
-import { DEFAULT_OLLAMA_BASE_URL, OllamaProvider } from '../ai/ollama';
-import { OpenRouterProvider } from '../ai/openrouter';
+import { createProvider } from '../ai/registry';
 import { buildAssetZip, sanitizeFilename, type ZipAssetEntry } from '../export/assets-zip';
 import { SETTING_KEYS, STORAGE_KEYS } from '../shared/constants';
-import { onMessage, type PingResult, sendMessage } from '../shared/messages';
+import { onMessage, type PingResult, sendTabMessage } from '../shared/messages';
 import {
   isContentScriptSender,
   requireExtensionPage as refuseUnlessExtensionPage,
@@ -27,6 +26,7 @@ import {
 import type {
   AIExplainRequest,
   AIExplainResult,
+  AIProviderId,
   CaptureResult,
   ElementRef,
   ExportAssetRequest,
@@ -83,7 +83,11 @@ export default defineBackground(() => {
       if (info.menuItemId !== CONTEXT_MENU_ID || tab?.id == null) return;
       let ref: { ref: ElementRef | null } = { ref: null };
       try {
-        ref = await sendMessage('GET_CONTEXT_TARGET', undefined, tab.id);
+        // sendTabMessage uses the promise form, which consumes
+        // chrome.runtime.lastError — the library's raw tab-targeted sender
+        // leaves it unchecked, logging "Could not establish connection."
+        // whenever a navigation/restricted page races the message.
+        ref = await sendTabMessage(tab.id, 'GET_CONTEXT_TARGET', undefined);
       } catch {
         ref = { ref: null };
       }
@@ -138,13 +142,13 @@ export default defineBackground(() => {
           if (tab?.id == null) break;
           let state = { enabled: false };
           try {
-            state = await sendMessage('GET_INSPECT_STATE', undefined, tab.id);
+            state = await sendTabMessage(tab.id, 'GET_INSPECT_STATE', undefined);
           } catch {
             // Not connected — nothing to toggle.
             break;
           }
           try {
-            await sendMessage('SET_INSPECT_MODE', { enabled: !state.enabled }, tab.id);
+            await sendTabMessage(tab.id, 'SET_INSPECT_MODE', { enabled: !state.enabled });
           } catch {
             // Content script disappeared mid-toggle.
           }
@@ -269,11 +273,12 @@ export default defineBackground(() => {
         };
       }
       try {
-        const [enabled, storedKey, providerId, ollamaBaseUrl] = await Promise.all([
+        const [enabled, storedKey, providerId, ollamaBaseUrl, customBaseUrl] = await Promise.all([
           repository.getSetting<boolean>(SETTING_KEYS.aiEnabled),
           repository.getSetting<string>(SETTING_KEYS.aiApiKey),
-          repository.getSetting<'openrouter' | 'ollama'>(SETTING_KEYS.aiProvider),
+          repository.getSetting<AIProviderId>(SETTING_KEYS.aiProvider),
           repository.getSetting<string>(SETTING_KEYS.aiOllamaBaseUrl),
+          repository.getSetting<string>(SETTING_KEYS.aiCustomBaseUrl),
         ]);
         if (!enabled) {
           return {
@@ -282,24 +287,22 @@ export default defineBackground(() => {
           };
         }
 
-        // Phase 9: local Ollama needs no key — the strictest privacy posture.
-        if (providerId === 'ollama') {
-          const provider = new OllamaProvider(ollamaBaseUrl?.trim() || DEFAULT_OLLAMA_BASE_URL);
-          return await provider.explain(data, '');
-        }
-
-        // OpenRouter: a user's stored key wins; otherwise the bundled author
-        // default is used in dev builds so AI works out of the box (see
-        // ai/config.ts — production builds ship keyless).
-        const apiKey = resolveApiKey(storedKey);
-        if (!apiKey) {
+        // Ollama is fully local — no key needed (the strictest privacy
+        // posture Vizquo offers). Every other provider needs the user's key;
+        // the OpenRouter path also honors the bundled author default in dev
+        // builds (ai/config.ts — production ships keyless).
+        const provider = createProvider(providerId ?? 'openrouter', {
+          ollamaBaseUrl: ollamaBaseUrl ?? undefined,
+          customBaseUrl: customBaseUrl ?? undefined,
+        });
+        const apiKey = providerId === 'ollama' ? '' : (resolveApiKey(storedKey) ?? '');
+        if (providerId !== 'ollama' && !apiKey) {
           return {
             ok: false,
             error:
-              'No AI key is set. Add your own OpenRouter API key in Settings (it is never shared).',
+              'No AI key is set. Add your provider\u2019s API key in Settings (it is never shared).',
           };
         }
-        const provider = new OpenRouterProvider();
         return await provider.explain(data, apiKey);
       } catch {
         return {
@@ -489,7 +492,8 @@ export default defineBackground(() => {
       if (!SAFE_SCHEMES.has(parsed.protocol)) {
         return {
           ok: false,
-          error: 'The asset URL uses an unsupported scheme — only http(s), blob, and data can be opened.',
+          error:
+            'The asset URL uses an unsupported scheme — only http(s), blob, and data can be opened.',
         };
       }
       // Cap the payload: videos can be large, but an unbounded fetch from a
@@ -517,8 +521,7 @@ export default defineBackground(() => {
         // Chunk the base64 conversion — spreading a multi-MB Uint8Array into
         // String.fromCharCode overflows the call stack.
         const mime =
-          response.headers.get('content-type')?.split(';')[0]?.trim() ||
-          'application/octet-stream';
+          response.headers.get('content-type')?.split(';')[0]?.trim() || 'application/octet-stream';
         const bytes = new Uint8Array(buffer);
         let binary = '';
         const CHUNK = 0x8000;
@@ -546,11 +549,12 @@ export default defineBackground(() => {
     const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
     let content: PingResult['content'] = {
       ok: false,
-      error: 'No content script is connected to this tab. Restricted pages (chrome://, the Web Store) cannot be inspected — open a normal web page.',
+      error:
+        'No content script is connected to this tab. Restricted pages (chrome://, the Web Store) cannot be inspected — open a normal web page.',
     };
     if (tab?.id != null) {
       try {
-        const reply = await sendMessage('PING_TAB', { nonce: data.nonce }, tab.id);
+        const reply = await sendTabMessage(tab.id, 'PING_TAB', { nonce: data.nonce });
         content = {
           ok: true,
           nonce: reply.nonce,

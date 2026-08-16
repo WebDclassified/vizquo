@@ -51,7 +51,10 @@ export function computeConsistency(input: {
   score -= Math.max(0, typeStyles.length - IDEAL_STYLE_COUNT) * 2;
   score -= Math.max(0, fonts.length - IDEAL_FONT_COUNT) * 5;
   score -= Math.max(0, colors.length - IDEAL_COLOR_COUNT) * 1.5;
-  score = Math.max(0, Math.min(100, Math.round(score)));
+  // Defensive: a malformed input (e.g. a non-finite usage count from an old
+  // cached scan) must degrade to a sane number, never NaN — the UI ring would
+  // otherwise render stroke-dasharray="NaN 360".
+  score = Number.isFinite(score) ? Math.max(0, Math.min(100, Math.round(score))) : 0;
 
   const findings: Finding[] = [...scaleOutliers];
   if (fonts.length > IDEAL_FONT_COUNT) {

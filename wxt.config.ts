@@ -31,9 +31,18 @@ export default defineConfig({
     // HMR — production never carries them.)
     permissions: ['storage', 'sidePanel', 'downloads', 'contextMenus', 'activeTab'],
     host_permissions: ['<all_urls>'],
-    // openrouter.ai and localhost are subsumed by <all_urls>; they stay listed
-    // so the AI provider toggles in Settings still report "granted" explicitly.
-    optional_host_permissions: ['https://openrouter.ai/*', 'http://localhost/*'],
+    // Provider origins are subsumed by <all_urls>; they stay listed so the AI
+    // provider toggles in Settings still report "granted" explicitly. The
+    // custom (OpenAI-compatible) provider has no static origin — its URL is
+    // user-entered, so that permission is requested on demand in Settings.
+    optional_host_permissions: [
+      'https://openrouter.ai/*',
+      'http://localhost/*',
+      'https://api.openai.com/*',
+      'https://api.anthropic.com/*',
+      'https://generativelanguage.googleapis.com/*',
+      'https://api.groq.com/*',
+    ],
     // The analysis worker runs inside the content script (isolated world). Its
     // script URL is built with browser.runtime.getURL(), and MV3 requires
     // extension resources fetched/loaded from content scripts to be declared

@@ -2576,6 +2576,87 @@ scenario('TOR-032', 'asset-blob-fetch', async (context, ev) => {
 });
 
 /* ------------------------------------------------------------------------ */
+/* TOR-033 — highlight-on-page (HIGHLIGHT_REFS / FIND_INSTANCES)             */
+/* ------------------------------------------------------------------------ */
+
+const FIXTURE_HIGHLIGHT = `<!doctype html><html><head><title>Torture highlight</title>
+<style>body{font-family:system-ui}.item{border:1px solid #ddd;border-radius:8px;padding:12px;margin:8px;background:#635bff}.accent{color:#ff6b81}</style>
+</head><body>
+<div id="list">
+  <div class="item"><p>Item one</p></div>
+  <div class="item"><p>Item two</p></div>
+  <div class="item accent"><p>Item three</p></div>
+  <div class="item accent"><p>Item four</p></div>
+</div>
+</body></html>`;
+
+scenario('TOR-033', 'highlight', async (context, ev) => {
+  const page = await newPage(context, '/highlight.html', {
+    '/highlight.html': (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_HIGHLIGHT }),
+  });
+  await page.waitForTimeout(600);
+  const tabId = await activeTabId();
+
+  /** Count the highlight boxes currently painted in the overlay shadow DOM. */
+  const countBoxes = () =>
+    page.evaluate(() => {
+      const host = Array.from(document.documentElement.children).find(
+        (el) => el instanceof HTMLElement && el.style.zIndex === '2147483646',
+      );
+      if (!host?.shadowRoot) return -1;
+      return host.shadowRoot.querySelectorAll('.vq-hl').length;
+    });
+
+  // 1. HIGHLIGHT_REFS paints a box per live ref (the panel's "highlight on
+  //    page" button path — the exact flow the user reported broken).
+  // Unique selectors so each ref resolves to its own element (a bare `.item`
+  // would resolve every ref to the first match — the classic stale-ref trap).
+  const refs = await page.evaluate(() =>
+    [...document.querySelectorAll('.item')].map((_el, i) => ({
+      selector: `div.item:nth-of-type(${i + 1})`,
+      xpath: '',
+      domPath: [],
+    })),
+  );
+  const hl = await bus(tabId, 'HIGHLIGHT_REFS', { refs, label: '4 items' });
+  assert(hl.ok === true, 'HIGHLIGHT_REFS accepted', ev);
+  await page.waitForTimeout(300);
+  const afterHl = await countBoxes();
+  assert(afterHl === 4, `4 refs painted 4 highlight boxes (got ${afterHl})`, ev);
+
+  // 2. FIND_INSTANCES (color) also paints boxes through the shared sink.
+  await bus(tabId, 'FIND_INSTANCES', { kind: 'color', value: '#635bff' });
+  await page.waitForTimeout(300);
+  const afterFind = await countBoxes();
+  assert(afterFind >= 2, `find-instances painted matching boxes (got ${afterFind})`, ev);
+
+  // 3. CLEAR_HIGHLIGHTS removes every box (Esc in the panel calls this).
+  await bus(tabId, 'CLEAR_HIGHLIGHTS', undefined);
+  await page.waitForTimeout(200);
+  const afterClear = await countBoxes();
+  assert(afterClear === 0, `clear removed all boxes (got ${afterClear})`, ev);
+
+  // 4. A STALE ref (every matching element removed from the DOM) never
+  //    crashes the overlay and paints nothing — the honest no-op the
+  //    quality bar requires. (A single removal would still resolve — the
+  //    selector matches the remaining items, which is correct behavior.)
+  await page.evaluate(() => {
+    for (const el of [...document.querySelectorAll('.item')]) el.remove();
+  });
+  const stale = await bus(tabId, 'HIGHLIGHT_REFS', {
+    refs: [{ selector: '.item', xpath: '', domPath: [] }],
+    label: 'stale',
+  });
+  assert(stale.ok === true, 'stale-ref HIGHLIGHT_REFS answered without crashing', ev);
+  await page.waitForTimeout(200);
+  const afterStale = await countBoxes();
+  assert(afterStale === 0, 'stale ref painted no ghost boxes', ev);
+
+  await page.close();
+});
+
+/* ------------------------------------------------------------------------ */
 /* Main                                                                      */
 /* ------------------------------------------------------------------------ */
 

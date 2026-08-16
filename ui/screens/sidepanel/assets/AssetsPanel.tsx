@@ -186,7 +186,7 @@ function AssetDetail(props: {
         {asset.classification && (
           <MetaRow
             label="Classification"
-            value={`${asset.classification.label} — ${Math.round((asset.classification.confidence.score ?? 0) * 100)}% ${asset.classification.confidence.level}`}
+            value={`${asset.classification?.label ?? asset.type} — ${Math.round((asset.classification?.confidence?.score ?? 0) * 100)}% ${asset.classification?.confidence?.level ?? 'unknown'}`}
           />
         )}
       </dl>

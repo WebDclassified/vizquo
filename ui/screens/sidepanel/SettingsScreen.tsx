@@ -12,6 +12,7 @@ import { createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { browser } from 'wxt/browser';
 import { aiHasKey, hasAuthorDefaultKey } from '../../../ai/config';
 import { DEFAULT_OLLAMA_BASE_URL } from '../../../ai/ollama';
+import { providerOrigin as resolveProviderOrigin } from '../../../ai/registry';
 import {
   LIBRARY_IMPORT_MAX_BYTES,
   parseLibraryDump,
@@ -20,6 +21,7 @@ import {
 import {
   AI_CUSTOM_MODEL,
   AI_MODELS,
+  AI_PROVIDER_DEFAULT_MODELS,
   AI_PROVIDERS,
   APP_AUTHOR,
   APP_NAME,
@@ -41,12 +43,9 @@ import { notify } from '../../stores/toast';
 import { setTheme, setUi, ui } from '../../stores/ui-store';
 import { downloadText } from './create/create-client';
 
-const OPENROUTER_ORIGIN = 'https://openrouter.ai/*';
-const LOCALHOST_ORIGIN = 'http://localhost/*';
-
 /** Host origin the current provider needs for its network calls. */
-function providerOrigin(provider: AIProviderId): string {
-  return provider === 'ollama' ? LOCALHOST_ORIGIN : OPENROUTER_ORIGIN;
+function providerOrigin(provider: AIProviderId): string | null {
+  return resolveProviderOrigin(provider, ui.ai.customBaseUrl);
 }
 
 function formatBytes(bytes: number): string {
@@ -122,14 +121,20 @@ export function SettingsScreen() {
   async function requestHostPermission(): Promise<void> {
     try {
       const origin = providerOrigin(ui.ai.provider);
+      if (!origin) {
+        notify({
+          title: 'Enter the custom endpoint URL first',
+          description: 'The custom provider needs a base URL (e.g. https://api.example.com/v1).',
+          tone: 'warning',
+        });
+        return;
+      }
       const granted = await browser.permissions.request({ origins: [origin] });
       setUi('ai', 'hostPermission', granted);
       notify({
         title: granted ? 'Provider access granted' : 'Provider access not granted',
         description: granted
-          ? ui.ai.provider === 'ollama'
-            ? 'Ollama requests will now reach your local server.'
-            : 'AI requests will now work with your key.'
+          ? 'AI requests will now work with your key.'
           : 'You can still use every non-AI feature.',
         tone: granted ? 'success' : 'warning',
       });
@@ -146,10 +151,31 @@ export function SettingsScreen() {
     } else {
       setUi('ai', 'hasKey', aiHasKey(ui.ai.userKey));
     }
+    // Each provider has its own sensible default model.
+    const defaultModel = AI_PROVIDER_DEFAULT_MODELS[provider];
+    if (defaultModel) {
+      setUi('ai', 'model', defaultModel);
+      persist(SETTING_KEYS.aiModel, defaultModel);
+    }
     persist(SETTING_KEYS.aiProvider, provider);
     // The host permission differs per provider — refresh it on switch.
-    const granted = await browser.permissions.contains({ origins: [providerOrigin(provider)] });
+    const origin = providerOrigin(provider);
+    const granted =
+      origin != null ? await browser.permissions.contains({ origins: [origin] }) : false;
     setUi('ai', 'hostPermission', granted);
+  }
+
+  async function changeCustomBaseUrl(raw: string) {
+    const value = raw.trim();
+    setUi('ai', 'customBaseUrl', value);
+    persist(SETTING_KEYS.aiCustomBaseUrl, value);
+    if (/^https?:\/\//.test(value)) {
+      const origin = providerOrigin('custom');
+      if (origin) {
+        const granted = await browser.permissions.contains({ origins: [origin] });
+        setUi('ai', 'hostPermission', granted);
+      }
+    }
   }
 
   async function changeOllamaBaseUrl(raw: string) {
@@ -222,6 +248,16 @@ export function SettingsScreen() {
   const modelSelectValue = () =>
     AI_MODELS.some((m) => m.id === ui.ai.model) ? ui.ai.model : AI_CUSTOM_MODEL;
   const isCustomModel = () => modelSelectValue() === AI_CUSTOM_MODEL;
+
+  /** Provider display metadata (label, key label/placeholder) for the UI. */
+  const providerMeta = () =>
+    AI_PROVIDERS.find((p) => p.id === ui.ai.provider) ?? {
+      id: 'openrouter' as const,
+      label: 'OpenRouter',
+      description: '',
+      keyLabel: 'API key',
+      keyPlaceholder: 'sk-…',
+    };
 
   // When the stored model is a custom slug (not in the list), prefill the
   // custom input so the active model is always visible on reopen (reviewer #1).
@@ -659,43 +695,92 @@ export function SettingsScreen() {
                 </div>
               </Show>
 
-              <Show when={ui.ai.provider === 'openrouter'}>
-                <label class="flex flex-col gap-1">
-                  <span class="text-[12px] font-medium text-[var(--vq-fg)]">Model</span>
-                  <select
-                    value={modelSelectValue()}
-                    onChange={(e) => changeModel((e.target as HTMLSelectElement).value)}
-                    class="h-8 rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg)] px-2 text-[12px] text-[var(--vq-fg)] focus:outline-none"
-                  >
-                    <For each={AI_MODELS}>
-                      {(model) => <option value={model.id}>{model.label}</option>}
-                    </For>
-                    <option value={AI_CUSTOM_MODEL}>Custom model…</option>
-                  </select>
-                </label>
+              <Show when={ui.ai.provider !== 'ollama'}>
+                <Show when={ui.ai.provider === 'openrouter'}>
+                  <label class="flex flex-col gap-1">
+                    <span class="text-[12px] font-medium text-[var(--vq-fg)]">Model</span>
+                    <select
+                      value={modelSelectValue()}
+                      onChange={(e) => changeModel((e.target as HTMLSelectElement).value)}
+                      class="h-8 rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg)] px-2 text-[12px] text-[var(--vq-fg)] focus:outline-none"
+                    >
+                      <For each={AI_MODELS}>
+                        {(model) => <option value={model.id}>{model.label}</option>}
+                      </For>
+                      <option value={AI_CUSTOM_MODEL}>Custom model…</option>
+                    </select>
+                  </label>
 
-                <Show when={isCustomModel()}>
-                  <div class="flex flex-col gap-1.5">
-                    <label class="flex flex-col gap-1">
-                      <span class="text-[11px] text-[var(--vq-fg-subtle)]">
-                        Model slug (e.g. <code class="vq-code">anthropic/claude-3.5-sonnet</code>)
-                      </span>
-                      <input
-                        id="vq-ai-model-custom"
-                        type="text"
-                        value={customModel()}
-                        onInput={(e) => setCustomModel((e.target as HTMLInputElement).value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') saveCustomModel();
-                        }}
-                        placeholder="provider/model"
-                        class="h-8 rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg)] px-2 text-[12px] text-[var(--vq-fg)] placeholder:text-[var(--vq-fg-subtle)] focus:border-[var(--vq-accent)] focus:outline-none"
-                      />
-                    </label>
-                    <Button size="sm" variant="secondary" onClick={saveCustomModel}>
-                      Use this model
-                    </Button>
-                  </div>
+                  <Show when={isCustomModel()}>
+                    <div class="flex flex-col gap-1.5">
+                      <label class="flex flex-col gap-1">
+                        <span class="text-[11px] text-[var(--vq-fg-subtle)]">
+                          Model slug (e.g. <code class="vq-code">anthropic/claude-3.5-sonnet</code>)
+                        </span>
+                        <input
+                          id="vq-ai-model-custom"
+                          type="text"
+                          value={customModel()}
+                          onInput={(e) => setCustomModel((e.target as HTMLInputElement).value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveCustomModel();
+                          }}
+                          placeholder="provider/model"
+                          class="h-8 rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg)] px-2 text-[12px] text-[var(--vq-fg)] placeholder:text-[var(--vq-fg-subtle)] focus:border-[var(--vq-accent)] focus:outline-none"
+                        />
+                      </label>
+                      <Button size="sm" variant="secondary" onClick={saveCustomModel}>
+                        Use this model
+                      </Button>
+                    </div>
+                  </Show>
+                </Show>
+                <Show when={ui.ai.provider !== 'openrouter'}>
+                  <label class="flex flex-col gap-1">
+                    <span class="text-[12px] font-medium text-[var(--vq-fg)]">Model</span>
+                    <input
+                      id="vq-ai-model-hosted"
+                      type="text"
+                      value={ui.ai.model}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const value = (e.target as HTMLInputElement).value.trim();
+                          if (value) {
+                            setUi('ai', 'model', value);
+                            persist(SETTING_KEYS.aiModel, value);
+                            notify({ title: `Model set to ${value}`, tone: 'success' });
+                          }
+                        }
+                      }}
+                      placeholder={AI_PROVIDER_DEFAULT_MODELS[ui.ai.provider] ?? 'model-slug'}
+                      class="h-8 rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg)] px-2 text-[12px] text-[var(--vq-fg)] placeholder:text-[var(--vq-fg-subtle)] focus:border-[var(--vq-accent)] focus:outline-none"
+                    />
+                    <span class="text-[11px] text-[var(--vq-fg-subtle)]">
+                      Enter the exact model slug your provider expects (Enter to save).
+                    </span>
+                  </label>
+                </Show>
+
+                <Show when={ui.ai.provider === 'custom'}>
+                  <label class="flex flex-col gap-1">
+                    <span class="text-[12px] font-medium text-[var(--vq-fg)]">
+                      Base URL (OpenAI-compatible)
+                    </span>
+                    <input
+                      id="vq-ai-custom-base"
+                      type="text"
+                      value={ui.ai.customBaseUrl}
+                      onInput={(e) =>
+                        void changeCustomBaseUrl((e.target as HTMLInputElement).value)
+                      }
+                      placeholder="https://api.example.com/v1"
+                      class="h-8 rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg)] px-2 text-[12px] text-[var(--vq-fg)] placeholder:text-[var(--vq-fg-subtle)] focus:border-[var(--vq-accent)] focus:outline-none"
+                    />
+                    <span class="text-[11px] text-[var(--vq-fg-subtle)]">
+                      Any server that speaks the OpenAI chat-completions format — LM Studio,
+                      Together, DeepSeek, vLLM, a private proxy…
+                    </span>
+                  </label>
                 </Show>
 
                 <Show when={ui.ai.userKey}>
@@ -715,8 +800,8 @@ export function SettingsScreen() {
                     <label class="flex flex-col gap-1">
                       <span class="flex items-center gap-1.5 text-[12px] font-medium text-[var(--vq-fg)]">
                         <KeyRound class="size-3.5" aria-hidden="true" />
-                        Your OpenRouter API key
-                        <Show when={ui.ai.hasKey}>
+                        {providerMeta().keyLabel}
+                        <Show when={ui.ai.hasKey && ui.ai.provider === 'openrouter'}>
                           <span class="vq-nums text-[10px] text-[var(--vq-fg-subtle)]">
                             (using bundled default — set your own to override)
                           </span>
@@ -725,7 +810,7 @@ export function SettingsScreen() {
                       <input
                         id="vq-ai-key"
                         type="password"
-                        placeholder="sk-or-…"
+                        placeholder={providerMeta().keyPlaceholder}
                         autocomplete="off"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
@@ -786,7 +871,9 @@ export function SettingsScreen() {
                     <Wrench class="size-3.5" aria-hidden="true" />
                     {ui.ai.provider === 'ollama'
                       ? 'localhost access not granted yet — needed to reach your Ollama server.'
-                      : 'openrouter.ai access not granted yet.'}
+                      : ui.ai.provider === 'custom'
+                        ? 'Access to your custom endpoint is not granted yet — it is requested when you enter a base URL and grant it below.'
+                        : `${providerMeta().label} access not granted yet — needed for AI requests.`}
                   </span>
                   <Button
                     size="sm"

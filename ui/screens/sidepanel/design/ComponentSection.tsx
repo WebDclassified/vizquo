@@ -46,8 +46,8 @@ function ComponentRow(props: { component: Component }) {
           </span>
         </button>
         <ConfidenceBadge
-          level={component().confidence.level}
-          score={component().confidence.score}
+          level={component().confidence?.level}
+          score={component().confidence?.score}
         />
         <Badge tone="neutral" class="vq-nums shrink-0">
           {instances().length} {instances().length === 1 ? 'instance' : 'instances'}

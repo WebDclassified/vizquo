@@ -13,6 +13,7 @@ import { Dialog as KDialog } from '@kobalte/core';
 import { Bot, Clipboard, LoaderCircle, Settings2, ShieldCheck } from 'lucide-solid';
 import { createMemo, createSignal, Show } from 'solid-js';
 import { aiReadiness } from '../../../../ai/gate';
+import { providerOrigin } from '../../../../ai/registry';
 import type { InspectionComparison } from '../../../../export/compare';
 import { SETTING_KEYS } from '../../../../shared/constants';
 import type {
@@ -135,13 +136,15 @@ async function setUiConsent(): Promise<void> {
   // background fetch to succeed — request it here so first send doesn't fail
   // with a confusing permission error (reviewer #5). Ollama → localhost.
   if (!ui.ai.hostPermission) {
-    const origin = ui.ai.provider === 'ollama' ? 'http://localhost/*' : 'https://openrouter.ai/*';
-    try {
-      const { browser } = await import('wxt/browser');
-      const granted = await browser.permissions.request({ origins: [origin] });
-      setUi('ai', 'hostPermission', granted);
-    } catch {
-      setUi('ai', 'hostPermission', false);
+    const origin = providerOrigin(ui.ai.provider, ui.ai.customBaseUrl);
+    if (origin) {
+      try {
+        const { browser } = await import('wxt/browser');
+        const granted = await browser.permissions.request({ origins: [origin] });
+        setUi('ai', 'hostPermission', granted);
+      } catch {
+        setUi('ai', 'hostPermission', false);
+      }
     }
   }
 }
@@ -283,8 +286,8 @@ export function AiExplainDialog() {
                 <div class="flex flex-col gap-2.5 py-2">
                   <p class="text-[11.5px] leading-relaxed text-[var(--vq-fg-muted)]">
                     {disabledReason() === 'AI is off'
-                      ? 'AI is off by default. Turn it on in Settings, add your own API key, and grant OpenRouter access — or keep using Vizquo without AI.'
-                      : 'Add your own OpenRouter API key in Settings. It is stored locally and used only for requests you make.'}
+                      ? 'AI is off by default. Turn it on in Settings, add your API key, and grant the provider access — or keep using Vizquo without AI.'
+                      : 'Add your API key for the selected provider in Settings. It is stored locally and used only for requests you make.'}
                   </p>
                   <div class="flex justify-end gap-1.5">
                     <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>

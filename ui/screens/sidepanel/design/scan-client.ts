@@ -150,7 +150,10 @@ async function probeL3Cache(url: string): Promise<{
     const fingerprint = result.fingerprint;
     let entry: { data: Inspection; fingerprint: string } | null = null;
     try {
-      const rows = await repository.listCacheEntries();
+      // Only inspection rows — loading every cache entry (screenshots, blobs)
+      // pulled multi-MB data URLs into memory on every scan. This is the
+      // indexed query, so a cold open on a heavy page stays snappy.
+      const rows = await repository.listInspectionCacheEntries();
       const candidates = rows
         .filter(
           (row) =>

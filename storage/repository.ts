@@ -56,6 +56,11 @@ export interface VizquoRepository {
   getCacheEntry<T>(key: string): Promise<CacheEntry<T> | null>;
   putCacheEntry(entry: CacheEntry): Promise<void>;
   listCacheEntries(): Promise<CacheEntry[]>;
+  /** Only inspection entries — the L3 probe wants one row, not every cached
+   *  screenshot/blob (loading all rows pulls megabytes of data URLs into
+   *  memory on every scan). Indexed by `kind`. */
+  listInspectionCacheEntries(): Promise<CacheEntry[]>;
+
   clearCache(): Promise<void>;
   getCacheStats(): Promise<CacheStats>;
 

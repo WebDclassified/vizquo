@@ -29,6 +29,7 @@ import {
 } from './inspector/inspector-client';
 import { NavTabs } from './NavTabs';
 import { OnboardingTour } from './OnboardingTour';
+import { StoppedScreen } from './StoppedScreen';
 import { WhatNewDialog } from './WhatNewDialog';
 import { WhatsNewTour } from './WhatsNewTour';
 
@@ -281,31 +282,40 @@ export function App() {
       <NavTabs />
 
       <main class="min-h-0 flex-1 overflow-y-auto">
-        <PanelErrorBoundary>
-          <Suspense fallback={<PanelFallback />}>
-            <Show when={ui.activePanel === 'inspect'}>
-              <InspectPanel />
-            </Show>
-            <Show when={ui.activePanel === 'design'}>
-              <DesignPanel />
-            </Show>
-            <Show when={ui.activePanel === 'assets'}>
-              <AssetsPanel />
-            </Show>
-            <Show when={ui.activePanel === 'analyze'}>
-              <AnalyzePanel />
-            </Show>
-            <Show when={ui.activePanel === 'create'}>
-              <CreatePanel />
-            </Show>
-            <Show when={ui.activePanel === 'library'}>
-              <LibraryPanel />
-            </Show>
-            <Show when={ui.activePanel === 'settings'}>
-              <SettingsScreen />
-            </Show>
-          </Suspense>
-        </PanelErrorBoundary>
+        <Show
+          when={!ui.stopped}
+          fallback={
+            <div class="flex h-full">
+              <StoppedScreen />
+            </div>
+          }
+        >
+          <PanelErrorBoundary>
+            <Suspense fallback={<PanelFallback />}>
+              <Show when={ui.activePanel === 'inspect'}>
+                <InspectPanel />
+              </Show>
+              <Show when={ui.activePanel === 'design'}>
+                <DesignPanel />
+              </Show>
+              <Show when={ui.activePanel === 'assets'}>
+                <AssetsPanel />
+              </Show>
+              <Show when={ui.activePanel === 'analyze'}>
+                <AnalyzePanel />
+              </Show>
+              <Show when={ui.activePanel === 'create'}>
+                <CreatePanel />
+              </Show>
+              <Show when={ui.activePanel === 'library'}>
+                <LibraryPanel />
+              </Show>
+              <Show when={ui.activePanel === 'settings'}>
+                <SettingsScreen />
+              </Show>
+            </Suspense>
+          </PanelErrorBoundary>
+        </Show>
       </main>
 
       <Footer />

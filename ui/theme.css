@@ -213,13 +213,18 @@
 /* ---- High-contrast variant (Settings → Accessibility) ----
  * Liquid glass is a translucency language; contrast mode needs solid,
  * fully-opaque surfaces and hard borders. Every material fill is forced
- * opaque here so readability never depends on the ambient scene. */
-[data-high-contrast="true"] {
+ * opaque here so readability never depends on the ambient scene.
+ *
+ * The overrides are THEME-AWARE: hardcoding light-mode whites here (as an
+ * earlier revision did) produced white cards under the dark palette — light
+ * text on white, effectively unreadable. Dark contrast keeps dark surfaces
+ * with full-contrast text and hard borders; light contrast keeps white. */
+[data-theme="light"][data-high-contrast="true"] {
   --vq-bg: var(--vq-bg-solid);
   --vq-bg-raised: #ffffff;
   --vq-bg-elevated: #ffffff;
-  --vq-bg-sunken: #e4e6ec;
-  --vq-bg-hover: #e4e6ec;
+  --vq-bg-sunken: #dde1ea;
+  --vq-bg-hover: #dde1ea;
   --vq-border: var(--vq-fg-muted);
   --vq-border-strong: var(--vq-fg);
   --vq-fg-muted: var(--vq-fg);
@@ -230,6 +235,23 @@
   --vq-mat-float-bg: #ffffff;
   --vq-overlay: rgb(0 0 0 / 0.6);
   --vq-shadow-float: 0 0 0 1px var(--vq-fg-muted), 0 8px 24px rgb(0 0 0 / 0.35);
+}
+[data-theme="dark"][data-high-contrast="true"] {
+  --vq-bg: var(--vq-bg-solid);
+  --vq-bg-raised: #12141b;
+  --vq-bg-elevated: #14161e;
+  --vq-bg-sunken: #0d0f14;
+  --vq-bg-hover: #191c26;
+  --vq-border: var(--vq-fg-muted);
+  --vq-border-strong: var(--vq-fg);
+  --vq-fg-muted: var(--vq-fg);
+  --vq-fg-subtle: #b4bac5;
+  --vq-mat-thin-bg: var(--vq-bg-solid);
+  --vq-mat-standard-bg: #12141b;
+  --vq-mat-elevated-bg: #14161e;
+  --vq-mat-float-bg: #161922;
+  --vq-overlay: rgb(0 0 0 / 0.7);
+  --vq-shadow-float: 0 0 0 1px var(--vq-fg-muted), 0 8px 24px rgb(0 0 0 / 0.5);
 }
 /* High contrast: glass is a translucency language — blur is removed outright
    (this also covers blur emitted by the inline shortcut recipes). */

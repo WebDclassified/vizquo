@@ -37,8 +37,10 @@ export const FONT_SOURCE_LABEL: Record<FontSource, string> = {
   unknown: 'Unknown source',
 };
 
-/** Compress "oklch(0.578 0.234 278.3)" to "oklch(0.58 0.23 278)". */
-export function oklchShort(oklch: string): string {
+/** Compress "oklch(0.578 0.234 278.3)" to "oklch(0.58 0.23 278)".
+ *  Page data: a cached token without oklch must render empty, never throw. */
+export function oklchShort(oklch: string | undefined | null): string {
+  if (!oklch) return '';
   return oklch.replace(/\(([\d.]+) ([\d.]+) ([\d.]+)/, (_m, l: string, c: string, h: string) => {
     const round = (n: string): string => {
       const value = Number.parseFloat(n);
@@ -54,7 +56,8 @@ export function countLabel(n: number, noun: string): string {
 }
 
 /** Black or white — readable text on a swatch (WCAG-lite luminance). */
-export function readableOn(hex: string): string {
+export function readableOn(hex: string | undefined | null): string {
+  if (!hex) return '#ffffff';
   const match = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
   if (!match) return '#ffffff';
   const value = match[1] ?? '000000';

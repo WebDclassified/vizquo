@@ -272,8 +272,17 @@ export interface AIRequest {
 /* Phase 7: contextual AI (Sections 7.22–7.23)                         */
 /* ------------------------------------------------------------------ */
 
-/** AI backends the AIProvider adapter supports (Section 2.2 pattern). */
-export type AIProviderId = 'openrouter' | 'ollama';
+/** AI backends the AIProvider adapter supports (Section 2.2 pattern).
+ *  Hosted providers need a user key; `ollama` is fully local; `custom` is an
+ *  OpenAI-compatible endpoint the user configures (base URL + key + model). */
+export type AIProviderId =
+  | 'openrouter'
+  | 'ollama'
+  | 'openai'
+  | 'anthropic'
+  | 'gemini'
+  | 'groq'
+  | 'custom';
 
 /**
  * One explain request. Built in the side panel from page data, sent to the

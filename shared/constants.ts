@@ -1,6 +1,7 @@
 /**
  * App-wide constants and setting keys.
  */
+import type { AIProviderId } from './types';
 
 export const APP_NAME = 'Vizquo';
 export const APP_VERSION = '0.11.0';
@@ -8,7 +9,7 @@ export const APP_VERSION = '0.11.0';
 export const APP_AUTHOR = 'Prabhat Teotia';
 
 /** Bump when the Inspection shape changes — invalidates all cached entries. */
-export const INSPECTION_SCHEMA_VERSION = 4;
+export const INSPECTION_SCHEMA_VERSION = 5;
 
 /** Sensible default cap for the L3 cache; configurable in Settings (Section 2.3). */
 export const DEFAULT_CACHE_MAX_BYTES = 200 * 1024 * 1024;
@@ -60,6 +61,8 @@ export const SETTING_KEYS = {
   /* ---- Phase 9: zero-cost local AI (Ollama) ---- */
   aiOllamaBaseUrl: 'ai.ollamaBaseUrl',
   aiOllamaModel: 'ai.ollamaModel',
+  /* ---- Custom (OpenAI-compatible) provider ---- */
+  aiCustomBaseUrl: 'ai.customBaseUrl',
   /* ---- Phase 8: what's-new + resizable regions ---- */
   changelogSeenVersion: 'changelog.seenVersion',
   splitInspector: 'split.inspector',
@@ -85,18 +88,75 @@ export const DEFAULT_AI_MODEL = 'openrouter/free';
 /** Select value that reveals the custom-model text input. */
 export const AI_CUSTOM_MODEL = '__custom__';
 
-export const AI_PROVIDERS: { id: 'openrouter' | 'ollama'; label: string; description: string }[] = [
+export const AI_PROVIDERS: {
+  id: AIProviderId;
+  label: string;
+  description: string;
+  keyLabel: string;
+  keyPlaceholder: string;
+}[] = [
   {
     id: 'openrouter',
     label: 'OpenRouter',
     description: 'Cloud, free models by default — nothing to install.',
+    keyLabel: 'OpenRouter API key',
+    keyPlaceholder: 'sk-or-…',
   },
   {
     id: 'ollama',
     label: 'Ollama (local)',
     description: 'Runs entirely on your machine — zero cost, zero cloud.',
+    keyLabel: 'API key (not needed — local)',
+    keyPlaceholder: '—',
+  },
+  {
+    id: 'openai',
+    label: 'OpenAI',
+    description: 'GPT models via OpenAI’s API — bring your own key.',
+    keyLabel: 'OpenAI API key',
+    keyPlaceholder: 'sk-…',
+  },
+  {
+    id: 'anthropic',
+    label: 'Anthropic (Claude)',
+    description: 'Claude models via the Anthropic Messages API.',
+    keyLabel: 'Anthropic API key',
+    keyPlaceholder: 'sk-ant-…',
+  },
+  {
+    id: 'gemini',
+    label: 'Google Gemini',
+    description: 'Gemini models via the Generative Language API.',
+    keyLabel: 'Gemini API key',
+    keyPlaceholder: 'AIza…',
+  },
+  {
+    id: 'groq',
+    label: 'Groq',
+    description: 'Fast open models (Llama, Mixtral) on Groq’s LPU cloud.',
+    keyLabel: 'Groq API key',
+    keyPlaceholder: 'gsk_…',
+  },
+  {
+    id: 'custom',
+    label: 'Custom (OpenAI-compatible)',
+    description:
+      'Any OpenAI-compatible endpoint — LM Studio, Together, DeepSeek, a private server…',
+    keyLabel: 'API key',
+    keyPlaceholder: 'sk-…',
   },
 ];
+
+/** Per-provider default models (the Settings model select presets). */
+export const AI_PROVIDER_DEFAULT_MODELS: Record<AIProviderId, string> = {
+  openrouter: 'openrouter/free',
+  ollama: 'llama3.2',
+  openai: 'gpt-4o-mini',
+  anthropic: 'claude-3-5-haiku-latest',
+  gemini: 'gemini-2.0-flash',
+  groq: 'llama-3.3-70b-versatile',
+  custom: '',
+};
 
 /** Default local model for the Ollama provider. */
 export const DEFAULT_OLLAMA_MODEL = 'llama3.2';
