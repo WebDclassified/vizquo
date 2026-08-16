@@ -64,7 +64,7 @@
     "unocss": "^66.7.5"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.7",
+    "@biomejs/biome": "^2.5.8",
     "@playwright/test": "^1.62.1",
     "@types/chrome": "^0.2.5",
     "@unocss/reset": "^66.7.5",
