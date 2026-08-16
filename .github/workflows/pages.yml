@@ -36,7 +36,7 @@ jobs:
     name: Build site artifact
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Configure Pages
         uses: actions/configure-pages@v5
       # Jekyll keeps the .md files (privacy policy, README) rendered as HTML —
