@@ -4,7 +4,7 @@
 import type { AIProviderId } from './types';
 
 export const APP_NAME = 'Vizquo';
-export const APP_VERSION = '0.11.0';
+export const APP_VERSION = '0.11.1';
 /** Creator / author credit — shown in the About panel, store listings, and docs. */
 export const APP_AUTHOR = 'Prabhat Teotia';
 

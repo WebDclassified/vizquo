@@ -1,5 +1,42 @@
 # Changelog
 
+## 0.11.1 — Panel hardening, Stop button, faster cache reads, six AI providers
+
+- **The "panel hit an unexpected error" crash is fixed (root cause of most
+  reported breakage).** A single token/asset from an older cached inspection
+  could be missing `confidence`/`oklch`/`role` — panels dereferenced those
+  unconditionally, so one bad value crashed the panel through the error
+  boundary and made favorites, highlight-on-page, and the Create section
+  appear dead. `ConfidenceBadge`, `oklchShort`, `readableOn`, role lookups
+  and asset classification are now defensive (render "Unknown", never
+  throw), and `INSPECTION_SCHEMA_VERSION` bumped to 5 so stale-shaped L3
+  cache entries are invalidated instead of served.
+- **Stop button + paused screen.** The header power button ends the
+  inspection session: disables inspect mode, clears highlights/live
+  edits/multi-selection (the page is restored), resets panel state, attempts
+  `window.close()` where allowed, and otherwise shows a "Vizquo is paused"
+  screen with Resume (Chrome side panels can't close programmatically). The
+  What's-new header button is removed (the auto-open on update stays).
+- **"Could not establish connection. Receiving end does not exist."** — the
+  background sent tab messages through the messaging library's raw
+  `chrome.tabs.sendMessage` form, which never reads `chrome.runtime.lastError`.
+  All four call sites now use the promise-based sender that consumes it.
+- **Faster cache reads on scan.** The L3 probe loaded every cache row
+  (multi-MB screenshot/blob data URLs) to find one inspection; the new
+  `listInspectionCacheEntries()` queries the `kind` index instead.
+- **High-contrast dark mode fixed.** The overrides hardcoded white surfaces
+  for every theme (light text on white in dark mode); they're now
+  theme-aware.
+- **Page-overview scan time shows two decimals**; consistency score guards
+  against non-finite values from malformed cached data.
+- **AI: six providers + custom endpoint.** OpenAI, Anthropic (Claude),
+  Gemini, Groq, and a Custom OpenAI-compatible provider (base URL + key +
+  model — LM Studio, Together, DeepSeek, vLLM…) join OpenRouter and Ollama,
+  behind a provider registry with per-provider host permissions.
+- **Regression tests:** `TOR-033` (highlight-on-page: 4 refs → 4 boxes,
+  clear → 0, stale ref → honest no-op), `favorites.test.ts` (toggle + star
+  state), `ai-providers.test.ts` (registry, origins, custom URL shape).
+
 ## 0.11.0 — Message authorization, Tailwind-v4 fixes, live key isolation, Instrumented-Glass landing
 
 - **Message authorization hardening (Requirements §15/§16, INV-007).** The
@@ -31,7 +68,7 @@
   surface." hero with a signature travelling lens, 3-step
   Inspect→Understand→Extract narrative, grouped sections (Visual DNA /
   Assets / Responsive+Analyze / Power Workflow), confidence badges
-  (DETECTED/DERIVED/INFERRED), trimmed nav, and 0.11.0 download packages.
+  (DETECTED/DERIVED/INFERRED), trimmed nav, and 0.11.1 download packages.
   Cross-browser smoke (Chromium/Firefox/WebKit) fully green.
 - **Repo-wide lint cleanup** — dead code in the torture suite, optional
   chaining, and `<title>`s on the browser-logo SVGs; `biome check .` clean.

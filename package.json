@@ -2,7 +2,7 @@
   "name": "vizquo",
   "description": "See beyond the surface — a browser extension that turns any live webpage into a visual blueprint: CSS, design tokens, assets, responsive behavior, and reusable patterns.",
   "private": true,
-  "version": "0.11.0",
+  "version": "0.11.1",
   "author": "Prabhat Teotia",
   "license": "MIT",
   "type": "module",

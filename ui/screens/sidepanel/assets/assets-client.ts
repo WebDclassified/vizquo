@@ -50,7 +50,10 @@ export async function openAssetInNewTab(asset: Asset): Promise<void> {
     window.open(url, '_blank', 'noopener');
     notify({
       title: `Opening ${asset.type} in a new tab`,
-      description: asset.type === 'video' || asset.type === 'audio' ? 'Media plays in the new tab.' : undefined,
+      description:
+        asset.type === 'video' || asset.type === 'audio'
+          ? 'Media plays in the new tab.'
+          : undefined,
       tone: 'neutral',
     });
   };
@@ -61,7 +64,11 @@ export async function openAssetInNewTab(asset: Asset): Promise<void> {
       return;
     }
   } catch {
-    notify({ title: 'Could not open asset', description: 'The asset URL is invalid.', tone: 'warning' });
+    notify({
+      title: 'Could not open asset',
+      description: 'The asset URL is invalid.',
+      tone: 'warning',
+    });
     return;
   }
   try {
