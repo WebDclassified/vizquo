@@ -71,7 +71,7 @@
     "@wxt-dev/module-solid": "^1.1.4",
     "fake-indexeddb": "^6.2.5",
     "happy-dom": "^20.11.2",
-    "typescript": "~5.9.3",
+    "typescript": "~7.0.2",
     "vitest": "^4.1.10",
     "wxt": "^0.21.3"
   }
