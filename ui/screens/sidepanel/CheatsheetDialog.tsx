@@ -58,6 +58,34 @@ export function CheatsheetDialog() {
                 </div>
               )}
             </For>
+
+            <div class="mt-2 border-t border-[var(--vq-border)] pt-2">
+              <p class="px-2 text-[10.5px] font-semibold tracking-wider text-[var(--vq-fg-subtle)] uppercase">
+                Designer vs Engineer mode
+              </p>
+              <div class="mt-1 flex flex-col gap-2 px-2 py-1.5">
+                <div class="rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg-sunken)] p-2">
+                  <p class="text-[12px] font-semibold text-[var(--vq-fg)]">Designer</p>
+                  <p class="text-[11px] leading-relaxed text-[var(--vq-fg-muted)]">
+                    Plain-language summaries. Values read like design decisions (colors, spacing,
+                    type), with a <b>Show CSS</b> toggle when you want the raw declaration. The
+                    box-model diagram stays visible. Default for a clean, visual read.
+                  </p>
+                </div>
+                <div class="rounded-[var(--vq-radius-md)] border border-[var(--vq-border)] bg-[var(--vq-bg-sunken)] p-2">
+                  <p class="text-[12px] font-semibold text-[var(--vq-fg)]">Engineer</p>
+                  <p class="text-[11px] leading-relaxed text-[var(--vq-fg-muted)]">
+                    Raw values by default — every property shows its exact CSS, color tokens include
+                    the oklch() coordinates, and the Show CSS toggle disappears. Denser, zero clicks
+                    between you and the declarations.
+                  </p>
+                </div>
+                <p class="px-1 text-[10.5px] leading-relaxed text-[var(--vq-fg-subtle)]">
+                  Switch with the <b>Designer / Engineer</b> toggle in the nav bar, or the{' '}
+                  <b>Ctrl/⌘ ⇧ D</b> shortcut. Your choice is remembered.
+                </p>
+              </div>
+            </div>
           </div>
 
           <footer class="border-t border-[var(--vq-border)] bg-[var(--vq-bg-sunken)] px-4 py-2.5 text-[11px] leading-relaxed text-[var(--vq-fg-muted)]">

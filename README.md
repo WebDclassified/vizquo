@@ -92,6 +92,33 @@ See the product inspect itself — the landing page runs the real demo:
 - **Optional AI** — "Why?" element explanations and design-system summaries via
   free OpenRouter models or a fully-local Ollama. Off by default, consent-gated.
 
+## Designer ⇄ Engineer modes
+
+The segmented **Designer / Engineer** toggle in the nav bar (and the
+**Ctrl/⌘⇧D** shortcut) changes how Vizquo *presents* the exact same data — it
+never changes what is inspected. Your choice is remembered between sessions.
+
+### Designer (default)
+For reading interfaces as a designer would — plain language, visual clarity:
+
+- Property rows read like design decisions instead of CSS (color roles,
+  spacing, type hierarchy) with a **Show CSS** toggle that reveals the raw
+  declaration when you need it.
+- The **box-model diagram** stays on screen in the Layout tab.
+- Color cards show the hex value cleanly, without coordinates.
+
+### Engineer
+For working directly with the declarations — everything raw, zero extra
+clicks:
+
+- Every property shows its **exact CSS value by default**; the Show CSS
+  toggle disappears.
+- Color cards include the raw **oklch()** coordinates under each hex.
+- Denser rows — built for copying values straight into your own code.
+
+Both modes share every other surface (assets, audits, screenshots, exports),
+and switching is instant — no rescan, no reload.
+
 ## Privacy
 
 - **Local by default.** Scans, screenshots, and your library live only in your
