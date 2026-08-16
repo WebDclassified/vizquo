@@ -37,7 +37,7 @@ const FONTS = `
  *  `mix-blend-mode: screen` drops the black field on the dark tile canvas. */
 const BRAND_MARK = `<img
   src="data:image/png;base64,${readFileSync(
-    join(__dirname, '..', 'public', 'icon', 'standalone-icon.png'),
+    join(__dirname, '..', 'deploy-kit', 'brand', 'artwork', 'standalone-icon.png'),
   ).toString('base64')}"
   alt="Vizquo"
   style="width:100%;height:100%;object-fit:contain;mix-blend-mode:screen;display:block;">`;

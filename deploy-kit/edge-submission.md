@@ -6,9 +6,9 @@
 **Everything you need to submit Vizquo to the Microsoft Edge Add-ons store — copy-paste ready.**
 
 - Store: **Edge Add-ons** (free, no developer fee)
-- Package: **`.output/vizquo-0.11.1-chrome.zip`** (Edge is Chromium — accepts the Chrome build)
+- Package: **`.output/vizquo-1.0.0-chrome.zip`** (Edge is Chromium — accepts the Chrome build)
 - Review time: up to **3 business days** officially (real-world: ~3–7 days)
-- Version: **0.11.1**
+- Version: **1.0.0**
 
 ---
 
@@ -20,7 +20,7 @@
 
 | File | Purpose |
 |---|---|
-| `.output/vizquo-0.11.1-chrome.zip` | the package you upload |
+| `.output/vizquo-1.0.0-chrome.zip` | the package you upload |
 | `deploy-kit/promo/edge-logo-300.png` | **300×300 extension logo** (required, 1:1) |
 | `deploy-kit/promo/promo-440x280.png` | small promotional tile (440×280, optional) |
 | `deploy-kit/promo/marquee-1400x560.png` | large promotional tile (1400×560, optional) |
@@ -32,7 +32,7 @@
 ## 1. Submit the package
 
 1. In the Partner Center dashboard click **+ New** → **Add new** → **Extension**.
-2. **Upload** `.output/vizquo-0.11.1-chrome.zip`.
+2. **Upload** `.output/vizquo-1.0.0-chrome.zip`.
 3. Fill in the wizard sections below, then **Save draft** and **Submit for review**.
 
 ---

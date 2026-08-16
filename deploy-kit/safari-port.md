@@ -21,10 +21,10 @@ with Xcode. This guide is the honest, complete path.
 
 1. Install **Xcode** from the Mac App Store (free).
 2. Copy the built Chrome extension into a folder (unzip
-   `vizquo-0.11.1-chrome.zip`).
+   `vizquo-1.0.0-chrome.zip`).
 3. Convert it:
    ```sh
-   xcrun safari-web-extension-converter /path/to/vizquo-0.11.1-chrome
+   xcrun safari-web-extension-converter /path/to/vizquo-1.0.0-chrome
    ```
    This generates an Xcode project with a native app wrapper + the extension
    target, and wires up the correct entitlements/bundle IDs.

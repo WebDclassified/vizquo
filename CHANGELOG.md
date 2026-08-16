@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.0.0 — First stable release
+
+A milestone release: Vizquo ships the final brand identity, a unified
+emerald glass theme across extension and landing, and a fully hardened
+inspection engine.
+
+**Brand**
+- New official V-Lens logo artwork (standalone icon + horizontal lockup)
+  used across the extension toolbar icons, side panel, landing page,
+  favicon, store screenshots and promo/OG tiles
+- Extension UI now wears the landing page's emerald glass theme
+
+**Stability (since 0.11.1)**
+- Panel crash fixed — stale page data can never take down a panel
+- "Receiving end does not exist" eliminated (background sends consume
+  `lastError`)
+- Stop button + paused screen ends the inspection session cleanly
+- Faster cache reads, theme-aware high contrast, 2-decimal scan time,
+  consistency-score NaN guard
+- 6 AI providers + custom OpenAI-compatible endpoints, all behind the
+  privacy gate
+- Technology/framework detection expanded (14 new markers, verified on
+  real sites); `@font-face` assets now extracted; video/audio/font
+  assets openable in a new tab
+- Full access by default — no per-site grant prompts at install
+
+**Quality gates**: 437 unit tests · 33/33 torture scenarios · landing
+smoke green on Chromium/Firefox/WebKit.
+
 ## 0.11.1 — Panel hardening, Stop button, faster cache reads, six AI providers
 
 - **The "panel hit an unexpected error" crash is fixed (root cause of most
@@ -68,7 +97,7 @@
   surface." hero with a signature travelling lens, 3-step
   Inspect→Understand→Extract narrative, grouped sections (Visual DNA /
   Assets / Responsive+Analyze / Power Workflow), confidence badges
-  (DETECTED/DERIVED/INFERRED), trimmed nav, and 0.11.1 download packages.
+  (DETECTED/DERIVED/INFERRED), trimmed nav, and 1.0.0 download packages.
   Cross-browser smoke (Chromium/Firefox/WebKit) fully green.
 - **Repo-wide lint cleanup** — dead code in the torture suite, optional
   chaining, and `<title>`s on the browser-logo SVGs; `biome check .` clean.
