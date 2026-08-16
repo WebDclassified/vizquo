@@ -32,22 +32,15 @@ const FONTS = `
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">`;
 
-/** Brand mark: the V-Lens — bold V holding the lens ring (emerald ring on
- *  near-white arms, matching the tile palette). V dominant, lens discovered. */
-const BRAND_MARK = `
-<svg width="100%" height="100%" viewBox="0 0 128 128" fill="none">
-  <defs>
-    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#63B98C"/>
-      <stop offset="100%" stop-color="#3E8E67"/>
-    </linearGradient>
-  </defs>
-  <g stroke="#F5F7FA" stroke-linecap="round">
-    <line x1="64" y1="118" x2="13" y2="18" stroke-width="26"/>
-    <line x1="115" y1="18" x2="64" y2="118" stroke-width="26"/>
-    <circle cx="64" cy="60" r="22" stroke="url(#ring)" stroke-width="6"/>
-  </g>
-</svg>`;
+/** Brand mark: the standalone V-Lens icon artwork (light-on-near-black),
+ *  embedded as a data URL — `setContent` pages can't load file:// images.
+ *  `mix-blend-mode: screen` drops the black field on the dark tile canvas. */
+const BRAND_MARK = `<img
+  src="data:image/png;base64,${readFileSync(
+    join(__dirname, '..', 'public', 'icon', 'standalone-icon.png'),
+  ).toString('base64')}"
+  alt="Vizquo"
+  style="width:100%;height:100%;object-fit:contain;mix-blend-mode:screen;display:block;">`;
 
 const BASE_CSS = `
   * { box-sizing: border-box; margin: 0; padding: 0; }

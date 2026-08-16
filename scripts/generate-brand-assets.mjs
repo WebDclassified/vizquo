@@ -17,7 +17,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chromium } from '@playwright/test';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -88,29 +87,6 @@ for (const [name, content] of Object.entries(files)) {
   console.log(`wrote ${join(target, name)}`);
 }
 
-/* --------------------------------------------------------------------------
- * Render apple-touch-icon.png (180×180, square — iOS applies its own mask)
- * ------------------------------------------------------------------------ */
-
-const APPLE_SVG = `
-<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 128 128" fill="none">
-  <title>Vizquo — V-Lens</title>
-  <rect x="0" y="0" width="128" height="128" fill="#0B0B0D"/>
-  ${mark(WHITE)}
-</svg>`;
-
-const browser = await chromium.launch();
-try {
-  const page = await browser.newPage();
-  await page.setContent(`<html><body style="margin:0;padding:0">${APPLE_SVG}</body></html>`);
-  await page.screenshot({
-    path: join(LANDING_DIR, 'apple-touch-icon.png'),
-    omitBackground: true,
-    clip: { x: 0, y: 0, width: 180, height: 180 },
-  });
-  console.log('wrote landing/apple-touch-icon.png');
-} finally {
-  await browser.close();
-}
-
+/* The PNG icon set (extension icons + apple-touch-icon) is derived from the
+   user's standalone icon artwork by scripts/generate-icons.mjs. */
 console.log('brand assets complete');

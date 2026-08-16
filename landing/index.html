@@ -15,7 +15,6 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://webdclassified.github.io/vizquo/deploy-kit/promo/og-1200x630.png">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" href="../public/icon/32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -180,8 +179,8 @@
     box-shadow: var(--edge-light), 0 14px 44px rgba(0,0,0,.45);
   }
   .nav { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 20px; }
-  .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 18px; letter-spacing: -0.02em; }
-  .brand img { width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 0 0 1px var(--vz-accent-border), 0 4px 14px rgba(62,142,103,.32); }
+  .brand { display: flex; align-items: center; }
+  .brand img { height: 22px; width: auto; mix-blend-mode: screen; }
   .nav-links { display: flex; align-items: center; gap: 26px; font-size: 14px; font-weight: 500; color: var(--vz-text-secondary); }
   .nav-links a { position: relative; transition: color .15s ease; }
   .nav-links a::after {
@@ -221,8 +220,7 @@
   /* Compact nav on small phones — brand, CTA and burger must fit 320px */
   @media (max-width: 560px) {
     .nav { gap: 10px; }
-    .brand { font-size: 16px; gap: 8px; }
-    .brand img { width: 26px; height: 26px; }
+    .brand img { height: 19px; }
     .nav-cta { padding: 8px 13px; font-size: 12.5px; }
     .cta-free { display: none; }
     .nav-burger { width: 38px; height: 38px; }
@@ -1088,7 +1086,7 @@
 <!-- ============ HEADER ============ -->
 <header id="siteHeader">
   <div class="wrap nav">
-    <a class="brand" href="#top"><img src="../public/icon/32.png" alt="Vizquo logo"> Vizquo</a>
+    <a class="brand" href="#top"><img src="../public/icon/horizontal-logo.png" alt="Vizquo — see beyond the surface"></a>
     <nav class="nav-links" id="navLinks" aria-label="Primary">
       <a href="#product">Product</a>
       <a href="#how">How it works</a>
@@ -1800,7 +1798,7 @@
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a class="brand" href="#top"><img src="../public/icon/32.png" alt="Vizquo logo"> Vizquo</a>
+        <a class="brand" href="#top"><img src="../public/icon/horizontal-logo.png" alt="Vizquo — see beyond the surface"></a>
         <p>The visual inspection instrument for the web. Free, local-first, private by default.</p>
       </div>
       <div class="footer-col">

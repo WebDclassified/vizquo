@@ -119,7 +119,7 @@ export default defineBackground(() => {
       tabId,
       text: data.enabled ? '●' : '',
     });
-    void browser.action.setBadgeBackgroundColor({ tabId, color: '#6e7bff' });
+    void browser.action.setBadgeBackgroundColor({ tabId, color: '#3e8e67' });
     void browser.action.setTitle({
       tabId,
       title: data.enabled

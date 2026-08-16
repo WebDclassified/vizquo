@@ -14,7 +14,7 @@ import { Panel } from '../../../components/Panel';
 import { analysis } from '../../../stores/analysis-store';
 
 /** Fallback colors so the explorer is usable even before a scan. */
-const FALLBACKS = ['#ffffff', '#000000', '#f5f7fa', '#6e7bff'];
+const FALLBACKS = ['#ffffff', '#000000', '#f5f7fa', '#3e8e67'];
 
 function paletteColors(inspection: Inspection | null): string[] {
   const scanned = inspection?.tokens.colors.map((c) => c.value.hex) ?? [];

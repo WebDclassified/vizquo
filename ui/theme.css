@@ -95,9 +95,9 @@
   /* ---- Light palette ---- */
   --vq-bg-solid: #e7eaf3;
   /* Ambient environment — visible color fields the glass sits above. */
-  --vq-ambient-1: rgb(110 123 255 / 0.2);
-  --vq-ambient-2: rgb(63 224 200 / 0.16);
-  --vq-ambient-3: rgb(150 120 255 / 0.14);
+  --vq-ambient-1: rgb(62 142 103 / 0.2);
+  --vq-ambient-2: rgb(111 207 151 / 0.16);
+  --vq-ambient-3: rgb(62 142 103 / 0.12);
   /* A soft light source sweeping from the top-left (the "illumination"). */
   --vq-beam: rgb(255 255 255 / 0.85);
   --vq-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.05 0 0 0 0 0.08 0 0 0 0 0.12 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -113,12 +113,12 @@
   --vq-border: rgb(15 18 24 / 0.12);
   --vq-border-strong: rgb(15 18 24 / 0.2);
   --vq-highlight: rgb(255 255 255 / 0.9);
-  --vq-accent: #5a66e6;
-  --vq-accent-hover: #4c57cf;
-  --vq-accent-active: #4149b8;
+  --vq-accent: #2f8e67;
+  --vq-accent-hover: #3a9e74;
+  --vq-accent-active: #287a58;
   --vq-accent-fg: #ffffff;
-  --vq-accent-soft: rgb(90 102 230 / 0.14);
-  --vq-accent-border: rgb(90 102 230 / 0.35);
+  --vq-accent-soft: rgb(62 142 103 / 0.14);
+  --vq-accent-border: rgb(62 142 103 / 0.35);
   --vq-success: #2f9e63;
   --vq-success-fg: #1d7a49;
   --vq-success-soft: rgb(47 158 99 / 0.14);
@@ -132,7 +132,7 @@
   --vq-info: #2e7fd9;
   --vq-info-fg: #1f63b0;
   --vq-info-soft: rgb(46 127 217 / 0.12);
-  --vq-ring: #5a66e6;
+  --vq-ring: #2f8e67;
   --vq-code-bg: rgb(15 18 24 / 0.06);
   --vq-overlay: rgb(30 34 44 / 0.4);
   --vq-grid-line: rgb(15 18 24 / 0.055);
@@ -156,9 +156,9 @@
 
 [data-theme="dark"] {
   --vq-bg-solid: #08090e;
-  --vq-ambient-1: rgb(122 106 255 / 0.24);
-  --vq-ambient-2: rgb(63 224 200 / 0.13);
-  --vq-ambient-3: rgb(90 102 230 / 0.18);
+  --vq-ambient-1: rgb(62 142 103 / 0.26);
+  --vq-ambient-2: rgb(111 207 151 / 0.14);
+  --vq-ambient-3: rgb(62 142 103 / 0.16);
   --vq-beam: rgb(255 255 255 / 0.05);
   --vq-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
 
@@ -173,12 +173,12 @@
   --vq-border: rgb(255 255 255 / 0.1);
   --vq-border-strong: rgb(255 255 255 / 0.18);
   --vq-highlight: rgb(255 255 255 / 0.08);
-  --vq-accent: #6e7bff;
-  --vq-accent-hover: #7c86ff;
-  --vq-accent-active: #5c68f2;
-  --vq-accent-fg: #0b0c10;
-  --vq-accent-soft: rgb(110 123 255 / 0.16);
-  --vq-accent-border: rgb(110 123 255 / 0.4);
+  --vq-accent: #3e8e67;
+  --vq-accent-hover: #63b98c;
+  --vq-accent-active: #357b5c;
+  --vq-accent-fg: #08110c;
+  --vq-accent-soft: rgb(62 142 103 / 0.16);
+  --vq-accent-border: rgb(62 142 103 / 0.4);
   --vq-success: #45d483;
   --vq-success-fg: #8ce8b4;
   --vq-success-soft: rgb(69 212 131 / 0.16);
@@ -192,7 +192,7 @@
   --vq-info: #5aa9ff;
   --vq-info-fg: #9cc9ff;
   --vq-info-soft: rgb(90 169 255 / 0.16);
-  --vq-ring: #6e7bff;
+  --vq-ring: #3e8e67;
   --vq-code-bg: rgb(255 255 255 / 0.07);
   --vq-overlay: rgb(3 4 7 / 0.6);
   --vq-grid-line: rgb(255 255 255 / 0.045);
