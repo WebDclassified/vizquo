@@ -37,13 +37,13 @@ const BRAND_MARK = `
 <svg width="100%" height="100%" viewBox="0 0 128 128">
   <defs>
     <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#d9bd85"/>
-      <stop offset="100%" stop-color="#c9a96e"/>
+      <stop offset="0%" stop-color="#5FB98C"/>
+      <stop offset="100%" stop-color="#3E8E67"/>
     </linearGradient>
   </defs>
   <circle cx="56" cy="56" r="30" fill="none" stroke="url(#ring)" stroke-width="9"/>
-  <circle cx="56" cy="56" r="10" fill="#54C99B"/>
-  <line x1="79" y1="79" x2="104" y2="104" stroke="#C9A96E" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="56" cy="56" r="10" fill="#6FCF97"/>
+  <line x1="79" y1="79" x2="104" y2="104" stroke="#3E8E67" stroke-width="9" stroke-linecap="round"/>
 </svg>`;
 
 const BASE_CSS = `
@@ -69,11 +69,11 @@ const BASE_CSS = `
           -webkit-mask-image: radial-gradient(ellipse 82% 72% at 50% 6%, #000 18%, transparent 72%);
           mask-image: radial-gradient(ellipse 82% 72% at 50% 6%, #000 18%, transparent 72%); }
   .serif { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; }
-  .grad-text { background: linear-gradient(120deg, #d9bd85, #e6cf9a 45%, #54c99b 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .grad-text { background: linear-gradient(120deg, #5FB98C, #63B98C 45%, #6FCF97 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
   /* Glass chip: translucent fill + hairline border + top edge light. */
   .chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.07); color: rgba(255,255,255,.84); border-radius: 999px; padding: 8px 15px; font-size: 11.5px; font-weight: 600; white-space: nowrap; box-shadow: inset 0 1px 0 rgba(255,255,255,.1); }
   .chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .accent-line { position: absolute; left: 0; right: 0; bottom: 0; height: 3.5px; background: linear-gradient(90deg, #c9a96e, #e6cf9a, #54c99b); }
+  .accent-line { position: absolute; left: 0; right: 0; bottom: 0; height: 3.5px; background: linear-gradient(90deg, #3E8E67, #63B98C, #6FCF97); }
 `;
 
 const SHELL = (body) =>
@@ -91,9 +91,9 @@ const SMALL_TILE = `
       Inspect any webpage.<br/>Extract its <span class="serif grad-text" style="font-size:15px;">design system</span>.
     </div>
     <div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap;">
-      <span class="chip" style="color:#e8d9ae;border-color:rgba(201,169,110,.45);background:rgba(201,169,110,.14);padding:6px 12px;font-size:10.5px;"><span class="dot" style="background:#c9a96e;"></span>Colors</span>
-      <span class="chip" style="color:#8fdcba;border-color:rgba(84,201,155,.4);background:rgba(84,201,155,.12);padding:6px 12px;font-size:10.5px;"><span class="dot" style="background:#54c99b;"></span>Type</span>
-      <span class="chip" style="padding:6px 12px;font-size:10.5px;"><span class="dot" style="background:#e6cf9a;"></span>Assets</span>
+      <span class="chip" style="color:#8FD4B0;border-color:rgba(201,169,110,.45);background:rgba(201,169,110,.14);padding:6px 12px;font-size:10.5px;"><span class="dot" style="background:#3E8E67;"></span>Colors</span>
+      <span class="chip" style="color:#8FE0B4;border-color:rgba(84,201,155,.4);background:rgba(84,201,155,.12);padding:6px 12px;font-size:10.5px;"><span class="dot" style="background:#6FCF97;"></span>Type</span>
+      <span class="chip" style="padding:6px 12px;font-size:10.5px;"><span class="dot" style="background:#63B98C;"></span>Assets</span>
     </div>
   </div>
   <div class="accent-line"></div>
@@ -112,12 +112,12 @@ const MARQUEE = `
     </div>
     <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;">
       ${[
-        ['Design DNA', '#e8d9ae', 'rgba(201,169,110,.14)', 'rgba(201,169,110,.4)', '#c9a96e'],
-        ['Element inspector', '#8fdcba', 'rgba(84,201,155,.12)', 'rgba(84,201,155,.4)', '#54c99b'],
-        ['Assets & SVG', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#e6cf9a'],
-        ['WCAG audits', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#e0c88f'],
+        ['Design DNA', '#8FD4B0', 'rgba(201,169,110,.14)', 'rgba(201,169,110,.4)', '#3E8E67'],
+        ['Element inspector', '#8FE0B4', 'rgba(84,201,155,.12)', 'rgba(84,201,155,.4)', '#6FCF97'],
+        ['Assets & SVG', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#63B98C'],
+        ['WCAG audits', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#63B98C'],
         ['Code generation', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#e7b75b'],
-        ['Free forever', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#45d483'],
+        ['Free forever', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#63B98C'],
       ]
         .map(
           ([label, color, bg, border, dot]) =>
@@ -144,12 +144,12 @@ const OG_CARD = `
     </div>
     <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;max-width:540px;">
       ${[
-        ['Design DNA', '#e8d9ae', 'rgba(201,169,110,.14)', 'rgba(201,169,110,.4)', '#c9a96e'],
-        ['Inspector', '#8fdcba', 'rgba(84,201,155,.12)', 'rgba(84,201,155,.4)', '#54c99b'],
-        ['Assets & SVG', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#e6cf9a'],
-        ['WCAG audits', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#e0c88f'],
+        ['Design DNA', '#8FD4B0', 'rgba(201,169,110,.14)', 'rgba(201,169,110,.4)', '#3E8E67'],
+        ['Inspector', '#8FE0B4', 'rgba(84,201,155,.12)', 'rgba(84,201,155,.4)', '#6FCF97'],
+        ['Assets & SVG', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#63B98C'],
+        ['WCAG audits', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#63B98C'],
         ['Optional AI', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#e7b75b'],
-        ['Free forever', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#45d483'],
+        ['Free forever', '#f4f6fb', 'rgba(255,255,255,.05)', 'rgba(255,255,255,.16)', '#63B98C'],
       ]
         .map(
           ([label, color, bg, border, dot]) =>
@@ -163,36 +163,36 @@ const OG_CARD = `
     <div style="display:flex;align-items:center;gap:8px;padding:14px 18px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);">
       <span style="width:11px;height:11px;border-radius:50%;background:#ff5f57;"></span>
       <span style="width:11px;height:11px;border-radius:50%;background:#febc2e;"></span>
-      <span style="width:11px;height:11px;border-radius:50%;background:#28c840;"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:#5FB98C;"></span>
       <span style="flex:1;margin-left:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;color:rgba(255,255,255,.5);background:rgba(255,255,255,.06);border-radius:7px;padding:5px 12px;">example.com</span>
     </div>
     <div style="padding:20px 20px 18px;display:flex;flex-direction:column;gap:0;">
       <div style="display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.07);">
-        <span style="width:20px;height:20px;border-radius:6px;background:linear-gradient(120deg,#c9a96e,#54c99b);"></span>
+        <span style="width:20px;height:20px;border-radius:6px;background:linear-gradient(120deg,#3E8E67,#6FCF97);"></span>
         <span style="font-size:13px;font-weight:700;">Vizquo — Design DNA</span>
-        <span style="margin-left:auto;width:7px;height:7px;border-radius:50%;background:#54c99b;box-shadow:0 0 10px rgba(84,201,155,.9);"></span>
+        <span style="margin-left:auto;width:7px;height:7px;border-radius:50%;background:#6FCF97;box-shadow:0 0 10px rgba(84,201,155,.9);"></span>
       </div>
       <div style="padding:16px 2px 14px;">
         <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.6);margin-bottom:7px;">Consistency score <b style="color:#f4f6fb;font-family:'JetBrains Mono',ui-monospace,monospace;">92/100</b></div>
         <div style="height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;">
-          <div style="height:100%;width:92%;border-radius:99px;background:linear-gradient(90deg,#c9a96e,#e6cf9a,#54c99b);box-shadow:0 0 14px rgba(201,169,110,.8);"></div>
+          <div style="height:100%;width:92%;border-radius:99px;background:linear-gradient(90deg,#3E8E67,#63B98C,#6FCF97);box-shadow:0 0 14px rgba(201,169,110,.8);"></div>
         </div>
       </div>
       ${[
-        ['Primary', '#c9a96e'],
-        ['Accent', '#54c99b'],
-        ['Font', '#e6cf9a'],
+        ['Primary', '#3E8E67'],
+        ['Accent', '#6FCF97'],
+        ['Font', '#63B98C'],
       ]
         .map(
           ([k, sw]) => `
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 10px;font-size:12.5px;color:rgba(255,255,255,.62);">
         <span style="display:flex;align-items:center;gap:9px;"><span style="width:11px;height:11px;border-radius:4px;background:${sw};border:1px solid rgba(255,255,255,.25);"></span>${k}</span>
-        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;color:#54c99b;">${sw}</span>
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;color:#6FCF97;">${sw}</span>
       </div>`,
         )
         .join('')}
       <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:14px;border-top:1px solid rgba(255,255,255,.07);font-size:12px;color:rgba(255,255,255,.5);">
-        <span style="background:rgba(84,201,155,.12);color:#54c99b;border:1px solid rgba(84,201,155,.35);border-radius:99px;padding:4px 11px;font-weight:700;font-size:11px;">✓ Cohesive</span>
+        <span style="background:rgba(84,201,155,.12);color:#6FCF97;border:1px solid rgba(84,201,155,.35);border-radius:99px;padding:4px 11px;font-weight:700;font-size:11px;">✓ Cohesive</span>
         <span style="margin-left:auto;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(255,255,255,.4);">v${APP_VERSION} · by Prabhat Teotia · local-first</span>
       </div>
     </div>
