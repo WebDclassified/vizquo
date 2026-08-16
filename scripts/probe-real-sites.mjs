@@ -332,7 +332,7 @@ async function detectLoginWall(page, targetUrl) {
     });
     const host = new URL(state.href).host;
     const LOGIN_TITLE =
-      /log ?in|sign ?in|verify you'?re human|unusual traffic|enable javascript|access denied|robot check|checking your browser/i;
+      /log ?in|sign ?in|verify you'?re human|unusual traffic|enable javascript|access denied|robot check|checking your browser|just a moment|attention required/i;
     if (host !== targetHost && !host.endsWith(targetHost.split('.').slice(-2).join('.'))) {
       return `redirected ${targetHost} → ${host}`;
     }
