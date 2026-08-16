@@ -582,10 +582,11 @@
   /* Two proper columns on desktop — a 6-column grid left the default tiles a
      sixth of the container wide (the "shrunked boxes" bug). Wide spans the
      row, full spans everything. */
-  .bento { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 34px; }
+  .bento { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 1fr; gap: 16px; margin-top: 34px; }
   @media (max-width: 640px) { .bento { grid-template-columns: 1fr; } }
   .bento-tile {
     min-width: 0; /* grid items default to min-width:auto — long mono rows must never blow out the page */
+    display: flex; flex-direction: column;
     border: 1px solid var(--vz-border); border-radius: var(--vz-radius-lg);
     background: var(--mat-standard);
     -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
@@ -603,26 +604,57 @@
   .bento-tile .bt-kicker { font-family: var(--vz-font-mono); font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--vz-accent-2); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
   .bento-tile h3 { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
   .bento-tile p { font-size: 13.5px; color: var(--vz-text-secondary); margin: 0 0 18px; line-height: 1.55; }
-  .bt-vis { position: relative; min-height: 96px; display: flex; align-items: center; }
+  .bt-vis { position: relative; min-height: 104px; display: flex; align-items: center; margin-top: auto; } /* margin-top:auto pins the visual to the tile bottom — equal-height rows align */
   .conf { font-family: var(--vz-font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: .08em; border-radius: 5px; padding: 2px 7px; }
   .conf.detected { color: var(--vz-teal); background: rgba(63,224,200,.1); border: 1px solid rgba(63,224,200,.3); }
   .conf.derived { color: var(--vz-amber); background: rgba(231,183,91,.1); border: 1px solid rgba(231,183,91,.3); }
   .conf.inferred { color: var(--vz-accent-2); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); }
 
-  /* Signature lens strip — page → lens → tokens (Redesign §12) */
-  .dna-lens { display: flex; align-items: center; gap: 18px; margin: 26px 0 4px; padding: 18px 24px; border: 1px solid var(--vz-border); border-radius: var(--vz-radius-lg); background: var(--mat-standard); box-shadow: var(--edge-light); flex-wrap: wrap; }
-  .dna-page { width: 112px; height: 80px; border: 1px solid var(--vz-border-strong); border-radius: 8px; background: #f6f7fb; padding: 11px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
-  .dna-page .dna-bar { height: 8px; width: 38%; background: linear-gradient(135deg, #6e7bff, #a78bfa); border-radius: 3px; }
-  .dna-page .dna-line { height: 5px; background: #d7dbe8; border-radius: 3px; }
+  /* Signature lens strip — page → lens → tokens (Redesign §12): a composed
+     pipeline on desktop (connector lines + arrowheads), a vertical stack on
+     mobile. Every node carries a mono label; nothing floats. */
+  .dna-lens {
+    display: grid;
+    grid-template-columns: auto minmax(44px, 1fr) auto minmax(44px, 1fr) minmax(0, 1.7fr);
+    align-items: center;
+    gap: 0 10px;
+    margin: 26px 0 4px;
+    padding: 28px 30px;
+    border: 1px solid var(--vz-border);
+    border-radius: var(--vz-radius-lg);
+    background: var(--mat-standard);
+    box-shadow: var(--edge-light);
+  }
+  .dna-node { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .dna-page {
+    width: 124px; height: 84px;
+    border: 1px solid var(--vz-border-strong); border-radius: 10px;
+    background: #f6f7fb; padding: 12px;
+    display: flex; flex-direction: column; gap: 9px;
+  }
+  .dna-page .dna-bar { height: 9px; width: 38%; background: linear-gradient(135deg, #6e7bff, #a78bfa); border-radius: 3px; }
+  .dna-page .dna-line { height: 6px; background: #d7dbe8; border-radius: 3px; }
   .dna-page .dna-line.w80 { width: 80%; } .dna-page .dna-line.w60 { width: 60%; } .dna-page .dna-line.w45 { width: 45%; }
-  .dna-arrow { font-family: var(--vz-font-mono); color: var(--vz-text-muted); font-size: 15px; }
-  .dna-glass { position: relative; width: 86px; height: 86px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(110,123,255,.55); background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.30), rgba(110,123,255,.10) 100%); box-shadow: 0 0 0 4px rgba(110,123,255,.10), inset 0 0 16px rgba(255,255,255,.10); }
+  .dna-node-label {
+    font-family: var(--vz-font-mono); font-size: 9px; font-weight: 700;
+    letter-spacing: .18em; color: var(--vz-text-muted);
+  }
+  .dna-flow { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .dna-flow .line { flex: 1; height: 1px; min-width: 20px; background: linear-gradient(90deg, rgba(110,123,255,.45), rgba(110,123,255,.12)); }
+  .dna-flow .head { font-family: var(--vz-font-mono); font-size: 13px; color: var(--vz-accent-2); }
+  .dna-glass { position: relative; width: 92px; height: 92px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(110,123,255,.55); background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.30), rgba(110,123,255,.10) 100%); box-shadow: 0 0 0 4px rgba(110,123,255,.10), inset 0 0 16px rgba(255,255,255,.10); }
   .dna-glass .dna-cross::before, .dna-glass .dna-cross::after { content: ""; position: absolute; background: rgba(110,123,255,.85); border-radius: 2px; }
-  .dna-glass .dna-cross::before { width: 14px; height: 1.5px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-  .dna-glass .dna-cross::after { width: 1.5px; height: 14px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .dna-glass .dna-cross::before { width: 15px; height: 1.5px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .dna-glass .dna-cross::after { width: 1.5px; height: 15px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
   .dna-lens-label { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); font-family: var(--vz-font-mono); font-size: 8.5px; font-weight: 700; letter-spacing: .16em; color: #fff; background: rgba(110,123,255,.92); border-radius: 4px; padding: 2px 6px; white-space: nowrap; }
-  .dna-tokens { display: flex; flex-wrap: wrap; gap: 8px; }
-  @media (max-width: 720px) { .dna-lens { justify-content: center; } }
+  .dna-tokens { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  @media (max-width: 900px) {
+    .dna-lens { grid-template-columns: 1fr; justify-items: center; gap: 12px 0; padding: 26px 20px; }
+    .dna-flow { flex-direction: column; gap: 2px; }
+    .dna-flow .line { flex: none; width: 1px; height: 26px; min-width: 0; background: linear-gradient(180deg, rgba(110,123,255,.45), rgba(110,123,255,.12)); }
+    .dna-flow .head { transform: rotate(90deg); font-size: 12px; line-height: 1; }
+    .dna-tokens { justify-content: center; }
+  }
 
   /* Power-workflow strip (Redesign §25) */
   .workflow { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 20px; padding: 15px 20px; border: 1px solid var(--vz-border); border-radius: var(--vz-radius-lg); background: var(--mat-thin); }
@@ -1188,13 +1220,16 @@
     <h2 class="reveal">Discover the visual DNA of any <span class="accent">interface</span></h2>
     <p class="lead reveal" data-delay="1">The patterns are already there. Vizquo finds them — and tells you whether each value was observed, derived, or inferred.</p>
     <div class="dna-lens reveal" data-delay="2">
-      <div class="dna-page" aria-hidden="true">
-        <span class="dna-bar"></span>
-        <span class="dna-line w80"></span><span class="dna-line w60"></span><span class="dna-line w45"></span>
+      <div class="dna-node" aria-hidden="true">
+        <div class="dna-page">
+          <span class="dna-bar"></span>
+          <span class="dna-line w80"></span><span class="dna-line w60"></span><span class="dna-line w45"></span>
+        </div>
+        <span class="dna-node-label">PAGE</span>
       </div>
-      <span class="dna-arrow" aria-hidden="true">→</span>
+      <span class="dna-flow" aria-hidden="true"><span class="line"></span><span class="head">→</span></span>
       <div class="dna-glass" aria-hidden="true"><span class="dna-lens-label">LENS</span><span class="dna-cross"></span></div>
-      <span class="dna-arrow" aria-hidden="true">→</span>
+      <span class="dna-flow" aria-hidden="true"><span class="line"></span><span class="head">→</span></span>
       <div class="dna-tokens" aria-hidden="true">
         <span class="token-chip"><span class="sw" style="background:#6e7bff"></span>COLOR <span class="v">#6E7BFF</span></span>
         <span class="token-chip">TYPE <span class="v">Inter 800</span></span>
