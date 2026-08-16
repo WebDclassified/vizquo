@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.11.0 — Message authorization, Tailwind-v4 fixes, live key isolation, Instrumented-Glass landing
+
+- **Message authorization hardening (Requirements §15/§16, INV-007).** The
+  background's privileged handlers (AI_EXPLAIN, EXPORT_ASSETS,
+  CAPTURE_VIEWPORT, OPEN_INSPECTOR_WINDOW) now refuse non-panel senders;
+  content-script handlers require `sender.tab`; AI payloads are capped at
+  256 KB and export batches at 500 assets; filenames are re-sanitized and
+  `javascript:`/`file:` schemes refused with honest reasons
+  (`shared/sender-guard.ts`, `TOR-029`).
+- **BUG-H-004 (P1) fixed — panel live editing reached the page again.** The
+  Create/Analyze/Assets clients sent content-script messages without a tabId,
+  so live edits, Time Machine, geometry and SVG-fetch from the panel UI never
+  arrived. Now routed through `ui.connection.tabId`; regression `TOR-030`
+  drives the real Create-tab UI (lock → apply → verify → undo → verify).
+- **BUG-H-005 (P1) fixed — Tailwind v4 arbitrary-value classes.** Classes like
+  `@container` and `px-(--geist-page-margin)` made the unescaped selector
+  throw a SyntaxError, breaking lock/inspect on such pages (Vercel corpus
+  finding). `engine/dom/ref.ts` now escapes them; regression `TOR-028` + 9
+  dom-ref unit tests.
+- **Live API-key isolation test (`TOR-031`).** Saving a key through the real
+  Settings UI is proven to keep it ONLY in extension IndexedDB — never in
+  `chrome.storage.local` (visible to content scripts), zero `chrome.runtime`
+  surface for page JS, and the debug bundle redacts it (verified from the
+  actual download).
+- **Console-noise fix.** Panel tab-targeted sends now consume
+  `chrome.runtime.lastError` via the polyfill path — no more "message channel
+  closed" errors when a reload races an in-flight inspection.
+- **Landing redesign (Redesign.md v2 — Instrumented Glass).** "See beyond the
+  surface." hero with a signature travelling lens, 3-step
+  Inspect→Understand→Extract narrative, grouped sections (Visual DNA /
+  Assets / Responsive+Analyze / Power Workflow), confidence badges
+  (DETECTED/DERIVED/INFERRED), trimmed nav, and 0.11.0 download packages.
+  Cross-browser smoke (Chromium/Firefox/WebKit) fully green.
+- **Repo-wide lint cleanup** — dead code in the torture suite, optional
+  chaining, and `<title>`s on the browser-logo SVGs; `biome check .` clean.
+- **Release gate on the fresh build:** unit 49/49 · torture 31/31 · probes
+  7/7 + 7/7 · real-site default 23/23 · corpus15 15/15 (Nike geo-redirect
+  honestly BLOCKED) · keyless scan 0 hits.
+
 > Created by Prabhat Teotia
 
 ## 0.10.9 — Liquid-glass UI, CSP-proof scans, storage + library hardening

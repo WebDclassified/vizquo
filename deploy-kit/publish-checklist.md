@@ -17,7 +17,7 @@ free with no developer fee.
    dedicated one for publishing).
 2. Go to https://partner.microsoft.com/dashboard/microsoftedge → **Sign in** →
    accept the publisher agreement (free, no fee).
-3. **Add new** → upload `.output/release/vizquo-0.10.9/vizquo-0.10.9-chrome.zip`.
+3. **Add new** → upload `.output/release/vizquo-0.11.0/vizquo-0.11.0-chrome.zip`.
 4. Fill the listing using `deploy-kit/store-listing.md`:
    - Name, summary, detailed description, category: Developer Tools.
    - Upload your 440×280 promo tile and screenshots.
@@ -32,8 +32,8 @@ free with no developer fee.
    choose "On your own" (self-distribution) or "Listed" (public store listing).
    **Listed** = visible to everyone.
 3. Upload
-   `.output/release/vizquo-0.10.9/vizquo-0.10.9-firefox.zip` AND
-   `.output/release/vizquo-0.10.9/vizquo-0.10.9-sources.zip` (AMO requires
+   `.output/release/vizquo-0.11.0/vizquo-0.11.0-firefox.zip` AND
+   `.output/release/vizquo-0.11.0/vizquo-0.11.0-sources.zip` (AMO requires
    source code for MV3).
 4. Fill the listing (same text as `deploy-kit/store-listing.md`; the manifest
    already declares `data_collection_permissions: none`).
@@ -47,7 +47,7 @@ free with no developer fee.
    later). Enable **2-Step Verification** (required to publish).
 2. Go to https://chrome.google.com/webstore/devconsole → accept the Developer
    Agreement → pay the **one-time $5** registration fee.
-3. **Add new item** → upload `.output/release/vizquo-0.10.9/vizquo-0.10.9-chrome.zip`.
+3. **Add new item** → upload `.output/release/vizquo-0.11.0/vizquo-0.11.0-chrome.zip`.
 4. Before publishing, in the item's package area use **"Set your own extension
    ID"** and download the generated PEM upload key. **Store it in a password
    manager — never in the repo.** Losing it prevents future updates under the

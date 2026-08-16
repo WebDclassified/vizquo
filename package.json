@@ -2,7 +2,7 @@
   "name": "vizquo",
   "description": "Inspect anything. Understand everything. Build faster. — a design-intelligence layer for the web.",
   "private": true,
-  "version": "0.10.9",
+  "version": "0.11.0",
   "author": "Prabhat Teotia",
   "license": "MIT",
   "type": "module",
