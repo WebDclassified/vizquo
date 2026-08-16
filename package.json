@@ -52,7 +52,7 @@
     "check:landing": "node scripts/check-landing-browsers.mjs"
   },
   "dependencies": {
-    "@kobalte/core": "^0.13.12",
+    "@kobalte/core": "^0.13.13",
     "@webext-core/messaging": "^4.0.0",
     "comlink": "^4.4.2",
     "css-tree": "^3.2.1",
