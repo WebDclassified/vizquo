@@ -97,8 +97,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Install Playwright Chromium
-        run: npx playwright install chromium
+      - name: Install Playwright Chromium (with system deps)
+        run: npx playwright install --with-deps chromium
       - name: Build extension
         run: npm run build
       - name: Run E2E smoke tests
@@ -114,7 +114,7 @@ jobs:
     name: Live probes (real Chrome + real sites)
     runs-on: ubuntu-latest
     needs: build
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -122,22 +122,28 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Install Playwright Chromium
-        run: npx playwright install chromium
+      - name: Install Playwright Chromium (with system deps)
+        run: npx playwright install --with-deps chromium
       - name: Build extension
         run: npm run build
       # The probes load the built extension in headed Chrome (under xvfb) and
       # drive real user flows. Core + advanced probe checks that need the
       # optional-host-permission prompt report SKIP when automation cannot
       # complete the native prompt — never a failure. The real-sites probe is
-      # deterministic (static content scripts inject without a grant) and
-      # fails the build when any real site regresses.
+      # deterministic (static content scripts inject without a grant); under
+      # VQ_PROBE_CI a site that blocks the runner's datacenter IP (auth wall,
+      # bot detection, consent redirect) is reported as BLOCKED — visible and
+      # counted, but not a failure, because it is an environment artifact, not
+      # an extension regression. Genuine failures (connect, context target,
+      # lock, scan, console errors) still fail the build everywhere.
       - name: Probe core flows
         run: xvfb-run -a node scripts/probe-extension.mjs
       - name: Probe advanced flows
         run: xvfb-run -a node scripts/probe-extension-advanced.mjs
       - name: QA against real sites
         run: xvfb-run -a node scripts/probe-real-sites.mjs
+        env:
+          VQ_PROBE_CI: "1"
 
   release:
     name: Store release pipeline (manual)

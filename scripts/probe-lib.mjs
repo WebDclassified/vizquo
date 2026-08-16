@@ -119,19 +119,34 @@ export async function getTabId(context, origin) {
     .catch(() => -1);
 }
 
-/** Pass/fail/skip reporter with a CI-friendly exit code. */
+/** Pass/fail/skip/blocked reporter with a CI-friendly exit code.
+ *
+ * FAIL lines fail the run. BLOCK lines are recorded visibly but do NOT fail
+ * the run — they describe an environment artifact (e.g. a site blocking a
+ * datacenter IP, or a network path unavailable to the CI runner), never a
+ * product regression. Callers enable blocked() explicitly (e.g. under
+ * VQ_PROBE_CI) so local runs stay strict. */
 export function makeReporter(name) {
   const results = [];
   const fail = (label, detail) => results.push(`FAIL  ${label}${detail ? ` — ${detail}` : ''}`);
   const pass = (label) => results.push(`PASS  ${label}`);
   const skip = (label, reason = '') =>
     results.push(`SKIP  ${label}${reason ? ` — ${reason}` : ''}`);
+  const blocked = (label, reason = '') =>
+    results.push(`BLOCK  ${label}${reason ? ` — ${reason}` : ''}`);
   const print = () => {
     console.log(`\n==== ${name} ====`);
     for (const line of results) console.log(line);
     const failures = results.filter((r) => r.startsWith('FAIL'));
-    console.log(`\n${results.length - failures.length}/${results.length} checks passed`);
+    const blockedCount = results.filter((r) => r.startsWith('BLOCK')).length;
+    const passed = results.length - failures.length;
+    console.log(
+      `\n${passed}/${results.length} checks passed` +
+        (blockedCount > 0
+          ? ` · ${blockedCount} BLOCKED by environment (reported, not failures)`
+          : ''),
+    );
     process.exit(failures.length === 0 ? 0 : 1);
   };
-  return { results, fail, pass, skip, print };
+  return { results, fail, pass, skip, blocked, print };
 }

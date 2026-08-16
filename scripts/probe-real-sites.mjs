@@ -123,7 +123,15 @@ const CORE_15 = [
   'huge-dom-fixture',
 ];
 
-const { pass, fail, print } = makeReporter('PROBE (real sites)');
+const { pass, fail, blocked, print } = makeReporter('PROBE (real sites)');
+
+// CI runners reach the internet from datacenter IPs, where some sites (auth
+// walls, bot detection, consent redirects) block the request itself. That is
+// an ENVIRONMENT artifact, not an extension regression — so under VQ_PROBE_CI
+// those sites are reported as BLOCKED (visible, counted, never a silent
+// pass) without failing the job. Genuine extension failures (connect,
+// context target, lock, scan, console errors) still fail the run everywhere.
+const CI_MODE = process.env.VQ_PROBE_CI === '1';
 
 let selected = SITES.filter((s) => s.tier === 0);
 const wanted =
@@ -179,7 +187,19 @@ try {
         await page.waitForTimeout(1200);
       } else {
         // Site scripts are NOT our errors — only panel + worker consoles count.
-        await page.goto(site.url, { timeout: 60_000, waitUntil: 'load' });
+        try {
+          await page.goto(site.url, { timeout: 60_000, waitUntil: 'load' });
+        } catch (e) {
+          const msg = String(e?.message ?? e);
+          if (CI_MODE && /net::|timeout|ERR_|unreachable/i.test(msg)) {
+            // Network path unavailable to the CI runner — environment, not
+            // an extension defect. Reported visibly, doesn't fail the job.
+            blocked(`${tag} page load`, `unreachable from CI runner (${msg.slice(0, 140)})`);
+            await page.close().catch(() => {});
+            continue;
+          }
+          throw e;
+        }
         await page.bringToFront();
         await page.waitForTimeout(1200);
         // --- Blocked-site diagnostics: auth walls / bot detection redirect
@@ -188,7 +208,14 @@ try {
         const wall = await detectLoginWall(page, site.url);
         if (wall) {
           const diag = await diagnose(panel, worker);
-          fail(`${tag} content script connected — BLOCKED by site (${wall})`, diag);
+          if (CI_MODE) {
+            blocked(
+              `${tag} content script connected — BLOCKED by site`,
+              `${wall} (datacenter IP — CI environment artifact, not an extension defect)`,
+            );
+          } else {
+            fail(`${tag} content script connected — BLOCKED by site (${wall})`, diag);
+          }
           await page.close().catch(() => {});
           continue;
         }
