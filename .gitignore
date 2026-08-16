@@ -34,3 +34,10 @@ pnpm-debug.log*
 *.swo
 .DS_Store
 Thumbs.db
+
+# ---- Maintainer-only working briefs (kept locally, not part of the repo) ----
+# The master requirements brief, the landing v2 design brief, and the daily
+# handoff notes live in _extra/ on the maintainer's machine. They drove the
+# implementation but are not project documentation — see README + CHANGELOG
+# for the outcomes. The release pipeline tolerates their absence.
+_extra/
