@@ -32,18 +32,21 @@ const FONTS = `
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">`;
 
-/** Brand mark: the inspection lens (champagne ring, emerald core, champagne tail). */
+/** Brand mark: the V-Lens — bold V holding the lens ring (emerald ring on
+ *  near-white arms, matching the tile palette). V dominant, lens discovered. */
 const BRAND_MARK = `
-<svg width="100%" height="100%" viewBox="0 0 128 128">
+<svg width="100%" height="100%" viewBox="0 0 128 128" fill="none">
   <defs>
     <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#5FB98C"/>
+      <stop offset="0%" stop-color="#63B98C"/>
       <stop offset="100%" stop-color="#3E8E67"/>
     </linearGradient>
   </defs>
-  <circle cx="56" cy="56" r="30" fill="none" stroke="url(#ring)" stroke-width="9"/>
-  <circle cx="56" cy="56" r="10" fill="#6FCF97"/>
-  <line x1="79" y1="79" x2="104" y2="104" stroke="#3E8E67" stroke-width="9" stroke-linecap="round"/>
+  <g stroke="#F5F7FA" stroke-linecap="round">
+    <line x1="64" y1="118" x2="13" y2="18" stroke-width="26"/>
+    <line x1="115" y1="18" x2="64" y2="118" stroke-width="26"/>
+    <circle cx="64" cy="60" r="22" stroke="url(#ring)" stroke-width="6"/>
+  </g>
 </svg>`;
 
 const BASE_CSS = `
@@ -86,7 +89,7 @@ const SMALL_TILE = `
   <div class="grid"></div>
   <div style="width:104px;height:104px;flex:0 0 auto;position:relative;">${BRAND_MARK}</div>
   <div style="display:flex;flex-direction:column;gap:11px;min-width:0;position:relative;">
-    <div style="font-family:'Space Grotesk','Inter',sans-serif;font-size:42px;font-weight:700;letter-spacing:-0.025em;line-height:1;">Vizquo</div>
+    <div style="font-family:'Space Grotesk','Inter',sans-serif;font-size:42px;font-weight:700;letter-spacing:-0.03em;line-height:1;">vizquo</div>
     <div style="font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.68);">
       Inspect any webpage.<br/>Extract its <span class="serif grad-text" style="font-size:15px;">design system</span>.
     </div>
@@ -106,7 +109,7 @@ const MARQUEE = `
   <div class="grid"></div>
   <div style="width:200px;height:200px;flex:0 0 auto;position:relative;">${BRAND_MARK}</div>
   <div style="display:flex;flex-direction:column;gap:16px;min-width:0;position:relative;">
-    <div style="font-family:'Space Grotesk','Inter',sans-serif;font-size:98px;font-weight:700;letter-spacing:-0.035em;line-height:1;">Vizquo</div>
+    <div style="font-family:'Space Grotesk','Inter',sans-serif;font-size:98px;font-weight:700;letter-spacing:-0.04em;line-height:1;">vizquo</div>
     <div style="font-size:27px;line-height:1.45;color:rgba(255,255,255,.7);">
       Inspect any webpage. Extract its <span class="serif grad-text" style="font-size:32px;">design system</span>.
     </div>
@@ -137,7 +140,7 @@ const OG_CARD = `
   <div class="grid"></div>
   <div style="display:flex;flex-direction:column;gap:18px;min-width:0;position:relative;flex:0 0 auto;max-width:560px;">
     <div style="width:118px;height:118px;">${BRAND_MARK}</div>
-    <div style="font-family:'Space Grotesk','Inter',sans-serif;font-size:78px;font-weight:700;letter-spacing:-0.035em;line-height:1;">Vizquo</div>
+    <div style="font-family:'Space Grotesk','Inter',sans-serif;font-size:78px;font-weight:700;letter-spacing:-0.04em;line-height:1;">vizquo</div>
     <div style="font-size:26px;line-height:1.5;color:rgba(255,255,255,.72);">
       Inspect any webpage. Extract its <span class="serif grad-text" style="font-size:31px;">design system</span>.<br/>
       Free, local-first, private by default.

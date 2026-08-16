@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 132 40" fill="none">
+  <title>Vizquo — V-Lens</title>
+  <g transform="translate(0 0) scale(0.3125)">
+    
+  <g fill="none" stroke="#F5F5F7">
+    <line x1="64" y1="118" x2="13" y2="18" stroke-width="26" stroke-linecap="round"/>
+    <line x1="115" y1="18" x2="64" y2="118" stroke-width="26" stroke-linecap="round"/>
+    <circle cx="64" cy="60" r="22" stroke="#F5F5F7" stroke-width="6"/>
+  </g>
+  </g>
+  <text x="50" y="28.5" font-family="'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="26" font-weight="700"
+        letter-spacing="-0.9" fill="#F5F5F7">vizquo</text>
+</svg>

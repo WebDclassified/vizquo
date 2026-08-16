@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vizquo — V-Lens Brand System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050505;
+    --bg-2: #0A0A0C;
+    --fg: #F5F5F7;
+    --fg-2: rgba(245,245,247,.62);
+    --fg-3: rgba(245,245,247,.42);
+    --border: rgba(255,255,255,.08);
+    --accent: #7C5CFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--fg); }
+  body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 72px 32px 96px; }
+  .kicker { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--fg-3); }
+  h1 { font-size: 44px; font-weight: 600; letter-spacing: -.03em; margin: 14px 0 10px; }
+  .sub { color: var(--fg-2); font-size: 16px; line-height: 1.6; max-width: 560px; }
+  .rule { height: 1px; background: var(--border); margin: 56px 0; }
+  .section-title { font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--fg-2); margin-bottom: 8px; }
+  .section-note { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--fg-3); margin-bottom: 28px; }
+  .panel { background: var(--bg-2); border: 1px solid var(--border); border-radius: 18px; padding: 48px 40px; display: flex; align-items: center; justify-content: center; min-height: 220px; }
+  .panel.light { background: #F5F5F7; border-color: transparent; }
+  .panel.two { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 0; overflow: hidden; }
+  .panel.two > div { display: flex; align-items: center; justify-content: center; min-height: 220px; padding: 40px; }
+  .panel.two .dark { background: var(--bg-2); }
+  .panel.two .light { background: #F5F5F7; }
+  .mark-rows { display: flex; flex-direction: column; gap: 14px; }
+  .mark-row { display: flex; align-items: center; gap: 20px; }
+  .mark-row .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--fg-3); min-width: 120px; }
+  .size-strip { display: flex; align-items: flex-end; gap: 0; }
+  .size-cell { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .size-cell + .size-cell { margin-left: 44px; }
+  .size-cell .tag { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--fg-3); }
+  .size-cell .px { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--fg-2); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } .panel.two { grid-template-columns: 1fr; } }
+  .concept { display: grid; grid-template-columns: 200px 1fr; gap: 32px; align-items: center; }
+  @media (max-width: 760px) { .concept { grid-template-columns: 1fr; } }
+  .concept .copy p { color: var(--fg-2); font-size: 14.5px; line-height: 1.7; margin-bottom: 12px; }
+  .concept .copy p b { color: var(--fg); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg-2); line-height: 1.9; }
+  .mono .hl { color: var(--accent); }
+  .footer { margin-top: 72px; padding-top: 28px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--fg-3); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">Vizquo Brand System — v1.0</div>
+  <h1>See beyond the surface.</h1>
+  <p class="sub">The V-Lens mark: a bold geometric V — the instrument — whose mouth holds a precision lens ring — the viewport. V dominant at every size; the lens discovered on a second look.</p>
+
+  <div class="rule"></div>
+
+  <!-- 01 Primary lockup -->
+  <div class="section-title">01 — Primary horizontal logo</div>
+  <div class="section-note">v-lens-mark + vizquo wordmark · #F5F5F7 on #050505</div>
+  <div class="panel">
+    <img src="../public/brand/vizquo-logo-horizontal.svg" alt="Vizquo primary lockup" style="width: 300px; height: auto;">
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- 02 Standalone icon -->
+  <div class="section-title">02 — Standalone V-Lens icon</div>
+  <div class="section-note">The mark must work independently of the wordmark.</div>
+  <div class="panel">
+    <img src="../public/brand/v-lens-mark.svg" alt="V-Lens mark" style="width: 180px; height: 180px;">
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- 03 / 04 Monochrome -->
+  <div class="section-title">03 &amp; 04 — Monochrome versions</div>
+  <div class="section-note">White on dark · black on light — the identity is monochrome-first.</div>
+  <div class="panel two">
+    <div class="dark"><img src="../public/brand/v-lens-mark.svg" alt="White mark" style="width: 120px; height: 120px;"></div>
+    <div class="light"><img src="../public/brand/v-lens-mark-black.svg" alt="Black mark" style="width: 120px; height: 120px;"></div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- 05 Accent -->
+  <div class="section-title">05 — Brand-accent version</div>
+  <div class="section-note">Violet #7C5CFF used sparingly — the lens ring only. Never a gradient.</div>
+  <div class="panel">
+    <img src="../public/brand/v-lens-mark-accent.svg" alt="Accent mark" style="width: 150px; height: 150px;">
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- 06 Small-size preview -->
+  <div class="section-title">06 — Small-size preview</div>
+  <div class="section-note">The V must read at 16px; internal details may simplify, the silhouette never does.</div>
+  <div class="panel" style="justify-content: flex-start; overflow-x: auto;">
+    <div class="size-strip">
+      <div class="size-cell"><img src="../public/brand/v-lens-mark.svg" width="16" height="16" alt=""><span class="tag">V-Lens</span><span class="px">16px</span></div>
+      <div class="size-cell"><img src="../public/brand/v-lens-mark.svg" width="24" height="24" alt=""><span class="px">24px</span></div>
+      <div class="size-cell"><img src="../public/brand/v-lens-mark.svg" width="32" height="32" alt=""><span class="px">32px</span></div>
+      <div class="size-cell"><img src="../public/brand/v-lens-mark.svg" width="48" height="48" alt=""><span class="px">48px</span></div>
+      <div class="size-cell"><img src="../public/brand/v-lens-mark.svg" width="64" height="64" alt=""><span class="px">64px</span></div>
+      <div class="size-cell"><img src="../public/brand/v-lens-mark.svg" width="128" height="128" alt=""><span class="px">128px</span></div>
+      <div class="size-cell"><img src="../public/brand/v-lens-mark.svg" width="180" height="180" alt=""><span class="px">180px</span></div>
+      <div class="size-cell"><img src="../public/brand/v-lens-mark.svg" width="512" height="512" alt=""><span class="px">512px</span></div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- 07 Wordmark + favicon -->
+  <div class="section-title">07 — Wordmark &amp; favicon</div>
+  <div class="section-note">Lowercase grotesk · the favicon rides the tile version for contrast on any tab.</div>
+  <div class="grid-2">
+    <div class="panel"><img src="../public/brand/vizquo-wordmark.svg" alt="vizquo wordmark" style="width: 170px; height: auto;"></div>
+    <div class="panel">
+      <div class="mark-rows">
+        <div class="mark-row"><img src="../public/icon/16.png" width="16" height="16" alt="16px favicon"><span class="label">favicon 16</span></div>
+        <div class="mark-row"><img src="../public/icon/32.png" width="32" height="32" alt="32px favicon"><span class="label">favicon 32</span></div>
+        <div class="mark-row"><img src="../public/icon/128.png" width="48" height="48" alt="128px icon"><span class="label">app icon 128</span></div>
+        <div class="mark-row"><img src="../landing/apple-touch-icon.png" width="48" height="48" alt="apple touch icon"><span class="label">apple-touch 180</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- Concept + geometry -->
+  <div class="section-title">Concept &amp; construction</div>
+  <div class="section-note">The geometry is a system, not a drawing.</div>
+  <div class="concept">
+    <img src="../public/brand/v-lens-mark.svg" alt="V-Lens" style="width: 200px; height: 200px;">
+    <div class="copy">
+      <p><b>Two arms, one lens.</b> The V arms are uniform 26-unit strokes at 27° from vertical, meeting at the apex. The lens ring (radius 22, 6-unit stroke) floats in the mouth with an even ~1.3-unit gap from the arms' inner edges — held, not attached.</p>
+      <p><b>Negative space is the product story.</b> What you look <i>through</i> is the space between the arms — the lens is the aperture the instrument provides. At 16px the ring simplifies away; the V silhouette carries the identity.</p>
+      <p><b>Motion potential.</b> The geometry is built for the signature animation: V → lens opens → inspection frame appears → hidden structure is revealed → returns to V. The mark is the first frame.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Vizquo · V-Lens Brand System</span>
+    <span>See beyond the surface.</span>
+  </div>
+</div>
+</body>
+</html>

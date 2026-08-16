@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 128 128" fill="none">
+  <title>Vizquo — V-Lens</title>
+  <g fill="none" stroke="#0B0B0D">
+    <line x1="64" y1="118" x2="13" y2="18" stroke-width="26" stroke-linecap="round"/>
+    <line x1="115" y1="18" x2="64" y2="118" stroke-width="26" stroke-linecap="round"/>
+    <circle cx="64" cy="60" r="22" stroke="#0B0B0D" stroke-width="6"/>
+  </g>
+</svg>
