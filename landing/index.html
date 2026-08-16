@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vizquo — See the web differently. Inspect any page, extract its design system.</title>
-<meta name="description" content="Vizquo is a free, local-first browser extension that inspects live webpages and reveals their design system — colors, typography, spacing, components, responsive behavior, and assets. Optional AI. Works in Chrome, Edge, Firefox, Brave, Opera, Vivaldi, and Arc. Safari coming soon.">
+<title>Vizquo — Inspect and Understand Any Webpage</title>
+<meta name="description" content="Vizquo is a free browser extension for designers and frontend developers to inspect webpages, discover design systems, extract assets and understand responsive interfaces. Local-first, no tracking, optional AI.">
 <meta name="theme-color" content="#08090e">
-<meta property="og:title" content="Vizquo — See the web differently.">
-<meta property="og:description" content="The visual inspection instrument for your browser. Free, local-first, no tracking. Inspect interfaces, extract assets, uncover design systems, analyze responsive behavior.">
+<meta property="og:title" content="Vizquo — See beyond the surface.">
+<meta property="og:description" content="Turn any webpage into a visual blueprint. A free, local-first browser extension that inspects CSS, assets, design tokens, responsive behavior and reusable patterns — right in your browser.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://webdclassified.github.io/vizquo/landing/">
 <meta property="og:image" content="https://webdclassified.github.io/vizquo/deploy-kit/promo/og-1200x630.png">
@@ -345,6 +345,39 @@
   .meas .lab.lx { top: -30px; left: 50%; transform: translateX(-50%); }
   .meas .lab.ly { left: -8px; top: 50%; transform: translateY(-50%) translateX(-100%); }
 
+  /* Signature lens — the ownable inspection motif (Redesign §12): a glass
+     magnifier that travels to the active element. Translucent ring + inner
+     lighting + crosshair, labels inside the circle so nothing collides. */
+  .lens {
+    position: absolute; pointer-events: none; z-index: 4;
+    width: 118px; height: 118px; border-radius: 50%;
+    border: 1px solid rgba(110,123,255,.55);
+    background:
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,.30), rgba(255,255,255,.06) 44%, rgba(110,123,255,.12) 100%);
+    -webkit-backdrop-filter: blur(2px) saturate(1.15);
+    backdrop-filter: blur(2px) saturate(1.15);
+    box-shadow: 0 0 0 5px rgba(110,123,255,.10), 0 12px 32px rgba(16,20,31,.28), inset 0 0 20px rgba(255,255,255,.10);
+    transform: translate(-50%, -50%) scale(.6);
+    opacity: 0;
+    transition: opacity .18s ease, transform .22s ease;
+  }
+  .lens.on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  .lens::before, .lens::after {
+    content: ""; position: absolute; background: rgba(110,123,255,.85); border-radius: 2px;
+  }
+  .lens::before { width: 16px; height: 1.5px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .lens::after { width: 1.5px; height: 16px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .lens .lens-label {
+    position: absolute; top: 10px; right: 12px;
+    font-family: var(--vz-font-mono); font-size: 9px; font-weight: 700; letter-spacing: .16em;
+    color: #fff; background: rgba(110,123,255,.92); border-radius: 4px; padding: 2px 6px;
+  }
+  .lens .lens-readout {
+    position: absolute; bottom: 10px; left: 12px; max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-family: var(--vz-font-mono); font-size: 9px; font-weight: 600;
+    color: #6e7bff; background: rgba(255,255,255,.94); border: 1px solid #e4e7f0; border-radius: 4px; padding: 2px 6px;
+  }
+
   /* Inspector panel — elevated glass */
   .inspector {
     display: flex; flex-direction: column;
@@ -440,23 +473,38 @@
   .how-band { background: radial-gradient(900px 500px at 50% 0%, rgba(110,123,255,.07), transparent 65%), var(--vz-bg-elevated); border-top: 1px solid var(--vz-border); border-bottom: 1px solid var(--vz-border); }
   .how-head { text-align: center; }
   .how-head .lead { margin-left: auto; margin-right: auto; }
-  .how-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 10px; }
-  @media (max-width: 1080px) { .how-grid { grid-template-columns: repeat(4, 1fr); } }
-  @media (max-width: 640px) { .how-grid { grid-template-columns: repeat(2, 1fr); } }
-  .how-step {
-    border: 1px solid var(--vz-border); border-radius: var(--vz-radius-md);
-    background: var(--mat-thin);
-    -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
-    backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate));
-    padding: 14px 14px 12px;
-    text-align: left;
+  .how3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 26px; }
+  @media (max-width: 900px) { .how3 { grid-template-columns: 1fr; } }
+  .how3-step {
+    border: 1px solid var(--vz-border); border-radius: var(--vz-radius-lg);
+    background: var(--mat-standard);
+    -webkit-backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
+    backdrop-filter: blur(var(--blur-standard)) saturate(var(--saturate));
     box-shadow: var(--edge-light);
+    padding: 24px;
+    text-align: left;
     transition: border-color .18s ease, transform .18s ease;
   }
-  .how-step:hover { border-color: var(--vz-accent-border); transform: translateY(-2px); }
-  .how-step .n { font-family: var(--vz-font-mono); font-size: 11px; font-weight: 700; color: var(--vz-accent-2); letter-spacing: .1em; }
-  .how-step h4 { font-size: 13.5px; font-weight: 700; margin: 6px 0 3px; }
-  .how-step p { font-size: 11.5px; color: var(--vz-text-muted); margin: 0; line-height: 1.45; }
+  .how3-step:hover { border-color: var(--vz-accent-border); transform: translateY(-2px); }
+  .how3-step .n { font-family: var(--vz-font-mono); font-size: 12px; font-weight: 700; color: var(--vz-accent-2); letter-spacing: .14em; }
+  .how3-step h3 { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; margin: 10px 0 2px; }
+  .how3-step .tag { font-family: var(--vz-font-mono); font-size: 11px; font-weight: 600; color: var(--vz-teal); margin: 0 0 10px; }
+  .how3-step > p { font-size: 13.5px; color: var(--vz-text-secondary); margin: 0 0 18px; line-height: 1.55; }
+  /* Mini evidence inside each step — instrumentation, not decoration */
+  .mini-vis { position: relative; min-height: 84px; border-radius: var(--vz-radius-md); background: var(--vz-bg-elevated); border: 1px solid var(--vz-border); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .mini-vis.sel .mv-frame { position: absolute; inset: 18px 14px; border: 1.5px dashed rgba(110,123,255,.7); border-radius: 6px; background: rgba(110,123,255,.05); }
+  .mini-vis.sel .mv-lab { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-family: var(--vz-font-mono); font-size: 9.5px; color: #fff; background: #6e7bff; border-radius: 4px; padding: 2px 7px; white-space: nowrap; }
+  .mini-vis.chips { gap: 8px; flex-wrap: wrap; padding: 18px 14px; }
+  .mv-chip { font-family: var(--vz-font-mono); font-size: 10px; color: var(--vz-text-secondary); border: 1px solid var(--vz-border-strong); background: var(--mat-thin); border-radius: 6px; padding: 5px 9px; }
+  .mv-chip b { color: var(--vz-text-primary); font-weight: 600; }
+  .mini-vis.assets { gap: 10px; }
+  .mv-asset { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--vz-border); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .mv-asset.im { background: rgba(110,123,255,.12); } .mv-asset.sv { background: rgba(167,139,250,.12); }
+  .mv-asset.fn { background: rgba(63,224,200,.1); } .mv-asset.vd { background: rgba(231,183,91,.1); }
+  .how-more { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .how-more .hm-label { font-family: var(--vz-font-mono); font-size: 11px; letter-spacing: .08em; color: var(--vz-text-muted); }
+  .how-more .hm-chip { font-family: var(--vz-font-mono); font-size: 11.5px; color: var(--vz-text-secondary); border: 1px solid var(--vz-border); background: var(--mat-thin); border-radius: 999px; padding: 6px 13px; }
+  .how-more .hm-chip i { color: var(--vz-text-muted); font-style: normal; }
 
   /* ============================================================
      Inspect — measurement overlay section
@@ -546,6 +594,31 @@
   .conf.detected { color: var(--vz-teal); background: rgba(63,224,200,.1); border: 1px solid rgba(63,224,200,.3); }
   .conf.derived { color: var(--vz-amber); background: rgba(231,183,91,.1); border: 1px solid rgba(231,183,91,.3); }
   .conf.inferred { color: var(--vz-accent-2); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); }
+
+  /* Signature lens strip — page → lens → tokens (Redesign §12) */
+  .dna-lens { display: flex; align-items: center; gap: 18px; margin: 26px 0 4px; padding: 18px 24px; border: 1px solid var(--vz-border); border-radius: var(--vz-radius-lg); background: var(--mat-standard); box-shadow: var(--edge-light); flex-wrap: wrap; }
+  .dna-page { width: 112px; height: 80px; border: 1px solid var(--vz-border-strong); border-radius: 8px; background: #f6f7fb; padding: 11px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+  .dna-page .dna-bar { height: 8px; width: 38%; background: linear-gradient(135deg, #6e7bff, #a78bfa); border-radius: 3px; }
+  .dna-page .dna-line { height: 5px; background: #d7dbe8; border-radius: 3px; }
+  .dna-page .dna-line.w80 { width: 80%; } .dna-page .dna-line.w60 { width: 60%; } .dna-page .dna-line.w45 { width: 45%; }
+  .dna-arrow { font-family: var(--vz-font-mono); color: var(--vz-text-muted); font-size: 15px; }
+  .dna-glass { position: relative; width: 86px; height: 86px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(110,123,255,.55); background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.30), rgba(110,123,255,.10) 100%); box-shadow: 0 0 0 4px rgba(110,123,255,.10), inset 0 0 16px rgba(255,255,255,.10); }
+  .dna-glass .dna-cross::before, .dna-glass .dna-cross::after { content: ""; position: absolute; background: rgba(110,123,255,.85); border-radius: 2px; }
+  .dna-glass .dna-cross::before { width: 14px; height: 1.5px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .dna-glass .dna-cross::after { width: 1.5px; height: 14px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .dna-lens-label { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); font-family: var(--vz-font-mono); font-size: 8.5px; font-weight: 700; letter-spacing: .16em; color: #fff; background: rgba(110,123,255,.92); border-radius: 4px; padding: 2px 6px; white-space: nowrap; }
+  .dna-tokens { display: flex; flex-wrap: wrap; gap: 8px; }
+  @media (max-width: 720px) { .dna-lens { justify-content: center; } }
+
+  /* Power-workflow strip (Redesign §25) */
+  .workflow { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 20px; padding: 15px 20px; border: 1px solid var(--vz-border); border-radius: var(--vz-radius-lg); background: var(--mat-thin); }
+  .wf-step { display: flex; align-items: center; gap: 8px; font-family: var(--vz-font-mono); font-size: 12px; font-weight: 600; color: var(--vz-text-primary); }
+  .wf-step .n { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: rgba(110,123,255,.16); border: 1px solid rgba(110,123,255,.4); color: var(--vz-accent-2); font-size: 10.5px; }
+  .wf-arrow { color: var(--vz-text-muted); font-size: 13px; }
+
+  /* Asset grid wider variant */
+  .asset-grid.wide-grid { grid-template-columns: repeat(6, 1fr); }
+  @media (max-width: 640px) { .asset-grid.wide-grid { grid-template-columns: repeat(3, 1fr); } }
   /* Design-system tile */
   .ds-swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
   .ds-swatch { border-radius: 8px; height: 44px; border: 1px solid rgba(255,255,255,.12); display: flex; align-items: flex-end; padding: 5px 7px; font-family: var(--vz-font-mono); font-size: 9.5px; color: rgba(255,255,255,.85); }
@@ -795,6 +868,12 @@
   .cta-band h2 { font-size: clamp(32px, 5vw, 56px); }
   .cta-sub { font-size: 15px; color: var(--vz-text-secondary); margin: 0 0 10px; font-family: var(--vz-font-mono); letter-spacing: .06em; }
   .cta-band .btn-primary { margin-top: 26px; font-size: 17px; padding: 17px 34px; }
+  .cta-lens { display: inline-flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 30px; }
+  .cta-lens-glass { position: relative; width: 104px; height: 104px; border-radius: 50%; border: 1px solid rgba(110,123,255,.55); background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.26), rgba(110,123,255,.10) 100%); box-shadow: 0 0 0 5px rgba(110,123,255,.10), inset 0 0 18px rgba(255,255,255,.10); }
+  .cta-lens-cross::before, .cta-lens-cross::after { content: ""; position: absolute; background: rgba(110,123,255,.85); border-radius: 2px; }
+  .cta-lens-cross::before { width: 18px; height: 1.5px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .cta-lens-cross::after { width: 1.5px; height: 18px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .cta-lens-label { font-family: var(--vz-font-mono); font-size: 10px; letter-spacing: .14em; color: var(--vz-text-muted); }
 
   /* ============================================================
      Footer
@@ -884,6 +963,7 @@
     .reveal, .reveal-scale, .reveal-l, .reveal-r, .rv { opacity: 1 !important; transform: none !important; transition: none !important; }
     .dl-ring { animation: none; }
     .meas { transition: none; }
+    .lens { transition: none; opacity: 1; }
   }
 </style>
 </head>
@@ -895,7 +975,6 @@
     <a class="brand" href="#top"><img src="../public/icon/32.png" alt="Vizquo logo"> Vizquo</a>
     <nav class="nav-links" id="navLinks" aria-label="Primary">
       <a href="#product">Product</a>
-      <a href="#features">Features</a>
       <a href="#how">How it works</a>
       <a href="#security">Security</a>
       <a href="#resources">Resources</a>
@@ -911,14 +990,14 @@
   <div class="hero-grid" aria-hidden="true"></div>
   <div class="hero-vignette" aria-hidden="true"></div>
   <div class="wrap">
-    <span class="hero-pill reveal"><span class="dot"></span> <span class="mono">v0.10.9</span> · by Prabhat Teotia · Free &amp; open source</span>
-    <h1 class="reveal" data-delay="1">See the web<br><span class="accent">differently.</span></h1>
-    <p class="sub reveal" data-delay="2">Inspect interfaces, extract assets, uncover design systems, analyze responsive behavior, and understand how modern websites are built — <b>directly in your browser</b>.</p>
+    <span class="hero-pill reveal"><span class="dot"></span> <span class="mono">v0.11.0</span> · by Prabhat Teotia · Free &amp; open source</span>
+    <h1 class="reveal" data-delay="1">See beyond the<br><span class="accent">surface.</span></h1>
+    <p class="sub reveal" data-delay="2">Vizquo turns any live webpage into a <b>visual blueprint</b> — revealing its CSS, assets, design tokens, responsive behavior, and reusable patterns, directly in your browser.</p>
     <div class="hero-btns reveal" data-delay="3">
       <a class="btn-primary" id="heroCta" href="#install">Add Vizquo — Free</a>
-      <a class="btn-ghost" href="#demo">Watch it inspect <span class="arr">↓</span></a>
+      <a class="btn-ghost" href="#how">See how it works <span class="arr">↓</span></a>
     </div>
-    <p class="hero-note reveal" data-delay="4" id="heroNote">Free · Local-first · No tracking</p>
+    <p class="hero-note reveal" data-delay="4" id="heroNote">Free · Local-first · Built for designers &amp; developers</p>
 
     <!-- Live inspection demo — the product itself, above the fold -->
     <div class="demo-wrap reveal" data-delay="4" id="demo">
@@ -930,6 +1009,10 @@
         </div>
         <div class="mock-site inspect-zone" id="mockSite">
           <div class="meas" aria-hidden="true"><span class="hair h-x"></span><span class="hair h-y"></span><span class="lab lx"></span><span class="lab ly"></span></div>
+          <div class="lens" id="lens" aria-hidden="true">
+            <span class="lens-label">LENS</span>
+            <span class="lens-readout" id="lensReadout">—</span>
+          </div>
           <div class="mock-nav">
             <span class="mock-logo">A</span>
             <span class="m-links"><span class="m-link">Product</span><span class="m-link">Pricing</span><span class="m-link">Docs</span></span>
@@ -975,9 +1058,9 @@
 <!-- ============ PRODUCT REVEAL ============ -->
 <section class="reveal-band" id="product">
   <div class="wrap">
-    <p class="kicker reveal">Product reveal</p>
-    <h2 class="reveal">Your browser already contains the <span class="accent">design system</span>. Vizquo reveals it.</h2>
-    <p class="lead reveal" data-delay="1">One scan reads a live page the way a design tool would — and reports exactly what it observed, with honest confidence labels.</p>
+    <p class="kicker reveal">Product proof</p>
+    <h2 class="reveal">A webpage is more than what you can <span class="accent">see</span>.</h2>
+    <p class="lead reveal" data-delay="1">Vizquo exposes the structure behind the interface — one scan reads a live page the way a design tool would, and reports exactly what it observed with honest confidence labels.</p>
     <div class="rv-values" id="rvValues">
       <span class="rv" data-d="0"><span class="sq q1"></span><span class="v">COLORS</span></span>
       <span class="rv" data-d="1"><span class="sq q2"></span><span class="v">TYPE STYLES</span></span>
@@ -1002,17 +1085,38 @@
   <div class="wrap">
     <div class="how-head">
       <p class="kicker reveal">How it works</p>
-      <h2 class="reveal">One inspection session, <span class="accent">seven moves</span></h2>
-      <p class="lead reveal" data-delay="1">Vizquo walks the page the way you would — then hands you every observation as a structured answer.</p>
+      <h2 class="reveal">One inspection session, <span class="accent">three moves</span></h2>
+      <p class="lead reveal" data-delay="1">Watch Vizquo solve the problem: point at it, understand how it is built, take what you need.</p>
     </div>
-    <div class="how-grid">
-      <div class="how-step reveal"><span class="n">01</span><h4>Inspect</h4><p>Point at any element. See its box, rules, and source.</p></div>
-      <div class="how-step reveal" data-delay="1"><span class="n">02</span><h4>Understand</h4><p>Tokens for color, type, space, radius, and shadows.</p></div>
-      <div class="how-step reveal" data-delay="2"><span class="n">03</span><h4>Extract</h4><p>Grab every image, SVG, icon, and font in seconds.</p></div>
-      <div class="how-step reveal" data-delay="3"><span class="n">04</span><h4>Analyze</h4><p>Consistency, contrast, responsive, and performance.</p></div>
-      <div class="how-step reveal" data-delay="4"><span class="n">05</span><h4>Experiment</h4><p>Live-edit styles, compare, and undo — temporarily.</p></div>
-      <div class="how-step reveal" data-delay="5"><span class="n">06</span><h4>Generate</h4><p>Turn what you see into React, CSS, or design tokens.</p></div>
-      <div class="how-step reveal" data-delay="6"><span class="n">07</span><h4>Explain</h4><p>Optional AI that reads only what you ask it to.</p></div>
+    <div class="how3">
+      <div class="how3-step reveal">
+        <span class="n">01</span><h3>Inspect</h3><p class="tag">Point at it.</p>
+        <p>Hover any element. Vizquo frames it, measures it, and shows its computed styles, box, and source.</p>
+        <div class="mini-vis sel" aria-hidden="true"><span class="mv-frame"></span><span class="mv-lab">W 742px · H 184px</span></div>
+      </div>
+      <div class="how3-step reveal" data-delay="1">
+        <span class="n">02</span><h3>Understand</h3><p class="tag">See how it is built.</p>
+        <p>CSS rules, typography, colors, spacing, variables — and the DOM path behind them.</p>
+        <div class="mini-vis chips" aria-hidden="true">
+          <span class="mv-chip">COLOR <b>#6E7BFF</b></span>
+          <span class="mv-chip">TYPE <b>Inter 800</b></span>
+          <span class="mv-chip">SPACE <b>24px</b></span>
+        </div>
+      </div>
+      <div class="how3-step reveal" data-delay="2">
+        <span class="n">03</span><h3>Extract</h3><p class="tag">Take what you need.</p>
+        <p>Images, SVG, icons, fonts, video, Lottie — classified, deduplicated, and downloadable.</p>
+        <div class="mini-vis assets" aria-hidden="true">
+          <span class="mv-asset im">🖼</span><span class="mv-asset sv">✦</span><span class="mv-asset fn">Aa</span><span class="mv-asset vd">▶</span>
+        </div>
+      </div>
+    </div>
+    <div class="how-more reveal" data-delay="3">
+      <span class="hm-label">Then keep going:</span>
+      <span class="hm-chip">04 Analyze</span>
+      <span class="hm-chip">05 Experiment</span>
+      <span class="hm-chip">06 Generate</span>
+      <span class="hm-chip">07 Explain <i>· optional AI</i></span>
     </div>
   </div>
 </section>
@@ -1052,12 +1156,28 @@
   </div>
 </section>
 
-<!-- ============ FEATURES BENTO ============ -->
+<!-- ============ VISUAL DNA ============ -->
 <section>
   <div class="wrap">
-    <p class="kicker reveal">Features</p>
-    <h2 class="reveal">Everything a page knows, <span class="accent">organized</span></h2>
-    <p class="lead reveal" data-delay="1">Each capability shows the real product surface — with confidence labels that say whether a value was observed, derived, or inferred.</p>
+    <p class="kicker reveal">Visual DNA</p>
+    <h2 class="reveal">Discover the visual DNA of any <span class="accent">interface</span></h2>
+    <p class="lead reveal" data-delay="1">The patterns are already there. Vizquo finds them — and tells you whether each value was observed, derived, or inferred.</p>
+    <div class="dna-lens reveal" data-delay="2">
+      <div class="dna-page" aria-hidden="true">
+        <span class="dna-bar"></span>
+        <span class="dna-line w80"></span><span class="dna-line w60"></span><span class="dna-line w45"></span>
+      </div>
+      <span class="dna-arrow" aria-hidden="true">→</span>
+      <div class="dna-glass" aria-hidden="true"><span class="dna-lens-label">LENS</span><span class="dna-cross"></span></div>
+      <span class="dna-arrow" aria-hidden="true">→</span>
+      <div class="dna-tokens" aria-hidden="true">
+        <span class="token-chip"><span class="sw" style="background:#6e7bff"></span>COLOR <span class="v">#6E7BFF</span></span>
+        <span class="token-chip">TYPE <span class="v">Inter 800</span></span>
+        <span class="token-chip">SPACE <span class="v">24px</span></span>
+        <span class="token-chip">RADIUS <span class="v">16px</span></span>
+        <span class="token-chip conf detected">DETECTED</span>
+      </div>
+    </div>
     <div class="bento">
       <!-- Design system -->
       <div class="bento-tile reveal">
@@ -1073,21 +1193,64 @@
           </div>
         </div>
       </div>
-      <!-- Assets -->
-      <div class="bento-tile reveal" data-delay="1">
-        <div class="bt-kicker"><span class="conf detected">OBSERVED</span> Assets</div>
-        <h3>Find every visual asset in seconds</h3>
-        <p>Images, SVG, icons, fonts, video — classified by type with sources and dimensions. Failures are listed, never silently dropped.</p>
+      <!-- Difference / Find instances -->
+      <div class="bento-tile wide reveal" data-delay="1">
+        <div class="bt-kicker"><span class="conf inferred">INFERRED</span> Find instances</div>
+        <h3>Understand why two buttons look different</h3>
+        <p>Select one element, and Vizquo finds every similar component on the page — highlighting near-duplicates and the exact style deltas between them. Recurring patterns become component definitions you can export.</p>
         <div class="bt-vis">
-          <div class="asset-grid">
-            <span class="asset-cell im">🖼</span><span class="asset-cell sv">🦄</span><span class="asset-cell fn">Aa</span>
-            <span class="asset-cell im">🖼</span><span class="asset-cell sv">✦</span><span class="asset-cell vd">▶</span>
-            <span class="asset-cell fn">Aa</span><span class="asset-cell im">🖼</span>
+          <div class="edit-row"><span class="prop">.btn</span> <span class="arrow">×12 instances</span> <span class="val">2 variants</span> <span class="arrow">·</span> <span class="prop">padding:</span> <span class="val">12px vs 16px</span></div>
+        </div>
+      </div>
+      <!-- Code -->
+      <div class="bento-tile reveal" data-delay="2">
+        <div class="bt-kicker"><span class="conf derived">DERIVED</span> Code</div>
+        <h3>From interface to implementation</h3>
+        <p>Selected element → React, CSS, or design tokens. Generated code is never executed by Vizquo.</p>
+        <div class="bt-vis">
+          <div class="code-lines">
+            <span class="c-tag">&lt;button</span> <span class="c-tag">class</span>=<span class="c-str">"btn-primary"</span><span class="c-tag">&gt;</span>Get started<span class="c-tag">&lt;/button&gt;</span><br>
+            <span class="c-tag">.btn-primary</span> { color: <span class="c-num">#fff</span>; background: <span class="c-str">#6e7bff</span>; radius: <span class="c-num">10px</span>; }
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ASSETS ============ -->
+<section>
+  <div class="wrap">
+    <p class="kicker reveal">Assets</p>
+    <h2 class="reveal">Every visual asset. <span class="accent">One place.</span></h2>
+    <p class="lead reveal" data-delay="1">Images, SVG, icons, fonts, video, Lottie — classified by type with sources and dimensions. Failures are listed, never silently dropped.</p>
+    <div class="bento">
+      <div class="bento-tile full reveal">
+        <div class="bt-kicker"><span class="conf detected">OBSERVED</span> Asset extraction</div>
+        <h3>Find every visual asset in seconds</h3>
+        <p>Hover an asset for extraction, copy its URL, or download the whole set — deduplicated, with real dimensions and sources.</p>
+        <div class="bt-vis">
+          <div class="asset-grid wide-grid">
+            <span class="asset-cell im">🖼</span><span class="asset-cell sv">🦄</span><span class="asset-cell fn">Aa</span>
+            <span class="asset-cell im">🖼</span><span class="asset-cell sv">✦</span><span class="asset-cell vd">▶</span>
+            <span class="asset-cell fn">Aa</span><span class="asset-cell im">🖼</span>
+            <span class="asset-cell sv">✦</span><span class="asset-cell vd">▶</span><span class="asset-cell im">🖼</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESPONSIVE + ANALYZE ============ -->
+<section>
+  <div class="wrap">
+    <p class="kicker reveal">Responsive · Analyze</p>
+    <h2 class="reveal">See the interface across <span class="accent">every breakpoint</span></h2>
+    <p class="lead reveal" data-delay="1">Vizquo reads how the layout, typography, and containers respond — then points out what needs attention.</p>
+    <div class="bento">
       <!-- Responsive -->
-      <div class="bento-tile reveal" data-delay="2">
+      <div class="bento-tile reveal">
         <div class="bt-kicker"><span class="conf derived">DERIVED</span> Responsive</div>
         <h3>See how the interface changes</h3>
         <p>Breakpoints and container queries detected per element — with honest overflow findings.</p>
@@ -1101,9 +1264,9 @@
         </div>
       </div>
       <!-- Analyze -->
-      <div class="bento-tile reveal" data-delay="3">
+      <div class="bento-tile reveal" data-delay="1">
         <div class="bt-kicker"><span class="conf inferred">INFERRED</span> Analyze</div>
-        <h3>Find what developers should fix</h3>
+        <h3>Find the details that need attention</h3>
         <p>Consistency, accessibility, performance, responsive, and asset health — heuristic scores, never presented as objective truth.</p>
         <div class="bt-vis">
           <div class="score-list">
@@ -1114,6 +1277,26 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ POWER WORKFLOW ============ -->
+<section>
+  <div class="wrap">
+    <p class="kicker reveal">Power workflow</p>
+    <h2 class="reveal">From inspection to <span class="accent">implementation</span></h2>
+    <p class="lead reveal" data-delay="1">Edit live, compare, capture, and generate — an instrument for experimentation, never permanent mutation.</p>
+    <div class="bento">
+      <!-- Live edit -->
+      <div class="bento-tile reveal">
+        <div class="bt-kicker"><span class="conf detected">OBSERVED</span> Live edit</div>
+        <h3>Change it. Compare it. Undo it.</h3>
+        <p>Temporary style edits that reset on reload — an instrument for experimentation, not mutation.</p>
+        <div class="bt-vis">
+          <div class="edit-row"><span class="prop">border-radius:</span><span class="val">12px</span><span class="arrow">→</span><span class="val">24px</span><span class="arrow">→</span><span class="undo">undo</span><span class="arrow">→</span><span class="val">12px</span></div>
+        </div>
+      </div>
       <!-- Screenshot -->
       <div class="bento-tile reveal" data-delay="1">
         <div class="bt-kicker"><span class="conf detected">OBSERVED</span> Screenshot</div>
@@ -1121,36 +1304,17 @@
         <p>Viewport, full-page, element, or selection captures — with exact scroll restoration.</p>
         <div class="bt-vis"><div class="cap-frame"><span class="cap-sweep"></span></div></div>
       </div>
-      <!-- Live edit -->
-      <div class="bento-tile reveal" data-delay="2">
-        <div class="bt-kicker"><span class="conf detected">OBSERVED</span> Live edit</div>
-        <h3>Change it. Compare it. Undo it.</h3>
-        <p>Temporary style edits that reset on reload — an instrument for experimentation, not mutation.</p>
-        <div class="bt-vis">
-          <div class="edit-row"><span class="prop">font-size:</span><span class="val">48px</span><span class="arrow">→</span><span class="val">56px</span><span class="arrow">→</span><span class="undo">undo</span><span class="arrow">→</span><span class="val">48px</span></div>
-        </div>
-      </div>
-      <!-- Code -->
-      <div class="bento-tile reveal" data-delay="3">
-        <div class="bt-kicker"><span class="conf derived">DERIVED</span> Code</div>
-        <h3>From interface to implementation</h3>
-        <p>Selected element → React, CSS, or design tokens. Generated code is never executed by Vizquo.</p>
-        <div class="bt-vis">
-          <div class="code-lines">
-            <span class="c-tag">&lt;button</span> <span class="c-tag">class</span>=<span class="c-str">"btn-primary"</span><span class="c-tag">&gt;</span>Get started<span class="c-tag">&lt;/button&gt;</span><br>
-            <span class="c-tag">.btn-primary</span> { color: <span class="c-num">#fff</span>; background: <span class="c-str">#6e7bff</span>; radius: <span class="c-num">10px</span>; }
-          </div>
-        </div>
-      </div>
-      <!-- Difference / Find instances -->
-      <div class="bento-tile wide reveal" data-delay="2">
-        <div class="bt-kicker"><span class="conf inferred">INFERRED</span> Find instances</div>
-        <h3>Understand why two buttons look different</h3>
-        <p>Select one element, and Vizquo finds every similar component on the page — highlighting near-duplicates and the exact style deltas between them. Recurring patterns become component definitions you can export.</p>
-        <div class="bt-vis">
-          <div class="edit-row"><span class="prop">.btn</span> <span class="arrow">×12 instances</span> <span class="val">2 variants</span> <span class="arrow">·</span> <span class="prop">padding:</span> <span class="val">12px vs 16px</span></div>
-        </div>
-      </div>
+    </div>
+    <div class="workflow reveal" data-delay="2" aria-label="Inspection to implementation workflow">
+      <span class="wf-step"><span class="n">1</span> Inspect</span>
+      <span class="wf-arrow" aria-hidden="true">→</span>
+      <span class="wf-step"><span class="n">2</span> Edit</span>
+      <span class="wf-arrow" aria-hidden="true">→</span>
+      <span class="wf-step"><span class="n">3</span> Compare</span>
+      <span class="wf-arrow" aria-hidden="true">→</span>
+      <span class="wf-step"><span class="n">4</span> Capture</span>
+      <span class="wf-arrow" aria-hidden="true">→</span>
+      <span class="wf-step"><span class="n">5</span> Generate</span>
     </div>
   </div>
 </section>
@@ -1161,7 +1325,7 @@
     <div class="ai-grid">
       <div>
         <p class="kicker reveal">Optional AI</p>
-        <h2 class="reveal">When you need context, <span class="accent">ask</span></h2>
+        <h2 class="reveal">Need an explanation? <span class="accent">Ask Vizquo.</span></h2>
         <p class="lead reveal" data-delay="1">Core inspection works entirely without AI. Enable it and Vizquo explains only what you ask it to — nothing is sent until you confirm, and payloads are bounded and redacted.</p>
         <div class="ai-providers reveal" data-delay="2">
           <span class="ai-provider off">AI off by default</span>
@@ -1186,7 +1350,7 @@
     <div class="sec-grid">
       <div>
         <p class="kicker reveal">Privacy</p>
-        <h2 class="reveal">Your pages <span class="accent">stay yours</span></h2>
+        <h2 class="reveal">Your browser is your <span class="accent">workspace</span>. Keep it that way.</h2>
         <div class="flow reveal" data-delay="1">
           <span class="flow-node">WEB PAGE</span>
           <span class="flow-arrow">→</span>
@@ -1288,43 +1452,43 @@
         <span class="badge">Your browser</span>
         <img class="logo" src="browsers/chrome.svg" alt="Google Chrome logo" width="30" height="30"><h4>Google Chrome</h4>
         <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
-        <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
+        <a class="btn-dl" href="downloads/vizquo-0.11.0-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="1" data-browser="edge">
         <span class="badge">Your browser</span>
         <img class="logo" src="browsers/edge.svg" alt="Microsoft Edge logo" width="30" height="30"><h4>Microsoft Edge</h4>
         <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
-        <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
+        <a class="btn-dl" href="downloads/vizquo-0.11.0-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="2" data-browser="firefox">
         <span class="badge">Your browser</span>
         <img class="logo" src="browsers/firefox.svg" alt="Firefox logo" width="30" height="30"><h4>Firefox</h4>
         <div class="ver">Firefox 121+ · Win / macOS / Linux</div>
-        <a class="btn-dl teal" href="downloads/vizquo-0.10.9-firefox.zip" download>⬇ Download ZIP</a>
+        <a class="btn-dl teal" href="downloads/vizquo-0.11.0-firefox.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="3" data-browser="brave">
         <span class="badge">Your browser</span>
         <img class="logo" src="browsers/brave.svg" alt="Brave logo" width="30" height="30"><h4>Brave</h4>
         <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
-        <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
+        <a class="btn-dl" href="downloads/vizquo-0.11.0-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-browser="opera">
         <span class="badge">Your browser</span>
         <img class="logo" src="browsers/opera.svg" alt="Opera logo" width="30" height="30"><h4>Opera</h4>
         <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
-        <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
+        <a class="btn-dl" href="downloads/vizquo-0.11.0-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="1" data-browser="vivaldi">
         <span class="badge">Your browser</span>
         <img class="logo" src="browsers/vivaldi.svg" alt="Vivaldi logo" width="30" height="30"><h4>Vivaldi</h4>
         <div class="ver">Chromium 110+ · Win / macOS / Linux</div>
-        <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
+        <a class="btn-dl" href="downloads/vizquo-0.11.0-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="2" data-browser="arc">
         <span class="badge">Your browser</span>
         <img class="logo" src="browsers/arc.svg" alt="Arc logo" width="30" height="30"><h4>Arc</h4>
         <div class="ver">Chromium 110+ · Win / macOS</div>
-        <a class="btn-dl" href="downloads/vizquo-0.10.9-chrome.zip" download>⬇ Download ZIP</a>
+        <a class="btn-dl" href="downloads/vizquo-0.11.0-chrome.zip" download>⬇ Download ZIP</a>
       </div>
       <div class="browser reveal" data-delay="3" data-browser="safari">
         <span class="badge">Your browser</span>
@@ -1357,7 +1521,7 @@
           <summary><span class="b-ic">🌐</span> Google Chrome <span class="chev">▶</span></summary>
           <div class="steps"><div class="steps-inner">
             <ol>
-              <li>Download the <b>Chrome ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>). You get a folder named <code>vizquo-0.10.9-chrome</code>.</li>
+              <li>Download the <b>Chrome ZIP</b> and unzip it (<span class="unzip-hint">right-click → Extract All</span>). You get a folder named <code>vizquo-0.11.0-chrome</code>.</li>
               <li>Open <code>chrome://extensions</code>.</li>
               <li>Enable <b>Developer mode</b> (toggle, top-right).</li>
               <li>Click <b>Load unpacked</b> → select the unzipped folder.</li>
@@ -1492,9 +1656,13 @@
   <div class="cta-grid" aria-hidden="true"></div>
   <div class="wrap">
     <p class="cta-sub reveal">Inspect · Understand · Extract · Build</p>
-    <h2 class="reveal">See what the browser <span class="accent">already knows</span></h2>
-    <p class="lead reveal" data-delay="1" style="margin-left:auto;margin-right:auto">Free forever, local-first, no tracking — works on every modern desktop browser.</p>
-    <a class="btn-primary reveal" data-delay="2" href="#install">Add Vizquo — Free</a>
+    <h2 class="reveal">See beyond the <span class="accent">surface.</span></h2>
+    <p class="lead reveal" data-delay="1" style="margin-left:auto;margin-right:auto">Inspect the web. Understand the system behind it. Free forever, local-first, no tracking.</p>
+    <div class="cta-lens reveal" data-delay="2" aria-hidden="true">
+      <span class="cta-lens-glass"><span class="cta-lens-cross"></span></span>
+      <span class="cta-lens-label">WEB PAGE → VIZQUO LENS → VISUAL BLUEPRINT</span>
+    </div>
+    <a class="btn-primary reveal" data-delay="3" href="#install">Add Vizquo — Free</a>
   </div>
 </section>
 </main>
@@ -1526,7 +1694,7 @@
     </div>
     <div class="footer-bottom">
       <span>© 2026 Vizquo · Created by <b style="color:var(--vz-text-primary)">Prabhat Teotia</b> · Free &amp; open source (MIT)</span>
-      <span class="tag"><b>v0.10.9</b> · local-first · zero network requests by default</span>
+      <span class="tag"><b>v0.11.0</b> · local-first · zero network requests by default</span>
     </div>
   </div>
 </footer>
@@ -1614,7 +1782,7 @@
     const hints = {
       win: 'right-click → Extract All',
       mac: 'double-click the ZIP (macOS unzips it automatically)',
-      linux: 'unzip the file in a terminal (e.g. unzip vizquo-0.10.9-chrome.zip)'
+      linux: 'unzip the file in a terminal (e.g. unzip vizquo-0.11.0-chrome.zip)'
     };
 
     let current = detected;
@@ -1727,6 +1895,8 @@
     const meas = zone ? zone.querySelector('.meas') : null;
     const measX = meas ? meas.querySelector('.lab.lx') : null;
     const measY = meas ? meas.querySelector('.lab.ly') : null;
+    const lens = zone ? zone.querySelector('.lens') : null;
+    const lensReadout = document.getElementById('lensReadout');
     if (!items.length || !rowsEl) return;
 
     const DATA = {
@@ -1796,6 +1966,7 @@
       srcEl.textContent = `Traced to · ${cfg.src}`;
       confEl.textContent = `Confidence ${cfg.conf}`;
       const r = el.getBoundingClientRect();
+      const zr = zone.getBoundingClientRect();
       const rows = [
         ['Width', `${Math.round(r.width)}px`],
         ['Height', `${Math.round(r.height)}px`]
@@ -1806,13 +1977,20 @@
       });
       rowsEl.innerHTML = html;
       if (meas && measX && measY) {
-        meas.style.left = `${r.left - zone.getBoundingClientRect().left}px`;
-        meas.style.top = `${r.top - zone.getBoundingClientRect().top}px`;
+        meas.style.left = `${r.left - zr.left}px`;
+        meas.style.top = `${r.top - zr.top}px`;
         meas.style.width = `${r.width}px`;
         meas.style.height = `${r.height}px`;
         measX.textContent = `${Math.round(r.width)}px`;
         measY.textContent = `${Math.round(r.height)}px`;
         zone.classList.add('has-meas');
+      }
+      // The lens travels to the center of the inspected element.
+      if (lens) {
+        lens.style.left = `${r.left - zr.left + r.width / 2}px`;
+        lens.style.top = `${r.top - zr.top + r.height / 2}px`;
+        lens.classList.add('on');
+        if (lensReadout) lensReadout.textContent = cfg.name;
       }
     }
 
@@ -1843,6 +2021,7 @@
           confEl.textContent = '';
           if (posEl) posEl.textContent = '';
           if (zone && meas) zone.classList.remove('has-meas');
+          if (lens) lens.classList.remove('on');
         }
       });
       el.addEventListener('click', () => {
@@ -1854,6 +2033,7 @@
           srcEl.textContent = 'Vizquo · element inspector';
           confEl.textContent = '';
           if (zone && meas) zone.classList.remove('has-meas');
+          if (lens) lens.classList.remove('on');
           return;
         }
         setActive(el, true);
