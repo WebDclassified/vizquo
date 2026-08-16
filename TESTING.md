@@ -129,6 +129,13 @@ STATUS / EVIDENCE; statuses are VERIFIED PASS / FAIL / BLOCKED only.
   content-script messages WITHOUT a tabId, so panel-initiated edits never
   reached the page). Drives the real Create-tab UI: lock → apply `color` via
   the panel → verified on the page → undo → verified reverted.
+- `TOR-031 api-key-isolation` — LIVE proof of the key-isolation architecture
+  (§22/INV-005): a key saved through the real Settings UI lands ONLY in the
+  extension's IndexedDB (`vizquo` DB, `settings` table — the background-read
+  path), never in `chrome.storage.local` (the namespace content scripts share
+  with the extension), page-world JavaScript has zero `chrome.runtime`
+  surface, the page origin's IndexedDB contains no `vizquo` DB, and the debug
+  bundle redacts the key (verified from the actual downloaded file).
 
 ## Current coverage
 

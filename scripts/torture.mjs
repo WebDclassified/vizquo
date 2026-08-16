@@ -18,9 +18,8 @@ import { launchProbeContext, makeReporter, openPanel } from './probe-lib.mjs';
 
 const ORIGIN = 'http://vizquo-torture.test';
 const CROSS_ORIGIN = 'http://vizquo-cross.test';
-const ALLOWED = new Set([ORIGIN, CROSS_ORIGIN]);
 
-const { pass, fail, print, results } = makeReporter('TORTURE SUITE');
+const { pass, fail, print } = makeReporter('TORTURE SUITE');
 
 const selected =
   process.env.VQ_TORTURE?.split(',')
@@ -1024,10 +1023,10 @@ scenario('TOR-012', 'prompt-injection-secrets', async (context, ev) => {
 });
 
 scenario('TOR-013', 'multi-tab-isolation', async (context, ev) => {
-  const mk = (id, color, label) =>
+  const mk = (color, label) =>
     `<!doctype html><html><head><title>${label}</title><style>body{font-family:system-ui}.b{color:${color};padding:4px}</style></head><body><div class="b">${label} content</div></body></html>`;
-  const aHtml = mk('a', 'rgb(200, 10, 10)', 'Tab A');
-  const bHtml = mk('b', 'rgb(10, 10, 200)', 'Tab B');
+  const aHtml = mk('rgb(200, 10, 10)', 'Tab A');
+  const bHtml = mk('rgb(10, 10, 200)', 'Tab B');
   await context.route(`${ORIGIN}/**`, (route) => {
     const p = new URL(route.request().url()).pathname;
     if (p === '/tab-a.html')

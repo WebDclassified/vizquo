@@ -155,7 +155,7 @@ async function runEngine(browserType, url) {
       .locator('.btn-dl')
       .evaluateAll((els) => els.map((el) => el.getAttribute('href')));
     for (const href of dlHrefs) {
-      if (!href || !href.startsWith('downloads/')) continue;
+      if (!href?.startsWith('downloads/')) continue;
       const res = await page.request.get(new URL(href, url).toString());
       if (res.status() !== 200) problems.push(`download link 404: ${href}`);
     }

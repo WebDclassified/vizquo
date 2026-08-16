@@ -1,4 +1,5 @@
 <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="953.37" height="984" viewBox="0 0 953.37 984">
+<title>Firefox logo</title>
   <defs>
     <radialGradient id="radial-gradient" cx="-14569.52" cy="9284.3" fx="-14598.28277817514" r="450.88" gradientTransform="matrix(0.76, 0.03, 0.05, -1.12, 11545.85, 11139.76)" gradientUnits="userSpaceOnUse">
       <stop offset="0.1" stop-color="#ffea00"/>
@@ -118,7 +119,7 @@
       <stop offset="1" stop-color="#ff8e00" stop-opacity="0"/>
     </linearGradient>
   </defs>
-  <title>Firefox_Logo,_2017_2</title>
+  <title>Firefox logo</title>
   <g id="Layer_2" data-name="Layer 2">
     <g id="Firefox_-_Large" data-name="Firefox - Large">
       <path d="M770.28,91.56c-24,27.88-35.1,90.64-10.82,154.26s61.5,49.8,84.7,114.67c30.62,85.6,16.37,200.59,16.37,200.59s36.81,106.61,62.47-6.63C979.79,341.74,770.28,143.94,770.28,91.56Z" style="fill: url(#radial-gradient)"/>

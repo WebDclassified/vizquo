@@ -161,11 +161,11 @@ export class InspectController {
     // Never claim a lock on an element that left the document (spec §7): the
     // panel must see STALE/REMOVED, not a valid-looking ref that resolves to
     // nothing (or — worse — to a different element via a reused selector).
-    return this.lockedEl && this.lockedEl.isConnected ? makeRef(this.lockedEl) : null;
+    return this.lockedEl?.isConnected ? makeRef(this.lockedEl) : null;
   }
 
   getHoveredRef(): ElementRef | null {
-    return this.hoveredEl && this.hoveredEl.isConnected ? makeRef(this.hoveredEl) : null;
+    return this.hoveredEl?.isConnected ? makeRef(this.hoveredEl) : null;
   }
 
   getContextTarget(): ElementRef | null {

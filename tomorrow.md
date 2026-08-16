@@ -25,7 +25,7 @@ WXT (web-extension toolkit, v0.21) · SolidJS · UnoCSS · TypeScript (strict) �
 Dexie/IndexedDB · Comlink worker · Vitest + Playwright · Biome
 
 ### Current version
-- `package.json` version: **0.10.9** ✅ (in sync with CHANGELOG).
+- `package.json` version: **0.11.0** ✅ (in sync with CHANGELOG).
 
 ---
 
@@ -46,7 +46,7 @@ Last full validation (all passed):
 | Big-site verification (YouTube) | `node scripts/diag-youtube.mjs` | ✅ scan completes via main-thread fallback (~20 s) |
 | Landing smoke (3 engines) | `node scripts/check-landing-browsers.mjs` | ✅ chromium · firefox · webkit |
 | Torture suite (deterministic stress/security) | `npm run test:torture` | ✅ **23/23** (huge-dom/css, deep-dom, mutation storm, shadow/iframe/SVG/CSP, spa-race, WebGL, responsive, secrets, storage isolation) |
-| Store ZIP | `npm run zip` | ✅ `vizquo-0.10.9-chrome.zip` |
+| Store ZIP | `npm run zip` | ✅ `vizquo-0.11.0-chrome.zip` |
 
 Manifest permissions (minimal, all used): `storage`, `sidePanel`, `downloads`,
 `contextMenus`, `activeTab`. No unused `scripting`/`offscreen` (WXT auto-adds
@@ -544,16 +544,17 @@ its §83 highest-priority risks:
   TESTING.md updated (TOR-024…030 listed).
 
 Full gate this pass: compile ✅ · lint ✅ · unit **49/49 files** · torture
-**30/30** · probe-extension 7/7 · probe-extension-advanced 7/7 (1 honest SKIP
-— captureVisibleTab needs activeTab) · real-site default **23/23** · corpus15
-**55/56** (only non-pass: Nike geo-redirect → BLOCKED by the site, honest).
+**31/31** (incl. TOR-031 live API-key isolation) · probe-extension 7/7 ·
+probe-extension-advanced 7/7 (1 honest SKIP — captureVisibleTab needs
+activeTab) · real-site default **23/23** · corpus15 **15/15** (Nike
+geo-redirect → BLOCKED by the site, honest) · landing smoke 3/3 engines.
 
 ## 18. Recommended first tasks tomorrow
 
-1. **Submit the 0.10.9 store packages (§6A)** — the release was cut
-   (`npm run release -- 0.10.8 0.10.9`): packages are in
-   `.output/release/vizquo-0.10.9/` (chrome/firefox/sources ZIPs + listing
-   kit), screenshots + promo tiles are regenerated at 0.10.9 (dark glass
+1. **Submit the 0.11.0 store packages (§6A)** — the release was cut
+   (`npm run release -- 0.10.9 0.11.0`): packages are in
+   `.output/release/vizquo-0.11.0/` (chrome/firefox/sources ZIPs + listing
+   kit), screenshots + promo tiles are regenerated at 0.11.0 (dark glass
    theme), and the landing download ZIPs are staged at `landing/downloads/`.
    The remaining steps are web-console uploads (Edge, Firefox AMO, Chrome
    Web Store — keep the PEM key safe).

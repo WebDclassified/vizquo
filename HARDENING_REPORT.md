@@ -273,22 +273,40 @@ highest-priority risks.
 | `npm run compile` | ✅ clean |
 | `npm run lint` | ✅ 0 warnings |
 | `npm run test` | ✅ 49/49 files (incl. `sender-guard`, `dom-ref`, `connection` regression tests) |
-| `npm run test:torture` | ✅ **30/30** |
+| `npm run test:torture` | ✅ **31/31** scenarios (TOR-001…031) |
 | `node scripts/probe-extension.mjs` | ✅ 7/7 |
 | `node scripts/probe-extension-advanced.mjs` | ✅ 7/7 (1 honest SKIP: captureVisibleTab needs activeTab) |
 | `node scripts/probe-real-sites.mjs` (default) | ✅ 23/23 |
-| corpus15 live corpus | ✅ 55/56 — the only non-pass is Nike's geo-redirect (`www.nike.com` → `www.nike.in`), an honest BLOCKED by the site, not an extension defect |
-| Landing smoke (3 engines) | ✅ (unchanged this pass) |
+| corpus15 live corpus | ✅ 15/15 core sites + Nike honestly BLOCKED (geo-redirect to `nike.in`) |
+| Landing smoke (3 engines) | ✅ Chromium + Firefox + WebKit, desktop + mobile, zero console errors |
+| Release 0.11.0 | ✅ compiled, lint-clean, zipped (chrome/firefox/sources), keyless scan 0 hits, promo + screenshots regenerated |
 
 ## New docs (Requirements §78)
 
 - `THREAT_MODEL.md` — assets, actors, surfaces, boundaries, INV-001…015 mapping.
 - `AI_PRIVACY.md` — payload bounding, key isolation, prompt-injection posture.
 - `SECURITY.md` / `TESTING.md` — updated with the sender-validation model and
-  TOR-024…030.
+  TOR-024…031.
+
+## Release 0.11.0 — fourth pass (landing redesign + live key isolation)
+
+- **TOR-031 api-key-isolation** (new): saves a key through the real Settings
+  UI and proves live that it lives only in extension IndexedDB — never
+  `chrome.storage.local` (the namespace content scripts share), no
+  `chrome.runtime` surface for page JS, no `vizquo` DB in the page origin,
+  and the downloaded debug bundle redacts the key.
+- Landing redesigned per `Redesign.md` v2 ("See beyond the surface"):
+  3-step Inspect→Understand→Extract narrative, grouped sections (Visual DNA /
+  Assets / Responsive+Analyze / Power Workflow), signature lens in hero + DNA
+  strip + final CTA, confidence badges, trimmed nav. Cross-browser smoke
+  (Chromium/Firefox/WebKit) fully green.
+- Lint debt cleared repo-wide (optional chaining, dead code in torture.mjs,
+  SVG `<title>`s) — `biome check .` is clean again.
 
 ## Release decision (this pass)
 
 **READY** — Requirements.md §83's seven highest-priority risks are closed with
-permanent regression tests; the full gate (unit 49/49, torture 30/30, probes
-23/23 + 7/7 + 7/7, corpus15 55/56 with one honest site-side BLOCK) passes.
+permanent regression tests; the full gate (unit 49/49, torture 31/31, probes
+23/23 + 7/7 + 7/7, corpus15 15/15 + one honest site-side BLOCK, landing smoke
+3/3 engines, release package assembled) passes on the freshly built 0.11.0
+artifacts.

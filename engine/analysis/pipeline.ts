@@ -114,10 +114,19 @@ export function createAnalysisPipeline(): AnalysisPipeline {
         ].join('|'),
       ),
       hashProjection(assetList, (a) =>
-        [a.url, a.type, a.source, a.alt ?? '', a.loading ?? '', (a.naturalDims ?? []).join('x')].join('|'),
+        [
+          a.url,
+          a.type,
+          a.source,
+          a.alt ?? '',
+          a.loading ?? '',
+          (a.naturalDims ?? []).join('x'),
+        ].join('|'),
       ),
-      hashProjection(a11yList, (s) =>
-        `${s.ref.domPath.join(',')} ${s.text} ${s.alt ?? ''} ${s.ariaLabel ?? ''} ${s.color} ${s.backgroundColor}`,
+      hashProjection(
+        a11yList,
+        (s) =>
+          `${s.ref.domPath.join(',')} ${s.text} ${s.alt ?? ''} ${s.ariaLabel ?? ''} ${s.color} ${s.backgroundColor}`,
       ),
       hashProjection(snapshot?.variables ?? [], (v) => `${v.name}=${v.value}`),
       hashProjection(snapshot?.breakpoints ?? [], (b) => b.raw),

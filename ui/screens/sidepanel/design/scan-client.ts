@@ -7,7 +7,7 @@
  * and multi-selection also flow through this module.
  */
 import { INSPECTION_SCHEMA_VERSION, STORAGE_KEYS } from '../../../../shared/constants';
-import { sendMessage, sendTabMessage } from '../../../../shared/messages';
+import { sendTabMessage } from '../../../../shared/messages';
 import { isForTab } from '../../../../shared/tab-isolation';
 import type {
   ElementRef,

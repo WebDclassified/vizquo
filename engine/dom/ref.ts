@@ -46,11 +46,7 @@ export function escapeCssIdent(name: string): string {
     const code = ch.codePointAt(0) ?? 0;
     const isAlpha = (code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a);
     const validChar =
-      isAlpha ||
-      (code >= 0x30 && code <= 0x39) ||
-      ch === '-' ||
-      ch === '_' ||
-      code > 0x7f;
+      isAlpha || (code >= 0x30 && code <= 0x39) || ch === '-' || ch === '_' || code > 0x7f;
     // CSS identifiers cannot START with a digit or a dash followed by a
     // digit; a leading dash followed by anything else is fine (`-z-10`).
     const badFirst =

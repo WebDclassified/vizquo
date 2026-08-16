@@ -95,7 +95,8 @@ describe('ElementRef generation', () => {
   });
 
   it('resolveRef accepts the selector when the DOM shifted but the identity is intact', () => {
-    document.body.innerHTML = '<div id="list"><div class="card">One</div><div class="card">Two</div></div>';
+    document.body.innerHTML =
+      '<div id="list"><div class="card">One</div><div class="card">Two</div></div>';
     const second = document.querySelectorAll('.card')[1]!;
     const ref = makeRef(second);
     // A sibling gains a class — the path still resolves and the selector
@@ -120,12 +121,8 @@ describe('escapeCssIdent (Tailwind v4 arbitrary values — Vercel regression)', 
 
   it('escapes @ / parens / brackets / percent / colon (arbitrary-value + variant syntax)', () => {
     expect(escapeCssIdent('@container')).toBe('\\40 container');
-    expect(escapeCssIdent('px-(--geist-page-margin)')).toBe(
-      'px-\\28 --geist-page-margin\\29 ',
-    );
-    expect(escapeCssIdent('w-[calc(100%-2rem)]')).toBe(
-      'w-\\5b calc\\28 100\\25 -2rem\\29 \\5d ',
-    );
+    expect(escapeCssIdent('px-(--geist-page-margin)')).toBe('px-\\28 --geist-page-margin\\29 ');
+    expect(escapeCssIdent('w-[calc(100%-2rem)]')).toBe('w-\\5b calc\\28 100\\25 -2rem\\29 \\5d ');
     expect(escapeCssIdent('grid-cols-[1fr_2fr]')).toContain('\\5b');
     expect(escapeCssIdent('hover:bg')).toBe('hover\\3a bg');
   });
@@ -161,9 +158,7 @@ describe('escapeCssIdent (Tailwind v4 arbitrary values — Vercel regression)', 
   it('identical siblings with hostile classes produce distinct selectors', () => {
     document.body.innerHTML =
       '<ul><li class="px-(--a)">A</li><li class="px-(--a)">B</li><li class="px-(--a)">C</li></ul>';
-    const selectors = Array.from(document.querySelectorAll('li')).map((li) =>
-      buildSelector(li),
-    );
+    const selectors = Array.from(document.querySelectorAll('li')).map((li) => buildSelector(li));
     expect(new Set(selectors).size).toBe(3);
     // Positional disambiguation keeps them unique even without a document query.
     expect(selectors[0]).toContain(':nth-of-type(1)');
