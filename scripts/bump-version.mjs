@@ -20,7 +20,7 @@ const FILES = [
   'deploy-kit/store-listing.md',
   'deploy-kit/safari-port.md',
   'README.md',
-  'tomorrow.md',
+  '_extra/tomorrow.md',
   'CHANGELOG.md',
 ];
 

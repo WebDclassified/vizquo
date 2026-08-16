@@ -27,7 +27,7 @@
 - **Console-noise fix.** Panel tab-targeted sends now consume
   `chrome.runtime.lastError` via the polyfill path — no more "message channel
   closed" errors when a reload races an in-flight inspection.
-- **Landing redesign (Redesign.md v2 — Instrumented Glass).** "See beyond the
+- **Landing redesign (_extra/Redesign.md v2 — Instrumented Glass).** "See beyond the
   surface." hero with a signature travelling lens, 3-step
   Inspect→Understand→Extract narrative, grouped sections (Visual DNA /
   Assets / Responsive+Analyze / Power Workflow), confidence badges

@@ -233,11 +233,11 @@ works".*
 
 ---
 
-# Third pass — Requirements.md full audit (2026-08-15, v0.10.9)
+# Third pass — _extra/Requirements.md full audit (2026-08-15, v0.10.9)
 
 ## What was audited
 
-The complete master requirements document (Requirements.md, §§1–88) was read
+The complete master requirements document (_extra/Requirements.md, §§1–88) was read
 end-to-end and mapped against the implementation, with focus on the §83
 highest-priority risks.
 
@@ -295,7 +295,7 @@ highest-priority risks.
   `chrome.storage.local` (the namespace content scripts share), no
   `chrome.runtime` surface for page JS, no `vizquo` DB in the page origin,
   and the downloaded debug bundle redacts the key.
-- Landing redesigned per `Redesign.md` v2 ("See beyond the surface"):
+- Landing redesigned per `_extra/Redesign.md` v2 ("See beyond the surface"):
   3-step Inspect→Understand→Extract narrative, grouped sections (Visual DNA /
   Assets / Responsive+Analyze / Power Workflow), signature lens in hero + DNA
   strip + final CTA, confidence badges, trimmed nav. Cross-browser smoke
@@ -305,7 +305,7 @@ highest-priority risks.
 
 ## Release decision (this pass)
 
-**READY** — Requirements.md §83's seven highest-priority risks are closed with
+**READY** — _extra/Requirements.md §83's seven highest-priority risks are closed with
 permanent regression tests; the full gate (unit 49/49, torture 31/31, probes
 23/23 + 7/7 + 7/7, corpus15 15/15 + one honest site-side BLOCK, landing smoke
 3/3 engines, release package assembled) passes on the freshly built 0.11.0
