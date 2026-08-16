@@ -98,9 +98,10 @@ See the product inspect itself — the landing page runs the real demo:
   browser (IndexedDB). No account, no tracking, no analytics — and **zero
   network requests** until you choose otherwise (the UI loads no external
   fonts, scripts, or resources).
-- **On-demand access.** Site access is granted per-site, on demand — never at
-  install. Cross-origin iframes and closed Shadow DOM are honestly labeled,
-  never bypassed.
+- **Full access, zero friction.** The extension carries `<all_urls>` host
+  access so it connects to every page instantly — no per-site grants, no
+  reloads, no prompts. Cross-origin iframes and closed Shadow DOM are
+  honestly labeled, never bypassed.
 - **AI is opt-in and bounded.** Disabled by default; shows exactly what it will
   send before the first request; payloads are redacted (no input values, no
   data attributes). You can use a local model that never leaves your machine.
@@ -121,8 +122,8 @@ npm run build        # production build → .output/chrome-mv3
 
 1. Open `chrome://extensions` (or `edge://extensions`) → enable **Developer mode**.
 2. **Load unpacked** → select `.output/chrome-mv3`.
-3. Pin Vizquo, open the side panel, and grant access to a tab when prompted —
-   that is how it connects: always on demand, never by default.
+3. Pin Vizquo and open the side panel — it connects to the current page
+   automatically (full host access; no grants or reloads).
 
 **Firefox** — `npm run build:firefox:mv3`, then load `.output/firefox-mv3` via
 `about:debugging#/runtime/this-firefox` (temporary add-on).

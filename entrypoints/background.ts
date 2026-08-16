@@ -31,6 +31,7 @@ import type {
   ElementRef,
   ExportAssetRequest,
   ExportAssetsResult,
+  FetchAssetBlobResult,
 } from '../shared/types';
 import { repository } from '../storage';
 
@@ -327,7 +328,8 @@ export default defineBackground(() => {
       } catch {
         return {
           ok: false,
-          error: 'The browser refused the capture. Grant site access to this tab and try again.',
+          error:
+            'The browser refused the capture. Restricted pages (chrome://, the Web Store, or an incognito window) cannot be captured — open a normal web page and try again.',
         };
       }
     },
@@ -461,12 +463,90 @@ export default defineBackground(() => {
     },
   );
 
+  // --- Phase 4: fetch one asset for in-tab playback (Section 7.10) ---------
+  onMessage(
+    'FETCH_ASSET_BLOB',
+    async ({
+      data,
+      sender,
+    }: {
+      data: { url: string };
+      sender?: SenderLike;
+    }): Promise<FetchAssetBlobResult> => {
+      // Panel-only (INV-007): the worker must not become an arbitrary fetch
+      // proxy for page scripts.
+      const refused = requireExtensionPage(sender, 'Asset fetch');
+      if (refused) return { ok: false, error: refused };
+      const raw = data.url;
+      if (!raw) return { ok: false, error: 'No asset URL provided.' };
+      const SAFE_SCHEMES = new Set(['http:', 'https:', 'blob:', 'data:']);
+      let parsed: URL;
+      try {
+        parsed = new URL(raw);
+      } catch {
+        return { ok: false, error: 'The asset URL is not a valid URL.' };
+      }
+      if (!SAFE_SCHEMES.has(parsed.protocol)) {
+        return {
+          ok: false,
+          error: 'The asset URL uses an unsupported scheme — only http(s), blob, and data can be opened.',
+        };
+      }
+      // Cap the payload: videos can be large, but an unbounded fetch from a
+      // hostile page would let the worker buffer gigabytes (§41 asset stress).
+      const MAX_OPEN_BYTES = 96 * 1024 * 1024;
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 20_000);
+        const response = await fetch(raw, { signal: controller.signal });
+        clearTimeout(timer);
+        if (!response.ok) {
+          return {
+            ok: false,
+            error: `HTTP ${response.status} while fetching the asset — it may require authentication or be temporarily unavailable.`,
+          };
+        }
+        const buffer = await response.arrayBuffer();
+        if (buffer.byteLength > MAX_OPEN_BYTES) {
+          return {
+            ok: false,
+            error: `The asset is larger than the ${MAX_OPEN_BYTES / 1024 / 1024} MB open-in-tab cap. Export it as a ZIP instead.`,
+          };
+        }
+        // A fresh data URL is safe to open in a new tab from the panel context.
+        // Chunk the base64 conversion — spreading a multi-MB Uint8Array into
+        // String.fromCharCode overflows the call stack.
+        const mime =
+          response.headers.get('content-type')?.split(';')[0]?.trim() ||
+          'application/octet-stream';
+        const bytes = new Uint8Array(buffer);
+        let binary = '';
+        const CHUNK = 0x8000;
+        for (let i = 0; i < bytes.length; i += CHUNK) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+        }
+        return {
+          ok: true,
+          dataUrl: `data:${mime};base64,${btoa(binary)}`,
+          mime,
+          size: buffer.byteLength,
+        };
+      } catch {
+        return {
+          ok: false,
+          error:
+            'Could not fetch the asset — the server may block direct downloads (CORS or hotlinking protection). It is never bypassed.',
+        };
+      }
+    },
+  );
+
   // Full round-trip: sidepanel → background → content → background → sidepanel.
   onMessage('PING', async ({ data }) => {
     const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
     let content: PingResult['content'] = {
       ok: false,
-      error: 'No content script is connected to this tab. Grant site access to connect.',
+      error: 'No content script is connected to this tab. Restricted pages (chrome://, the Web Store) cannot be inspected — open a normal web page.',
     };
     if (tab?.id != null) {
       try {
@@ -481,7 +561,8 @@ export default defineBackground(() => {
       } catch {
         content = {
           ok: false,
-          error: 'Page not connected. Grant site access, then reload the tab.',
+          error:
+            'Page not connected. The content script did not inject — reload the tab to reconnect.',
         };
       }
     }

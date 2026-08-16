@@ -1,8 +1,10 @@
 /**
  * Content script — Phase 3.
  *
- * Runs in the page's isolated world on http/https once the user grants site
- * access. Phase 2: the interactive inspect controller (hover/click/keyboard),
+ * Runs in the page's isolated world on every http/https page. The manifest
+ * carries <all_urls> as a REQUIRED host permission, so the content script
+ * injects at load time with no per-site grant or reload — full access by
+ * default. Phase 2: the interactive inspect controller (hover/click/keyboard),
  * per-element analysis, DOM tree, context-menu target. Phase 3 adds the
  * full-page scan pipeline (scan → Comlink worker → progressive results), find
  * instances / similar highlighting, and shift-click multi-selection. State

@@ -20,19 +20,20 @@ export default defineConfig({
     // WXT's manifest author type is the `{ email }` object shape; Chrome
     // serializes the string form, so cast only for the type checker.
     author: 'Prabhat Teotia' as unknown as { email: string },
-    // The minimum working set — the content script is declared statically
-    // below (no runtime injection API needed) and screenshot compositing runs
-    // on the panel's own canvas, so scripting/offscreen stay out. activeTab is
-    // the most conservative permission there is: granted only when the user
-    // invokes the extension (toolbar click / context menu / shortcut), and it
-    // lets the screenshot studio capture the current tab without a prior site
-    // grant. (WXT auto-adds scripting+tabs to the dev manifest for content-
-    // script HMR — production never carries them.)
+    // The working set — the content script is declared statically below (no
+    // runtime injection API needed) and screenshot compositing runs on the
+    // panel's own canvas, so scripting/offscreen stay out. <all_urls> is a
+    // REQUIRED host permission: the extension is a full-access inspection
+    // instrument, so content scripts inject on every http/https page at load
+    // time with zero per-site prompts or reloads. activeTab remains for the
+    // toolbar-invoked cases and keeps the context-menu hand-off instant.
+    // (WXT auto-adds scripting+tabs to the dev manifest for content-script
+    // HMR — production never carries them.)
     permissions: ['storage', 'sidePanel', 'downloads', 'contextMenus', 'activeTab'],
-    // <all_urls> is the per-site access the user grants on demand (never at
-    // install); openrouter.ai is requested when the user enables cloud AI, and
-    // localhost when they choose the fully-local Ollama provider (Phase 9).
-    optional_host_permissions: ['<all_urls>', 'https://openrouter.ai/*', 'http://localhost/*'],
+    host_permissions: ['<all_urls>'],
+    // openrouter.ai and localhost are subsumed by <all_urls>; they stay listed
+    // so the AI provider toggles in Settings still report "granted" explicitly.
+    optional_host_permissions: ['https://openrouter.ai/*', 'http://localhost/*'],
     // The analysis worker runs inside the content script (isolated world). Its
     // script URL is built with browser.runtime.getURL(), and MV3 requires
     // extension resources fetched/loaded from content scripts to be declared

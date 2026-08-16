@@ -150,6 +150,34 @@ describe('extractAssets (Section 7.10)', () => {
     const hero = assets.filter((a) => a.url.endsWith('/hero.png'));
     expect(hero).toHaveLength(1);
   });
+
+  it('extracts @font-face fonts with absolute urls and the font-face source', () => {
+    document.head.innerHTML =
+      '<style>@font-face { font-family: Inter; src: url(/fonts/inter.woff2) format("woff2"), url(/fonts/inter.woff) format("woff"); }</style>';
+    const { assets } = extractAssets();
+    const fonts = assets.filter((a) => a.type === 'font');
+    expect(fonts.map((f) => f.url)).toEqual([
+      'https://example.com/fonts/inter.woff2',
+      'https://example.com/fonts/inter.woff',
+    ]);
+    expect(fonts.every((f) => f.source === 'font-face')).toBe(true);
+  });
+
+  it('extracts preloaded webfonts', () => {
+    document.head.innerHTML =
+      '<link rel="preload" as="font" href="/fonts/display.woff2" crossorigin>';
+    const { assets } = extractAssets();
+    expect(assets.some((a) => a.type === 'font' && a.url.endsWith('/fonts/display.woff2'))).toBe(
+      true,
+    );
+  });
+
+  it('skips fonts with empty or relative-only src (no false positives)', () => {
+    document.head.innerHTML =
+      '<style>@font-face { font-family: Local; src: local("Arial"); }</style>';
+    const { assets } = extractAssets();
+    expect(assets.filter((a) => a.type === 'font')).toHaveLength(0);
+  });
 });
 
 describe('summarizeSvg bounds', () => {

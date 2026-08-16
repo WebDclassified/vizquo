@@ -1012,6 +1012,16 @@ export type ExportAssetsResult =
 /** SVG source fetched from the page on demand (copy/download actions). */
 export type FetchAssetSvgResult = { ok: true; content: string } | { ok: false; error: string };
 
+/**
+ * Result of fetching a raw asset (video/audio/font/image) through the worker.
+ * Used to open page-scoped blob:/data: assets in a new tab — a page's blob
+ * URL is meaningless in the panel's extension context, so the worker fetches
+ * the bytes (full host access) and returns them as a fresh data URL.
+ */
+export type FetchAssetBlobResult =
+  | { ok: true; dataUrl: string; mime: string; size: number }
+  | { ok: false; error: string };
+
 /* ------------------------------------------------------------------ */
 /* Phase 6: live editing, screenshots, codegen (Sections 7.18–7.21, 7.24) */
 /* ------------------------------------------------------------------ */

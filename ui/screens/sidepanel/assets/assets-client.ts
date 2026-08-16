@@ -37,6 +37,49 @@ export async function exportAssets(assets: Asset[]): Promise<ExportAssetsResult 
   }
 }
 
+/**
+ * Open any asset in a new tab — playable for video/audio, viewable for
+ * images/fonts. Plain http(s) URLs open directly (the browser plays them
+ * natively). Page-scoped blob:/data: URLs are meaningless in the panel's
+ * extension context, so they are re-fetched through the worker (full host
+ * access) and opened as a fresh data URL. Failures surface as a toast —
+ * never silently dropped.
+ */
+export async function openAssetInNewTab(asset: Asset): Promise<void> {
+  const direct = (url: string) => {
+    window.open(url, '_blank', 'noopener');
+    notify({
+      title: `Opening ${asset.type} in a new tab`,
+      description: asset.type === 'video' || asset.type === 'audio' ? 'Media plays in the new tab.' : undefined,
+      tone: 'neutral',
+    });
+  };
+  try {
+    const parsed = new URL(asset.url);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      direct(asset.url);
+      return;
+    }
+  } catch {
+    notify({ title: 'Could not open asset', description: 'The asset URL is invalid.', tone: 'warning' });
+    return;
+  }
+  try {
+    const result = await sendMessage('FETCH_ASSET_BLOB', { url: asset.url });
+    if (result.ok) {
+      direct(result.dataUrl);
+    } else {
+      notify({ title: 'Could not open asset', description: result.error, tone: 'warning' });
+    }
+  } catch {
+    notify({
+      title: 'Could not open asset',
+      description: 'The background worker did not answer the fetch request.',
+      tone: 'warning',
+    });
+  }
+}
+
 /** Fetch an SVG's source from the page (copy / download / convert actions). */
 export async function fetchAssetSvg(url: string): Promise<FetchAssetSvgResult> {
   if (ui.connection.tabId == null) {

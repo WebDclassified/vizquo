@@ -266,6 +266,64 @@ export function extractAssets(
     if (truncated) break;
   }
 
+  // --- Fonts (@font-face + runtime-loaded webfonts) ------------------------
+  // Fonts were declared in the asset model (AssetType + AssetSource['font-face']
+  // + ZIP export + panel filter) but never actually extracted — a real gap.
+  // Sources, in order:
+  //   1. Every readable @font-face src rule. Cross-origin stylesheets throw on
+  //      cssRules access and are honestly skipped — never bypassed.
+  //   2. document.fonts (FontFaceSet) — fonts the page actually loaded,
+  //      including ones injected at runtime by JS.
+  //   3. <link rel="preload" as="font"> declarations.
+  const fontUrls = new Set<string>();
+  const addFont = (raw: string): void => {
+    for (const part of raw.split(',')) {
+      const m = part.match(/url\(\s*["']?([^"')]+)["']?\s*\)/);
+      const candidate = m?.[1];
+      if (!candidate) continue;
+      const abs = absoluteUrl(candidate);
+      if (abs && !fontUrls.has(abs)) {
+        fontUrls.add(abs);
+        if (!push({ type: 'font', url: abs, source: 'font-face' })) break;
+      }
+    }
+  };
+  for (const sheet of Array.from(doc.styleSheets)) {
+    try {
+      for (const rule of Array.from(sheet.cssRules)) {
+        if (rule.type === CSSRule.FONT_FACE_RULE) {
+          const src = (rule as CSSFontFaceRule).style.getPropertyValue('src');
+          if (src) addFont(src);
+        }
+      }
+    } catch {
+      // Cross-origin stylesheet — cssRules is inaccessible; the runtime-loaded
+      // fonts below usually cover these anyway.
+    }
+  }
+  try {
+    for (const face of Array.from(doc.fonts)) {
+      // FontFace.src is part of the spec but missing from some TS DOM libs.
+      const src = (face as { src?: string }).src;
+      if ((face.status === 'loaded' || face.status === 'loading') && src) addFont(src);
+    }
+  } catch {
+    // document.fonts is unavailable in some DOM runtimes — @font-face above
+    // already covered the structural cases.
+  }
+  for (const link of Array.from(
+    doc.querySelectorAll<HTMLLinkElement>(
+      'link[rel="preload"][as="font"], link[rel="prefetch"][as="font"]',
+    ),
+  )) {
+    if (!link.href) continue;
+    const abs = absoluteUrl(link.href);
+    if (abs && !fontUrls.has(abs)) {
+      fontUrls.add(abs);
+      push({ type: 'font', url: abs, source: 'font-face' });
+    }
+  }
+
   return { assets, truncated };
 }
 

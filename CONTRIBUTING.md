@@ -63,8 +63,9 @@ Load the dev build in the browser:
 2. **Firefox** — `about:debugging#/runtime/this-firefox` → **Load Temporary
    Add-on…** → select the `manifest.json` in `.output/firefox-mv3`.
 
-Open the side panel, then **grant access to a tab** when prompted — that's
-how Vizquo connects (always on demand, never by default).
+Open the side panel — it connects to the current page automatically (the
+manifest carries `<all_urls>` host access; there are no per-site grants or
+prompts).
 
 ## Validation gate
 

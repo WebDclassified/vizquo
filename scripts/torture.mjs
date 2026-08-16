@@ -1960,23 +1960,22 @@ scenario('TOR-026', 'service-worker-lifecycle', async (context, ev) => {
 });
 
 scenario('TOR-027', 'permissions', async (context, ev) => {
-  // §40: the optional-host-permission matrix. Nothing is granted at install;
-  // core inspection works with ZERO grants (declarative content script +
-  // activeTab); the on-demand AI-provider grant/revoke/retry cycle is driven
-  // through the real Settings UI (a click = a user gesture); the deny path is
-  // unit-tested (tests/connection.test.ts); and unsupported pages get the
-  // honest 'unavailable' explanation, never a cryptic error (§41).
+  // §40: the full-access permission matrix. <all_urls> is a REQUIRED host
+  // permission, so content scripts inject on every http/https page at load
+  // time — no per-site grants, no reloads, no prompts. The AI-provider
+  // origins (openrouter.ai, localhost) are subsumed by <all_urls> and report
+  // as granted; the Settings/AI toggles therefore never prompt. The deny
+  // path is unit-tested (tests/connection.test.ts), and unsupported pages
+  // get the honest 'unavailable' explanation, never a cryptic error (§41).
   const page = await newPage(context, '/perm.html', {
     '/perm.html': (r) =>
       r.fulfill({ status: 200, contentType: 'text/html', body: FIXTURE_REPLACEMENT }),
   });
   const tabId = await activeTabId();
 
-  // 1. Minimum-permissions at install: the static content-script declaration
-  //    carries REQUIRED http/https host access (the extension could not
-  //    inspect anything without it — this is what the store lists as "read
-  //    data on all websites"). What must be TRUE is that NOTHING optional is
-  //    granted: no per-site origin, no AI provider, no <all_urls>.
+  // 1. Full access by default: <all_urls> is granted at install (the static
+  //    content-script declaration runs on every http/https page), so per-site
+  //    and AI-provider origins all report contained — zero prompts anywhere.
   const initial = await worker.evaluate(async (origin) => {
     const all = await chrome.permissions.getAll();
     const openrouter = await chrome.permissions.contains({ origins: ['https://openrouter.ai/*'] });
@@ -1984,57 +1983,39 @@ scenario('TOR-027', 'permissions', async (context, ev) => {
     return { origins: all.origins ?? [], openrouter, perSite };
   }, ORIGIN);
   assert(
-    initial.origins.includes('http://*/*') && initial.origins.includes('https://*/*'),
-    'required http/https host access present (static content-script declaration)',
-    ev,
-  );
-  assert(initial.openrouter === false, 'AI provider access not granted by default', ev);
-  assert(
-    initial.perSite === false,
-    'no per-site grant at install (optional <all_urls> untouched)',
+    initial.origins.includes('<all_urls>') ||
+      (initial.origins.includes('http://*/*') && initial.origins.includes('https://*/*')),
+    'full host access present by default (<all_urls> at install)',
     ev,
   );
   assert(
-    !initial.origins.some((o) => o.includes('vizquo-torture')),
-    `no per-site origin in getAll() (${initial.origins.join(', ')})`,
+    initial.openrouter === true && initial.perSite === true,
+    'AI-provider and per-site origins are subsumed by <all_urls> — nothing left to prompt for',
     ev,
   );
 
-  // 2. Core inspection works with ZERO optional grants — the minimum-
-  //    permissions promise (declarative content script + activeTab), verified
-  //    at runtime.
+  // 2. Core inspection works with NO user action — the content script is
+  //    already injected on this page (full access), verified at runtime.
   const scan = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
-  assert(scan.ok && scan.res.ok === true, 'full scan works with zero optional host grants', ev);
+  assert(scan.ok && scan.res.ok === true, 'full scan works immediately (no grant step)', ev);
   assert(scan.res.inspection.scannedElementCount > 0, 'samples collected', ev);
 
-  // 3. On-demand grant through the REAL Settings UI (click = user gesture).
-  //    The native prompt is auto-accepted under --enable-automation on most
-  //    runs; when automation cannot complete it, the step is BLOCKED with an
-  //    honest note — never a product failure.
+  // 3. The Settings AI-provider toggle still resolves true — no prompt, no
+  //    user gesture needed, because <all_urls> already covers the origin.
   const panel = await openPanel(context, extensionId);
   await panel.getByRole('button', { name: 'Settings' }).click();
-  const grantButton = panel.getByRole('button', { name: 'Grant access' });
-  let granted = false;
-  try {
-    await grantButton.click({ timeout: 10_000 });
-    await panel.waitForTimeout(4000);
-    granted = await worker.evaluate(async () =>
-      chrome.permissions.contains({ origins: ['https://openrouter.ai/*'] }),
-    );
-  } catch {
-    granted = false;
-  }
-  if (granted) ev.push('openrouter grant auto-accepted (click gesture)');
-  else ev.push('native grant prompt blocked by automation — grant step BLOCKED');
+  const granted = await worker.evaluate(async () =>
+    chrome.permissions.contains({ origins: ['https://openrouter.ai/*'] }),
+  );
+  assert(granted === true, 'AI provider origin contained (subsumed by <all_urls>)', ev);
 
   // 4. Revoke. The browser's own guard rejects removing origins that are
-  //    subsumed by the REQUIRED content-script hosts (`https://*/*` ⊇
-  //    openrouter.ai): remove() throws "cannot remove required permissions".
-  //    No Vizquo code ever calls permissions.remove — user-level revocation
-  //    is the browser's native Site access UI (chrome://extensions), which
-  //    automation cannot click (BLOCKED, documented). What is assertable:
-  //    the guard fires honestly (no silent state corruption) and every
-  //    non-AI feature keeps working afterwards.
+  //    subsumed by the REQUIRED <all_urls> host permission: remove() throws
+  //    "cannot remove required permissions". No Vizquo code ever calls
+  //    permissions.remove — user-level revocation is the browser's native
+  //    Site access UI (chrome://extensions). What is assertable: the guard
+  //    fires honestly (no silent state corruption) and every non-AI feature
+  //    keeps working afterwards.
   const revoke = await worker.evaluate(async () => {
     try {
       await chrome.permissions.remove({ origins: ['https://openrouter.ai/*'] });
@@ -2045,7 +2026,7 @@ scenario('TOR-027', 'permissions', async (context, ev) => {
   });
   assert(
     revoke.threw && revoke.msg.includes('cannot remove required permissions'),
-    'browser guard: optional origins subsumed by required content-script hosts are non-revocable at the API level',
+    'browser guard: origins subsumed by the required <all_urls> host permission are non-revocable at the API level',
     ev,
   );
   const scanAfter = await bus(tabId, 'SCAN_PAGE', undefined, 120_000);
@@ -2055,27 +2036,19 @@ scenario('TOR-027', 'permissions', async (context, ev) => {
     ev,
   );
 
-  // 5. Retry — request again through the UI. The revoke doesn't refresh the
-  //    panel's in-memory hostPermission flag, so reload the panel to restore
-  //    the honest UI state (button visible again), then request again.
+  // 5. Retry — re-check the Settings toggle after the revoke attempt: the
+  //    origin is still contained (required permission), so the UI stays
+  //    honest without any re-grant dance.
   await panel.reload().catch(() => {});
   await panel.waitForSelector('text=Vizquo', { timeout: 15_000 }).catch(() => {});
   await panel
     .getByRole('button', { name: 'Settings' })
     .click()
     .catch(() => {});
-  let regranted = false;
-  try {
-    await grantButton.click({ timeout: 10_000 });
-    await panel.waitForTimeout(4000);
-    regranted = await worker.evaluate(async () =>
-      chrome.permissions.contains({ origins: ['https://openrouter.ai/*'] }),
-    );
-  } catch {
-    regranted = false;
-  }
-  if (regranted) ev.push('re-grant after revoke auto-accepted');
-  else ev.push('re-grant prompt blocked by automation — retry step BLOCKED');
+  const regranted = await worker.evaluate(async () =>
+    chrome.permissions.contains({ origins: ['https://openrouter.ai/*'] }),
+  );
+  assert(regranted === true, 'origin still contained after reload (required permission)', ev);
 
   // 6. Deny path: AI stays honest-disabled without a key (unit-tested deny
   //    semantics in tests/connection.test.ts) — core features untouched.
@@ -2116,21 +2089,14 @@ scenario('TOR-027', 'permissions', async (context, ev) => {
   await chromePage.goto('chrome://extensions').catch(() => {});
   await chromePage.bringToFront();
   await panel.waitForTimeout(3500); // card re-checks on tab activation
-  const grantTab = panel.getByRole('button', { name: 'Grant access to this tab' });
-  const grantSeen = await grantTab.isVisible().catch(() => false);
-  assert(grantSeen, 'unsupported page shows the honest grant affordance', ev);
-  await grantTab.click({ timeout: 10_000 }).catch(() => {});
-  // The honest outcome is either the explicit http/https explanation (older
-  // Chrome / when the chip request fails) or the "check the toolbar prompt"
-  // guidance (Chrome 133+ addHostAccessRequest — the browser's own chip then
-  // explains "can't access this site" for unsupported URLs). Never a
-  // cryptic error.
+  // Restricted pages get the honest explanation — full access applies to
+  // normal web pages, never a cryptic error (§41 unsupported-page matrix).
   const honest = await panel
-    .getByText(/Check the toolbar prompt|only regular websites \(http\/https\)/)
+    .getByText(/can't be inspected|full access to normal web pages|chrome:\.\.\//i)
     .waitFor({ state: 'visible', timeout: 8000 })
     .then(() => true)
     .catch(() => false);
-  assert(honest, 'grant on chrome:// produces an honest, non-cryptic explanation', ev);
+  assert(honest, 'unsupported page shows the honest restricted-page explanation', ev);
 
   await chromePage.close();
   await panel.close();
@@ -2516,6 +2482,95 @@ scenario('TOR-031', 'api-key-isolation', async (context, ev) => {
     ev.push('debug-bundle-download=blocked-by-environment');
     pass('debug bundle redaction verified in code path (download blocked here)');
   }
+
+  await page.close();
+});
+
+scenario('TOR-032', 'asset-blob-fetch', async (context, ev) => {
+  // §20/INV-007: the worker's FETCH_ASSET_BLOB (open video/audio in a new
+  // tab) must be panel-only, scheme-capped, and honest about failures — a
+  // content script must never turn the worker into an arbitrary fetch proxy.
+  const page = await newPage(context, '/blob.html', {
+    '/blob.html': (r) =>
+      r.fulfill({
+        status: 200,
+        contentType: 'text/html',
+        body: `<!doctype html><html><head><title>blob fixture</title></head><body>
+          <video src="blob:https://${'x'.repeat(20)}/video.mp4"></video>
+          <img src="data:image/png;base64,iVBORw0KGgo=">
+        </body></html>`,
+      }),
+  });
+  const panel = await openPanel(context, extensionId);
+
+  // 1. A data: URL asset round-trips through the worker into a fresh data URL
+  //    (the panel's open-in-new-tab path for non-http(s) assets).
+  const dataOk = await panel.evaluate(async () => {
+    const r = await chrome.runtime.sendMessage({
+      id: 913,
+      type: 'FETCH_ASSET_BLOB',
+      timestamp: Date.now(),
+      data: { url: 'data:image/png;base64,iVBORw0KGgo=' },
+    });
+    return r?.res ?? r;
+  });
+  assert(
+    dataOk?.ok === true && dataOk.dataUrl.startsWith('data:image/png;base64,'),
+    'data: asset fetched by the worker into a fresh data URL',
+    ev,
+  );
+
+  // 2. A blob: URL is accepted at the scheme gate and fails honestly when the
+  //    page blob no longer exists (page-context blob URLs are meaningless
+  //    here) — an honest error, never a hang or a silent drop.
+  const blobOk = await panel.evaluate(async () => {
+    const r = await chrome.runtime.sendMessage({
+      id: 914,
+      type: 'FETCH_ASSET_BLOB',
+      timestamp: Date.now(),
+      data: { url: 'blob:https://example.com/dead-beef' },
+    });
+    return r?.res ?? r;
+  });
+  assert(
+    blobOk?.ok === false && /fetch|HTTP|scheme/i.test(blobOk?.error ?? ''),
+    'dead blob: URL produces an honest fetch error (scheme allowed, fetch fails cleanly)',
+    ev,
+  );
+
+  // 3. Scheme cap: javascript:/file:/chrome: URLs are refused before any
+  //    fetch — the worker is never a proxy for hostile schemes.
+  const evil = await panel.evaluate(async () => {
+    const r = await chrome.runtime.sendMessage({
+      id: 915,
+      type: 'FETCH_ASSET_BLOB',
+      timestamp: Date.now(),
+      data: { url: 'javascript:alert(1)' },
+    });
+    return r?.res ?? r;
+  });
+  assert(
+    evil?.ok === false && /unsupported scheme/i.test(evil?.error ?? ''),
+    'javascript: asset URL refused at the worker (never fetched or executed)',
+    ev,
+  );
+
+  // 4. The worker answers over http(s) with the real payload when reachable
+  //    (example.com is dependable and CORS-open).
+  const httpOk = await panel.evaluate(async () => {
+    const r = await chrome.runtime.sendMessage({
+      id: 916,
+      type: 'FETCH_ASSET_BLOB',
+      timestamp: Date.now(),
+      data: { url: 'https://example.com/' },
+    });
+    return r?.res ?? r;
+  });
+  assert(
+    httpOk?.ok === true && httpOk.size > 0 && /text\/html/.test(httpOk?.mime ?? ''),
+    'http(s) asset fetched with the declared mime and size',
+    ev,
+  );
 
   await page.close();
 });

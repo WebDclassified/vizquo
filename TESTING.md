@@ -106,12 +106,12 @@ STATUS / EVIDENCE; statuses are VERIFIED PASS / FAIL / BLOCKED only.
   scan after restart. (The `ServiceWorker.stopAllWorkers` CDP method does not
   exist in this Chromium; `Target.closeTarget` on the SW target is the honest
   equivalent.)
-- `TOR-027 permissions` — zero optional grants at install (only the static
-  content-script `http/https` host access), full scan works with ZERO grants,
-  the on-demand OpenRouter grant/revoke/retry cycle through the real Settings
-  UI (auto-accept is BLOCKED by automation where the native prompt wins),
-  `permissions.remove` for a subsumed origin throws the browser's own honest
-  guard, and `chrome://` pages get the honest grant affordance.
+- `TOR-027 permissions` — full access by default: `<all_urls>` is a REQUIRED
+  host permission, so per-site and AI-provider origins report contained with
+  no prompts, a full scan runs with no user action, the Settings AI toggle
+  resolves instantly (origin subsumed), the browser's own guard refuses
+  `permissions.remove` for a subsumed origin, and core features keep working
+  after the revoke attempt.
 - `TOR-028 tailwind-arbitrary-classes` — regression for the Vercel corpus
   finding: Tailwind-v4 classes like `@container` / `px-(--geist-page-margin)`
   made the unescaped selector throw a SyntaxError, breaking lock/inspect/

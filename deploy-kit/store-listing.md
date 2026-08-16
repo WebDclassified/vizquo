@@ -40,7 +40,7 @@ on the listing.
 >
 > **Privacy first.**
 > - Everything is **local by default**: scans, screenshots and your library live only in your browser (IndexedDB). No account, no tracking, no analytics, and **zero network requests** until you choose otherwise.
-> - Site access is granted **per-site, on demand** — never at install.
+> - Full access by default: the extension connects to every page instantly with no per-site grants, reloads, or prompts.
 > - AI is **off by default** and consent-gated: it shows exactly what it will send before the first request, and you can use a local model (Ollama) that never leaves your machine.
 > - The extension requests only the minimum permissions (see below).
 >
@@ -61,7 +61,8 @@ on the listing.
 - **downloads** — saves exported asset ZIPs and screenshots.
 - **contextMenus** — adds the "Inspect with Vizquo" right-click action.
 - **activeTab** — the most conservative permission in Chrome: active only while you invoke the extension (toolbar click, context menu, or shortcut) so the screenshot studio and context-menu hand-off work without any prior site grant.
-- **Optional host permissions** (`<all_urls>`, `https://openrouter.ai/*`, `http://localhost/*`) — requested **on demand** only: per-site inspection access when you click "Grant access to this tab", OpenRouter when you enable cloud AI, and localhost when you choose the local Ollama provider. Never granted at install.
+- **Host permissions** (`<all_urls>`) — **required at install**: the statically-declared content script must run on every web page for inspection, scanning, asset extraction, and Time Machine to work with zero per-site prompts. This is what the browser labels "Read and change all your data on all websites."
+- **Optional host permissions** (`https://openrouter.ai/*`, `http://localhost/*`) — subsumed by the `<all_urls>` grant; listed so the AI provider toggles stay explicit. Enabling AI never triggers an extra prompt.
 
 ## 7. Privacy form answers (Chrome Web Store)
 

@@ -61,7 +61,11 @@ const MARKERS: Marker[] = [
       Array.from(doc.scripts).some((s) => /react(\.development)?\.js|react-dom/.test(s.src)),
     probable: (doc) => {
       const root = doc.getElementById('root');
-      return root !== null && root.children.length > 0;
+      return (
+        (root !== null && root.children.length > 0) ||
+        doc.getElementById('__NEXT_DATA__') !== null ||
+        doc.getElementById('___gatsby') !== null
+      );
     },
   },
   {
@@ -69,7 +73,122 @@ const MARKERS: Marker[] = [
     category: 'frontend',
     detect: (doc) =>
       doc.getElementById('__NEXT_DATA__') !== null ||
-      Array.from(doc.scripts).some((s) => /\/_next\/static\//.test(s.src)),
+      doc.querySelector('script#__NEXT_DATA__') !== null ||
+      Array.from(doc.scripts).some(
+        (s) => /\/_next\/static\//.test(s.src) || /next\/dist/.test(s.src),
+      ),
+    probable: (doc) =>
+      Array.from(doc.scripts).some((s) => /_next|next-data|__next_f/.test(s.src)) ||
+      doc.querySelector('script[src*="_next/static/chunks"]') !== null,
+  },
+  {
+    name: 'Vite',
+    category: 'infra',
+    detect: (doc) =>
+      Array.from(doc.scripts).some((s) => /\/@vite\/client|vite\/client/.test(s.src)) ||
+      Array.from(doc.querySelectorAll<HTMLLinkElement>('link')).some((l) =>
+        /@vite\/client/.test(l.href),
+      ),
+    probable: (doc) =>
+      doc.querySelector('script[type="module"][src*="/src/"]') !== null ||
+      doc.querySelector('script[type="module"][src*="/assets/"]') !== null,
+  },
+  {
+    name: 'Gatsby',
+    category: 'frontend',
+    detect: (doc) =>
+      Array.from(doc.scripts).some((s) => /gatsby/.test(s.src)) ||
+      doc.querySelector('#___gatsby') !== null,
+  },
+  {
+    name: 'Preact',
+    category: 'frontend',
+    detect: (doc) =>
+      Array.from(doc.scripts).some((s) => /preact/.test(s.src)) ||
+      doc.querySelector('[data-preact-version]') !== null,
+    probable: (doc) => doc.getElementById('app') !== null || doc.getElementById('root') !== null,
+  },
+  {
+    name: 'Lit',
+    category: 'frontend',
+    detect: (doc) =>
+      Array.from(doc.scripts).some((s) => /lit(-element)?(\.min)?\.js|@lit\//.test(s.src)) ||
+      Array.from(doc.scripts).some((s) => /lit-html/.test(s.src)),
+    probable: (doc) =>
+      Array.from(doc.querySelectorAll('*')).some((el) =>
+        /^[a-z]+-[a-z]+$/.test(el.tagName.toLowerCase()),
+      ),
+  },
+  {
+    name: 'Emotion',
+    category: 'styling',
+    detect: (doc) =>
+      Array.from(doc.querySelectorAll<HTMLStyleElement>('style')).some(
+        (s) =>
+          /data-emotion|@emotion/.test(s.textContent ?? '') ||
+          /data-emotion/.test(s.dataset.emotion ?? ''),
+      ) || doc.querySelector('style[data-emotion]') !== null,
+  },
+  {
+    name: 'styled-components',
+    category: 'styling',
+    detect: (doc) =>
+      Array.from(doc.querySelectorAll<HTMLStyleElement>('style')).some(
+        (s) =>
+          /sc-bd|sc-\w{6}/.test(s.textContent ?? '') || /data-styled/.test(s.dataset.styled ?? ''),
+      ) || doc.querySelector('style[data-styled]') !== null,
+    probable: (doc) => Array.from(doc.querySelectorAll('[class*="sc-"]')).length >= 3,
+  },
+  {
+    name: 'framer-motion',
+    category: 'frontend',
+    detect: (doc) => Array.from(doc.scripts).some((s) => /framer-motion|motion\/react/.test(s.src)),
+  },
+  {
+    name: 'Sass / SCSS',
+    category: 'styling',
+    detect: (doc) =>
+      Array.from(doc.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')).some((l) =>
+        /\.scss(\.map)?$/.test(l.href),
+      ) || Array.from(doc.styleSheets).some((sheet) => /\.scss/.test(sheet.href ?? '')),
+  },
+  {
+    name: 'Webflow',
+    category: 'platform',
+    detect: (doc) =>
+      Array.from(doc.scripts).some((s) => /webflow\.js|assets\.webflow\.com/.test(s.src)) ||
+      Array.from(doc.querySelectorAll<HTMLLinkElement>('link')).some((l) =>
+        /assets\.webflow\.com/.test(l.href),
+      ) ||
+      doc.querySelector('html[data-wf-page], html[data-wf-site]') !== null,
+  },
+  {
+    name: 'Squarespace',
+    category: 'platform',
+    detect: (doc) =>
+      Array.from(doc.scripts).some((s) => /static1\.squarespace\.com/.test(s.src)) ||
+      doc.querySelector('meta[name="generator"][content*="Squarespace"]') !== null,
+  },
+  {
+    name: 'Vercel',
+    category: 'platform',
+    detect: (doc) =>
+      Array.from(doc.scripts).some((s) => /vercel\.com\/_vercel/.test(s.src)) ||
+      doc.querySelector('script[data-vercel-analytics]') !== null,
+  },
+  {
+    name: 'Netlify',
+    category: 'platform',
+    detect: (doc) =>
+      doc.querySelector('meta[name="generator"][content*="Netlify"]') !== null ||
+      Array.from(doc.scripts).some((s) => /netlify/.test(s.src)),
+  },
+  {
+    name: 'Docusaurus',
+    category: 'platform',
+    detect: (doc) =>
+      Array.from(doc.scripts).some((s) => /docusaurus/.test(s.src)) ||
+      doc.querySelector('link[href*="docusaurus"]') !== null,
   },
   {
     name: 'Vue',

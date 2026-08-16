@@ -5,6 +5,8 @@ import { detectTechnologies } from '../engine/technology/detect';
 beforeEach(() => {
   document.head.innerHTML = '';
   document.body.innerHTML = '';
+  document.documentElement.removeAttribute('data-wf-page');
+  document.documentElement.removeAttribute('data-wf-site');
 });
 
 describe('detectTechnologies (Section 7.14)', () => {
@@ -17,10 +19,11 @@ describe('detectTechnologies (Section 7.14)', () => {
     });
   });
 
-  it('detects Next.js from #__NEXT_DATA__', () => {
+  it('detects Next.js from #__NEXT_DATA__ and marks React probable (React 18 has no data-reactroot)', () => {
     document.body.innerHTML = '<script id="__NEXT_DATA__" type="application/json">{}</script>';
     const tech = detectTechnologies(document);
     expect(tech.find((t) => t.name === 'Next.js')?.confidence).toBe('detected');
+    expect(tech.find((t) => t.name === 'React')?.confidence).toBe('probable');
   });
 
   it('detects Vue from data-v- scoped-style attributes', () => {
@@ -95,5 +98,82 @@ describe('detectTechnologies (Section 7.14)', () => {
     document.head.innerHTML =
       '<script src="/manifest.webmanifest"></script><script src="/manifest-123.js"></script>';
     expect(detectTechnologies(document).find((t) => t.name === 'Remix')).toBeUndefined();
+  });
+
+  it('detects Vite from the dev client or /src module scripts', () => {
+    document.head.innerHTML = '<script type="module" src="/@vite/client"></script>';
+    expect(detectTechnologies(document).find((t) => t.name === 'Vite')?.confidence).toBe(
+      'detected',
+    );
+  });
+
+  it('detects Next.js App Router from _next/static chunks', () => {
+    document.body.innerHTML = '<script src="/_next/static/chunks/main-abc123.js" async></script>';
+    expect(detectTechnologies(document).find((t) => t.name === 'Next.js')?.confidence).toBe(
+      'detected',
+    );
+  });
+
+  it('detects Gatsby from its root node', () => {
+    document.body.innerHTML = '<div id="___gatsby"><div>content</div></div>';
+    expect(detectTechnologies(document).find((t) => t.name === 'Gatsby')?.confidence).toBe(
+      'detected',
+    );
+  });
+
+  it('detects Webflow from its data attributes', () => {
+    document.documentElement.setAttribute('data-wf-page', 'abc');
+    document.body.innerHTML = '<script src="https://assets.webflow.com/js/webflow.js"></script>';
+    expect(detectTechnologies(document).find((t) => t.name === 'Webflow')?.confidence).toBe(
+      'detected',
+    );
+  });
+
+  it('detects Squarespace from its static CDN', () => {
+    document.head.innerHTML =
+      '<script src="https://static1.squarespace.com/static/ta/abc/0/scripts/script.js"></script>';
+    expect(detectTechnologies(document).find((t) => t.name === 'Squarespace')?.confidence).toBe(
+      'detected',
+    );
+  });
+
+  it('detects Emotion from data-emotion style tags', () => {
+    document.head.innerHTML = '<style data-emotion="css">.css-abc123{color:red}</style>';
+    expect(detectTechnologies(document).find((t) => t.name === 'Emotion')?.confidence).toBe(
+      'detected',
+    );
+  });
+
+  it('detects styled-components from data-styled style tags', () => {
+    document.head.innerHTML = '<style data-styled="true">.sc-bd1{color:red}</style>';
+    expect(
+      detectTechnologies(document).find((t) => t.name === 'styled-components')?.confidence,
+    ).toBe('detected');
+  });
+
+  it('detects Docusaurus from its assets', () => {
+    document.head.innerHTML = '<script src="/assets/js/docusaurus.abc.min.js"></script>';
+    expect(detectTechnologies(document).find((t) => t.name === 'Docusaurus')?.confidence).toBe(
+      'detected',
+    );
+  });
+
+  it('detects Preact from its script', () => {
+    document.head.innerHTML = '<script src="/assets/preact.abc.js"></script>';
+    expect(detectTechnologies(document).find((t) => t.name === 'Preact')?.confidence).toBe(
+      'detected',
+    );
+  });
+
+  it('detects Sass from .scss stylesheets', () => {
+    document.head.innerHTML = '<link rel="stylesheet" href="/assets/main.scss">';
+    expect(detectTechnologies(document).find((t) => t.name === 'Sass / SCSS')?.confidence).toBe(
+      'detected',
+    );
+  });
+
+  it('still returns an empty stack for plain HTML after the marker additions', () => {
+    document.body.innerHTML = '<main><h1>Plain</h1><p>No framework.</p></main>';
+    expect(detectTechnologies(document)).toHaveLength(0);
   });
 });

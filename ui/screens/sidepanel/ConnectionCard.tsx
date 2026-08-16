@@ -118,18 +118,19 @@ export function ConnectionCard() {
               <div class="vq-grid mx-1.5 mb-1 flex flex-col gap-2 rounded-[var(--vq-radius-md)] border border-[var(--vq-warning-soft)] bg-[var(--vq-warning-soft)] p-2.5">
                 <p class="text-[12px] leading-relaxed text-[var(--vq-warning-fg)]">
                   <Show when={notConnected()} fallback="Checking the page…">
-                    Vizquo can't reach this page yet. Grant access to connect the inspector —
-                    nothing is sent anywhere; everything runs locally.
+                    This page can't be inspected — Vizquo has full access to normal web pages, but
+                    browsers restrict extensions on pages like chrome://, the Web Store, or browser
+                    settings. Open a regular website and the inspector connects automatically.
                   </Show>
                 </p>
                 <div class="flex flex-col gap-1.5">
                   <Button size="sm" variant="primary" onClick={onGrantAccess} disabled={granting()}>
                     <ShieldCheck class="size-3.5" />
-                    {granting() ? 'Requesting access…' : 'Grant access to this tab'}
+                    {granting() ? 'Requesting access…' : 'Try to connect'}
                   </Button>
                   <p class="text-[11px] leading-relaxed text-[var(--vq-fg-subtle)]">
-                    Your browser will ask to allow Vizquo on this site — click <b>Allow</b>. Nothing
-                    is sent anywhere; everything runs locally.
+                    Vizquo is a local-first inspection instrument: nothing is sent anywhere;
+                    everything runs in your browser.
                   </p>
                 </div>
               </div>

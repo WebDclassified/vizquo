@@ -19,13 +19,14 @@ tracking of any kind.
 - **No personal data** (name, email, identifiers) is collected.
 - Opening the extension and inspecting pages makes **no network requests**.
 
-## 2. Site access (on demand)
+## 2. Site access (full by default)
 
-Vizquo runs on a page only after you explicitly grant access to that site
-(per-site, via the browser's own permission prompt). Access can be revoked at
-any time. When granted, Vizquo reads the page's DOM, computed styles, and
-assets to build its inspection — this data is processed locally and is never
-transmitted.
+Vizquo requests `<all_urls>` host access at install (the browser shows this
+as "Read and change all your data on all websites") so it can connect to any
+web page instantly — there are no per-site permission prompts. You can revoke
+or restrict access at any time from the browser's extension settings. Vizquo
+reads the page's DOM, computed styles, and assets to build its inspection —
+this data is processed locally and is never transmitted.
 
 ## 3. Optional AI features (off by default)
 

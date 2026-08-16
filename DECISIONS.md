@@ -38,13 +38,17 @@ side-panel pages. The background writes a timestamped marker to
 and the panel reacts to `storage.onChanged`. Simple, permission-free (we
 already hold `storage`), and avoids an extra message-hop protocol for Phase 1.
 
-### Site access requires a reload after grant
-Declarative content scripts with `optional_host_permissions` only inject on
-pages loaded after the grant. "Grant access to this tab" therefore requests
-the permission and reloads the tab (a deliberate, user-initiated action). The
-side panel survives the reload and re-checks automatically. On-demand
-injection via `chrome.scripting` would need a message-protocol handshake; the
-reload flow is simpler and unambiguous.
+### Site access is full by default (no grant flow)
+Vizquo is an inspection instrument: the manifest carries a REQUIRED
+`host_permissions: ['<all_urls>']`, so the statically-declared content script
+injects on every http/https page at load time. There are no per-site grants,
+no reloads, and no prompts — the panel connects the instant it opens. The
+earlier on-demand model (optional `<all_urls>`, "Grant access to this tab",
+tab reload after grant) was replaced because it added friction for the exact
+inspection workflow the product exists to serve. The AI-provider origins
+(openrouter.ai / localhost) are subsumed by the grant and never prompt.
+Data remains local-first regardless — page content leaves the browser only
+when the user opts into AI with their own key.
 
 ### Eviction order: kind first, then LRU
 Per Section 2.3, screenshots/large blobs are evicted before inspection token

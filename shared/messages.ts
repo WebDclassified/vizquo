@@ -20,6 +20,7 @@ import type {
   ElementRef,
   ExportAssetRequest,
   ExportAssetsResult,
+  FetchAssetBlobResult,
   FetchAssetSvgResult,
   FindInstancesKind,
   FindInstancesResult,
@@ -120,6 +121,10 @@ export interface ProtocolMap {
   EXPORT_ASSETS: (data: { requests: ExportAssetRequest[] }) => ExportAssetsResult;
   /** Fetch an SVG's source text from the page (copy / download actions). */
   FETCH_ASSET_SVG: (data: { url: string }) => FetchAssetSvgResult;
+  /** Fetch a raw asset's bytes through the worker (page blob:/data: URLs are
+   *  meaningless in the panel's extension context). Used to open video/audio/
+   *  font assets in a new tab. Panel-only; size-capped. */
+  FETCH_ASSET_BLOB: (data: { url: string }) => FetchAssetBlobResult;
   /** Highlight the given element refs on the page (click an asset → locate it). */
   HIGHLIGHT_REFS: (data: { refs: ElementRef[]; label: string }) => void;
 

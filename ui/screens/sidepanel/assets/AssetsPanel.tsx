@@ -29,6 +29,7 @@ import {
   exportAssets,
   fetchAssetSvg,
   highlightAssetRefs,
+  openAssetInNewTab,
 } from './assets-client';
 import { SvgInspector } from './SvgInspector';
 
@@ -415,7 +416,9 @@ export function AssetsPanel() {
   };
 
   const openInNewTab = (asset: Asset): void => {
-    window.open(asset.url, '_blank', 'noopener');
+    // http(s) URLs open directly; blob:/data: URLs are re-fetched through the
+    // worker so videos/audio actually play and images/fonts actually render.
+    void openAssetInNewTab(asset);
   };
 
   const downloadSingle = async (asset: Asset): Promise<void> => {

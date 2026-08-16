@@ -70,15 +70,15 @@ applies (Requirements §15/§16, INV-007):
 
 ## Permissions
 
-Minimum base permission set — `storage`, `sidePanel`, `downloads`,
-`contextMenus`, `activeTab` — with no runtime injection or offscreen APIs
-(`scripting` / `offscreen` are deliberately absent; the content script is
-statically declared, and WXT's dev-mode `scripting` grant never ships).
-`activeTab` applies only while the user is actively invoking the extension;
-permanent per-site access is requested on demand via
-`optional_host_permissions`, and the OpenRouter / localhost origins are
-requested only when the corresponding AI provider is enabled. See
-`PERMISSIONS.md`.
+Base permission set — `storage`, `sidePanel`, `downloads`, `contextMenus`,
+`activeTab` — plus a **required** `host_permissions: ['<all_urls>']` so the
+statically-declared content script runs on every web page at load time (no
+per-site grants, reloads, or prompts). There is no runtime injection or
+offscreen API (`scripting` / `offscreen` are deliberately absent, and WXT's
+dev-mode `scripting` grant never ships). The OpenRouter / localhost AI
+origins are subsumed by the `<all_urls>` grant and therefore never prompt.
+Data stays local-first regardless: page content only leaves the browser when
+the user opts into AI with their own key. See `PERMISSIONS.md`.
 
 ## Reporting
 
