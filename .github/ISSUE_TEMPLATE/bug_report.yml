@@ -1,0 +1,89 @@
+name: 🐛 Bug report
+description: Report something that is broken, wrong, or crashes
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! The more precise the report, the faster it gets
+        fixed — Vizquo is torture-tested, so a good repro goes a long way.
+  - type: input
+    id: version
+    attributes:
+      label: Vizquo version
+      description: Shown in the side panel → Settings → About (e.g. 0.11.0)
+      placeholder: "0.11.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Edge
+        - Firefox
+        - Brave
+        - Opera
+        - Vivaldi
+        - Arc
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser version + OS
+      placeholder: "Chrome 126 · macOS 14.5"
+    validations:
+      required: true
+  - type: textarea
+    id: page
+    attributes:
+      label: Page / fixture
+      description: The URL that reproduces it, or a minimal HTML snippet if it's deterministic
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: 1. … 2. … 3. …
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors (if any)
+      description: Right-click the page → Inspect → Console. Paste the red lines, or a screenshot.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: Reproduces on a fresh browser profile (no other extensions interfering)
+        - label: I checked the open issues for a duplicate
+  - type: markdown
+    attributes:
+      value: |
+        **Quality bar:** confirmed bugs get a regression test (a `TOR-0xx`
+        torture scenario or a unit test) before the fix merges.

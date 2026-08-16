@@ -1,0 +1,19 @@
+# Keeps dependencies current. The CI gate (compile → lint → test → build →
+# e2e → probes) runs on every PR, so a green dependabot PR is safe to merge.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      # Framework churn is riskier — review these individually.
+      wxt:
+        patterns: ["wxt", "@wxt-dev/*"]
+      solid:
+        patterns: ["solid-js", "@kobalte/*"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -1,11 +1,34 @@
 {
   "name": "vizquo",
-  "description": "Inspect anything. Understand everything. Build faster. — a design-intelligence layer for the web.",
+  "description": "See beyond the surface — a browser extension that turns any live webpage into a visual blueprint: CSS, design tokens, assets, responsive behavior, and reusable patterns.",
   "private": true,
   "version": "0.11.0",
   "author": "Prabhat Teotia",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WebDclassified/vizquo.git"
+  },
+  "homepage": "https://webdclassified.github.io/vizquo/landing/",
+  "bugs": {
+    "url": "https://github.com/WebDclassified/vizquo/issues"
+  },
+  "keywords": [
+    "browser-extension",
+    "design-inspection",
+    "design-system",
+    "css",
+    "devtools",
+    "design-tokens",
+    "frontend",
+    "ux",
+    "accessibility",
+    "webpack-free",
+    "wxt",
+    "solidjs",
+    "typescript"
+  ],
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",

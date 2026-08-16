@@ -1,0 +1,43 @@
+name: ✨ Feature request
+description: Suggest an idea for Vizquo
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Feature requests are triaged against Vizquo's
+        principles: local-first, honest data, keyboard-friendly, no
+        security bypasses, AI optional.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: A concrete workflow that is slow or impossible today. Avoid vague "would be nice" phrasing.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What should Vizquo do? How would it appear in the UI?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: Other ways to solve the problem (including "do nothing")
+  - type: textarea
+    id: impact
+    attributes:
+      label: Who benefits?
+      description: Designers, frontend devs, design engineers, design-system teams — or everyone?
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Fits Vizquo's principles
+      options:
+        - label: Stays local-first (no server, no tracking)
+        - label: Keeps AI optional
+        - label: Does not bypass browser security or page restrictions
