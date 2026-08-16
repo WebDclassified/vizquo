@@ -59,7 +59,7 @@ jobs:
     steps:
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
         # Fails only while Pages is still configured to "Deploy from a branch"
         # (Settings → Pages → Source → "GitHub Actions"). Kept soft so the
         # interim runs don't turn CI red before that one-time switch.
