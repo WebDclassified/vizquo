@@ -72,7 +72,7 @@
     "fake-indexeddb": "^6.2.5",
     "happy-dom": "^20.11.2",
     "typescript": "~5.9.3",
-    "vitest": "^4.1.10",
+    "vitest": "^4.1.11",
     "wxt": "^0.21.3"
   }
 }
