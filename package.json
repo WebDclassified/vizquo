@@ -67,7 +67,7 @@
     "@biomejs/biome": "^2.5.7",
     "@playwright/test": "^1.62.1",
     "@types/chrome": "^0.2.5",
-    "@unocss/reset": "^66.7.5",
+    "@unocss/reset": "^66.8.0",
     "@wxt-dev/module-solid": "^1.1.4",
     "fake-indexeddb": "^6.2.5",
     "happy-dom": "^20.11.2",
