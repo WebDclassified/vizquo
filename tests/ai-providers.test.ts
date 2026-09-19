@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { AnthropicProvider } from '../ai/anthropic';
-import { GeminiProvider } from '../ai/gemini';
 import { OllamaProvider } from '../ai/ollama';
 import { OpenAiCompatibleProvider } from '../ai/openai-compatible';
-import { OpenRouterProvider } from '../ai/openrouter';
 import { createProvider, providerOrigin } from '../ai/registry';
 import type { AIExplainRequest } from '../shared/types';
 
@@ -17,27 +14,14 @@ const REQUEST: AIExplainRequest = {
 
 describe('provider registry', () => {
   it('constructs the right provider class per id', () => {
-    expect(createProvider('openrouter')).toBeInstanceOf(OpenRouterProvider);
     expect(createProvider('ollama', {})).toBeInstanceOf(OllamaProvider);
-    expect(createProvider('openai')).toBeInstanceOf(OpenAiCompatibleProvider);
-    expect(createProvider('groq')).toBeInstanceOf(OpenAiCompatibleProvider);
-    expect(createProvider('anthropic')).toBeInstanceOf(AnthropicProvider);
-    expect(createProvider('gemini')).toBeInstanceOf(GeminiProvider);
     expect(createProvider('custom', { customBaseUrl: 'https://x.example/v1' })).toBeInstanceOf(
       OpenAiCompatibleProvider,
     );
   });
 
   it('maps each provider to its host origin', () => {
-    expect(providerOrigin('openrouter')).toBe('https://openrouter.ai/*');
-    expect(providerOrigin('openai')).toBe('https://api.openai.com/*');
-    expect(providerOrigin('anthropic')).toBe('https://api.anthropic.com/*');
-    expect(providerOrigin('gemini')).toBe('https://generativelanguage.googleapis.com/*');
-    expect(providerOrigin('groq')).toBe('https://api.groq.com/*');
     expect(providerOrigin('ollama')).toBe('http://localhost/*');
-  });
-
-  it('derives the custom origin from the base URL and returns null when missing', () => {
     expect(providerOrigin('custom', 'https://api.deepseek.com/v1')).toBe(
       'https://api.deepseek.com/*',
     );
@@ -46,7 +30,9 @@ describe('provider registry', () => {
   });
 
   it('fails honestly when a key is missing', async () => {
-    const result = await createProvider('openai').explain(REQUEST, '');
+    const result = await createProvider('custom', {
+      customBaseUrl: 'https://x.example/v1',
+    }).explain(REQUEST, '');
     expect(result.ok).toBe(false);
   });
 
@@ -76,6 +62,29 @@ describe('custom OpenAI-compatible provider URL shape', () => {
       expect(result.ok).toBe(true);
       if (result.ok) expect(result.text).toBe('the answer');
       expect(calls[0]).toBe('https://x.example/v1/chat/completions');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it('sends the request model verbatim — never a bundled default', async () => {
+    const calls: { url: string; body: { model?: string } }[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      calls.push({
+        url: String(input),
+        body: JSON.parse(String(init?.body ?? '{}')) as { model?: string },
+      });
+      return new Response(JSON.stringify({ choices: [{ message: { content: 'ok' } }] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }) as typeof fetch;
+
+    try {
+      const provider = createProvider('custom', { customBaseUrl: 'https://x.example/v1' });
+      await provider.explain({ ...REQUEST, model: 'my-endpoint-model-7b' }, 'sk-test');
+      expect(calls[0]?.body.model).toBe('my-endpoint-model-7b');
     } finally {
       globalThis.fetch = originalFetch;
     }

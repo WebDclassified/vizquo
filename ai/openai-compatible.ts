@@ -46,7 +46,7 @@ export class OpenAiCompatibleProvider implements AIProvider {
   private readonly label: string;
   private readonly baseUrl: string;
 
-  constructor(id: 'openai' | 'groq' | 'custom', options: OpenAiCompatibleOptions) {
+  constructor(id: 'custom', options: OpenAiCompatibleOptions) {
     this.id = id;
     this.label = options.label;
     this.baseUrl = options.baseUrl.replace(/\/+$/, '');

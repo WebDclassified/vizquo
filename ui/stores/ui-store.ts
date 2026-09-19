@@ -6,10 +6,8 @@
  */
 
 import { createStore } from 'solid-js/store';
-import { aiHasKey } from '../../ai/config';
 import { DEFAULT_OLLAMA_BASE_URL } from '../../ai/ollama';
 import {
-  DEFAULT_AI_MODEL,
   DEFAULT_OLLAMA_MODEL,
   DEFAULT_SETTINGS,
   type ThemeId,
@@ -97,10 +95,13 @@ const [ui, setUi] = createStore<UIState>({
   whatsNewTour: { visible: false, step: 0, done: true },
   ai: {
     enabled: false,
-    provider: 'openrouter',
-    model: DEFAULT_AI_MODEL,
-    // The bundled author default makes AI usable before a user key exists.
-    hasKey: aiHasKey(false),
+    // Custom (OpenAI-compatible) endpoint by default — the user's own
+    // endpoint, key, and model. No built-in vendor ships with Vizquo.
+    provider: 'custom',
+    // No default model: the user must enter the exact slug their endpoint
+    // expects (a guessed slug is what produces "model not found" 404s).
+    model: '',
+    hasKey: false,
     userKey: false,
     consentGiven: false,
     hostPermission: false,

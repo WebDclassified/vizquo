@@ -13,7 +13,6 @@
 
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/utils/define-background';
-import { resolveApiKey } from '../ai/config';
 import { createProvider } from '../ai/registry';
 import { buildAssetZip, sanitizeFilename, type ZipAssetEntry } from '../export/assets-zip';
 import { SETTING_KEYS, STORAGE_KEYS } from '../shared/constants';
@@ -287,20 +286,21 @@ export default defineBackground(() => {
           };
         }
 
-        // Ollama is fully local — no key needed (the strictest privacy
-        // posture Vizquo offers). Every other provider needs the user's key;
-        // the OpenRouter path also honors the bundled author default in dev
-        // builds (ai/config.ts — production ships keyless).
-        const provider = createProvider(providerId ?? 'openrouter', {
+        // Both providers are user-owned: `custom` is the user's own
+        // OpenAI-compatible endpoint (their key, their model slug); `ollama`
+        // is fully local — no key at all. Vizquo never inserts its own vendor,
+        // key, or model into the request.
+        const activeProvider: AIProviderId = providerId ?? 'custom';
+        const provider = createProvider(activeProvider, {
           ollamaBaseUrl: ollamaBaseUrl ?? undefined,
           customBaseUrl: customBaseUrl ?? undefined,
         });
-        const apiKey = providerId === 'ollama' ? '' : (resolveApiKey(storedKey) ?? '');
-        if (providerId !== 'ollama' && !apiKey) {
+        const apiKey = activeProvider === 'ollama' ? '' : (storedKey ?? '');
+        if (activeProvider === 'custom' && !apiKey.trim()) {
           return {
             ok: false,
             error:
-              'No AI key is set. Add your provider\u2019s API key in Settings (it is never shared).',
+              'No API key is set. Add your endpoint\u2019s API key in Settings (it is never shared).',
           };
         }
         return await provider.explain(data, apiKey);

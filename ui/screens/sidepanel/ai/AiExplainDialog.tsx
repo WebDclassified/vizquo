@@ -95,15 +95,15 @@ function RequestGate(props: { request: AIExplainRequest; onRun: () => void; busy
         fallback={
           <div class="rounded-[var(--vq-radius-md)] border border-[var(--vq-warning-soft)] bg-[var(--vq-warning-soft)] p-2.5">
             <p class="text-[11.5px] leading-relaxed text-[var(--vq-warning-fg)]">
-              First use: this content is sent to the model provider you chose. Confirm to proceed —
+              First use: this content is sent to the endpoint you configured. Confirm to proceed —
               you won't be asked again, but the summary above always stays visible.
             </p>
           </div>
         }
       >
         <p class="text-[10.5px] text-[var(--vq-fg-subtle)]">
-          Content shown above will be sent to {ui.ai.provider}. You can turn AI off in Settings any
-          time.
+          Content shown above will be sent to your configured AI endpoint. You can turn AI off in
+          Settings any time.
         </p>
       </Show>
 
@@ -286,8 +286,8 @@ export function AiExplainDialog() {
                 <div class="flex flex-col gap-2.5 py-2">
                   <p class="text-[11.5px] leading-relaxed text-[var(--vq-fg-muted)]">
                     {disabledReason() === 'AI is off'
-                      ? 'AI is off by default. Turn it on in Settings, add your API key, and grant the provider access — or keep using Vizquo without AI.'
-                      : 'Add your API key for the selected provider in Settings. It is stored locally and used only for requests you make.'}
+                      ? 'AI is off by default. Turn it on in Settings, add your endpoint\u2019s API key, and grant it access — or keep using Vizquo without AI.'
+                      : 'Add the API key for your endpoint in Settings. It is stored locally and used only for requests you make.'}
                   </p>
                   <div class="flex justify-end gap-1.5">
                     <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>

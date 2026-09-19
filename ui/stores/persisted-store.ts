@@ -4,10 +4,8 @@
  * (Section 2.2); a chrome.storage.sync mirror for roaming settings is deferred
  * until a setting actually needs to roam (see DECISIONS.md).
  */
-import { aiHasKey } from '../../ai/config';
 import { DEFAULT_OLLAMA_BASE_URL } from '../../ai/ollama';
 import {
-  DEFAULT_AI_MODEL,
   DEFAULT_OLLAMA_MODEL,
   DEFAULT_SETTINGS,
   SETTING_KEYS,
@@ -66,12 +64,15 @@ export async function loadPersistedSettings(): Promise<void> {
         : { visible: true, step: 0, done: false },
       ai: {
         enabled: aiEnabled ?? false,
-        provider: aiProvider ?? 'openrouter',
-        model: aiModel ?? DEFAULT_AI_MODEL,
-        // Ollama needs no key — local inference. Otherwise a key is available
-        // when the user saved their own OR the bundled author default exists
-        // (the key value never enters the UI store).
-        hasKey: (aiProvider ?? 'openrouter') === 'ollama' || aiHasKey(Boolean(aiApiKey)),
+        // Legacy stored values ('openrouter', 'openai', …) are normalizing
+        // providers: Vizquo now ships only user-owned endpoints.
+        provider: normalizeProvider(aiProvider),
+        // An empty stored model is legitimate (the user hasn't chosen one
+        // yet — the Settings field starts empty on purpose).
+        model: aiModel ?? '',
+        // Ollama needs no key — local inference. Otherwise a key exists only
+        // when the user saved their own (no bundled key ships in any build).
+        hasKey: normalizeProvider(aiProvider) === 'ollama' || Boolean(aiApiKey),
         userKey: Boolean(aiApiKey),
         consentGiven: aiConsentGiven ?? false,
         hostPermission: false,
@@ -90,4 +91,16 @@ export function persist(key: string, value: unknown): void {
   void repository.setSetting(key, value).catch(() => {
     // Non-fatal: the UI stays correct for the session even if persistence fails.
   });
+}
+
+/**
+ * Map stored provider ids onto the two supported providers. Builds before
+ * 1.1.0 offered built-in vendors (openrouter, openai, anthropic, gemini,
+ * groq); their keys/origins mean nothing to a generic OpenAI-compatible
+ * endpoint, so those users land on `custom` (the closest model) with their
+ * key and base URL preserved — never silently dropped onto Ollama.
+ */
+function normalizeProvider(stored: AIProviderId | null | undefined): AIProviderId {
+  if (stored === 'ollama') return 'ollama';
+  return 'custom';
 }

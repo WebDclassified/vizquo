@@ -69,25 +69,10 @@ export const SETTING_KEYS = {
 } as const;
 
 /**
- * OpenRouter model list (Section 7.23). Every option is free — the AI layer
- * costs users nothing. `openrouter/free` (the top pick) auto-routes to the
- * best available free model and is the default. Users can pick any other
- * listed model or type a custom slug in Settings.
+ * AI provider metadata (Section 7.23). Vizquo ships NO built-in AI vendor and
+ * NO model list — the user brings their own endpoint and their own model slug.
+ * `custom` is any OpenAI-compatible server; `ollama` is a fully-local server.
  */
-export const AI_MODELS: { id: string; label: string; free: boolean }[] = [
-  { id: 'openrouter/free', label: 'OpenRouter Free (auto-select)', free: true },
-  { id: 'deepseek/deepseek-chat:free', label: 'DeepSeek Chat (free)', free: true },
-  { id: 'deepseek/deepseek-r1:free', label: 'DeepSeek R1 (free)', free: true },
-  { id: 'meta-llama/llama-3.3-70b-instruct:free', label: 'Llama 3.3 70B (free)', free: true },
-  { id: 'qwen/qwen-2.5-72b-instruct:free', label: 'Qwen 2.5 72B (free)', free: true },
-  { id: 'google/gemini-2.0-flash-exp:free', label: 'Gemini 2.0 Flash (free)', free: true },
-];
-
-export const DEFAULT_AI_MODEL = 'openrouter/free';
-
-/** Select value that reveals the custom-model text input. */
-export const AI_CUSTOM_MODEL = '__custom__';
-
 export const AI_PROVIDERS: {
   id: AIProviderId;
   label: string;
@@ -96,70 +81,34 @@ export const AI_PROVIDERS: {
   keyPlaceholder: string;
 }[] = [
   {
-    id: 'openrouter',
-    label: 'OpenRouter',
-    description: 'Cloud, free models by default — nothing to install.',
-    keyLabel: 'OpenRouter API key',
-    keyPlaceholder: 'sk-or-…',
+    id: 'custom',
+    label: 'Custom (OpenAI-compatible)',
+    description:
+      'Your own endpoint — OpenAI, DeepSeek, Together, LM Studio, vLLM, a private proxy…',
+    keyLabel: 'API key',
+    keyPlaceholder: 'sk-…',
   },
   {
     id: 'ollama',
     label: 'Ollama (local)',
-    description: 'Runs entirely on your machine — zero cost, zero cloud.',
+    description: 'Runs entirely on your machine — zero cost, zero cloud, no key.',
     keyLabel: 'API key (not needed — local)',
     keyPlaceholder: '—',
   },
-  {
-    id: 'openai',
-    label: 'OpenAI',
-    description: 'GPT models via OpenAI’s API — bring your own key.',
-    keyLabel: 'OpenAI API key',
-    keyPlaceholder: 'sk-…',
-  },
-  {
-    id: 'anthropic',
-    label: 'Anthropic (Claude)',
-    description: 'Claude models via the Anthropic Messages API.',
-    keyLabel: 'Anthropic API key',
-    keyPlaceholder: 'sk-ant-…',
-  },
-  {
-    id: 'gemini',
-    label: 'Google Gemini',
-    description: 'Gemini models via the Generative Language API.',
-    keyLabel: 'Gemini API key',
-    keyPlaceholder: 'AIza…',
-  },
-  {
-    id: 'groq',
-    label: 'Groq',
-    description: 'Fast open models (Llama, Mixtral) on Groq’s LPU cloud.',
-    keyLabel: 'Groq API key',
-    keyPlaceholder: 'gsk_…',
-  },
-  {
-    id: 'custom',
-    label: 'Custom (OpenAI-compatible)',
-    description:
-      'Any OpenAI-compatible endpoint — LM Studio, Together, DeepSeek, a private server…',
-    keyLabel: 'API key',
-    keyPlaceholder: 'sk-…',
-  },
 ];
-
-/** Per-provider default models (the Settings model select presets). */
-export const AI_PROVIDER_DEFAULT_MODELS: Record<AIProviderId, string> = {
-  openrouter: 'openrouter/free',
-  ollama: 'llama3.2',
-  openai: 'gpt-4o-mini',
-  anthropic: 'claude-3-5-haiku-latest',
-  gemini: 'gemini-2.0-flash',
-  groq: 'llama-3.3-70b-versatile',
-  custom: '',
-};
 
 /** Default local model for the Ollama provider. */
 export const DEFAULT_OLLAMA_MODEL = 'llama3.2';
+
+/**
+ * Per-provider default models. `custom` has NO default — the user must type
+ * the exact slug their endpoint expects (a guessed slug is what produces
+ * "model not found" 404s, so Vizquo never guesses).
+ */
+export const AI_PROVIDER_DEFAULT_MODELS: Record<AIProviderId, string> = {
+  custom: '',
+  ollama: DEFAULT_OLLAMA_MODEL,
+};
 
 export interface SettingsDefaults {
   theme: ThemeId;

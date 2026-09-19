@@ -273,16 +273,11 @@ export interface AIRequest {
 /* ------------------------------------------------------------------ */
 
 /** AI backends the AIProvider adapter supports (Section 2.2 pattern).
- *  Hosted providers need a user key; `ollama` is fully local; `custom` is an
- *  OpenAI-compatible endpoint the user configures (base URL + key + model). */
-export type AIProviderId =
-  | 'openrouter'
-  | 'ollama'
-  | 'openai'
-  | 'anthropic'
-  | 'gemini'
-  | 'groq'
-  | 'custom';
+ *  Vizquo ships NO built-in AI vendor: `custom` is any OpenAI-compatible
+ *  endpoint the user configures (base URL + key + model); `ollama` is a
+ *  fully-local server the user runs. Nothing else — no bundled provider,
+ *  no bundled key, no bundled model list. */
+export type AIProviderId = 'custom' | 'ollama';
 
 /**
  * One explain request. Built in the side panel from page data, sent to the
