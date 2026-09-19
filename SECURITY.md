@@ -75,8 +75,10 @@ Base permission set — `storage`, `sidePanel`, `downloads`, `contextMenus`,
 statically-declared content script runs on every web page at load time (no
 per-site grants, reloads, or prompts). There is no runtime injection or
 offscreen API (`scripting` / `offscreen` are deliberately absent, and WXT's
-dev-mode `scripting` grant never ships). The OpenRouter / localhost AI
-origins are subsumed by the `<all_urls>` grant and therefore never prompt.
+dev-mode `scripting` grant never ships). The localhost AI origin is subsumed
+by the `<all_urls>` grant and therefore never prompts; the custom
+(OpenAI-compatible) endpoint's origin is derived from the base URL the user
+enters and requested on demand. Vizquo ships no built-in AI vendor origins.
 Data stays local-first regardless: page content only leaves the browser when
 the user opts into AI with their own key. See `PERMISSIONS.md`.
 

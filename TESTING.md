@@ -253,13 +253,12 @@ STATUS / EVIDENCE; statuses are VERIFIED PASS / FAIL / BLOCKED only.
 - `tests/ai.test.ts` — prompt hygiene: long text bounded to 200 chars, raw
   outerHTML never dumped beyond the 160-char sanitized snippet, input values
   / data-* attributes excluded by construction, payload summaries state
-  exactly what is sent, and page/asset summaries omit HTML/DOM. The OpenRouter
-  provider (mocked fetch) maps success, 401, 429, network failure, empty
-  key, and empty model responses to honest results. The Ollama provider
-  (mocked fetch) builds correct localhost requests from a base URL + model,
-  and fails loudly when either is missing. The readiness gate enforces
-  disabled → no-key → no-consent ordering, and the consent dialog requests
-  the right host origin per provider (OpenRouter vs localhost).
+  exactly what is sent, and page/asset summaries omit HTML/DOM. The readiness
+  gate enforces disabled → no-key → no-consent ordering, and the consent
+  dialog requests the right host origin per provider (custom endpoint vs
+  localhost). The custom OpenAI-compatible provider (mocked fetch, in
+  `tests/ai-providers.test.ts`) posts the request's model slug verbatim to
+  `<baseUrl>/chat/completions` — Vizquo never substitutes a bundled model.
 
 ### Phase 5 — Responsive & audits
 

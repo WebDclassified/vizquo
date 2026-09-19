@@ -89,8 +89,10 @@ See the product inspect itself — the landing page runs the real demo:
   collections, notes, comparison, and printable reports.
 - **Command palette** (Ctrl/⌘K) and omnibox commands (`viz scan`, `viz
   inspect`, …) for keyboard-first workflows.
-- **Optional AI** — "Why?" element explanations and design-system summaries via
-  free OpenRouter models or a fully-local Ollama. Off by default, consent-gated.
+- **Optional AI** — "Why?" element explanations and design-system summaries
+  via your own OpenAI-compatible endpoint (your key, your model) or a
+  fully-local Ollama. No built-in AI vendor, key, or model ships with the
+  extension. Off by default, consent-gated.
 
 ## Designer ⇄ Engineer modes
 
@@ -215,7 +217,7 @@ editing, `TOR-031` for API-key isolation). Details in
 | Messaging | **@webext-core/messaging** (typed RPC) |
 | Worker offloading | **Comlink** |
 | CSS parsing | **css-tree** · Color science **culori** · ZIP export **fflate** |
-| AI | **OpenRouter** (free `:free` models) + **Ollama** (fully local) |
+| AI | **Your own OpenAI-compatible endpoint** (bring your own key + model) + **Ollama** (fully local) |
 | Tests | **Vitest** + **Playwright** + a custom Chrome torture harness · Lint/format **Biome** |
 
 ## Project structure
@@ -227,7 +229,7 @@ vizquo/
 ├── engine/             # DOM/scanning/analysis engine: refs, pipeline, inspectors, workers
 ├── shared/             # Typed message bus, constants, sender guard, tab isolation
 ├── storage/            # IndexedDB repository + adapters (inspections, cache, settings, notes)
-├── ai/                 # Optional AI: gate, providers (OpenRouter / Ollama), bounded payloads
+├── ai/                 # Optional AI: gate, providers (custom endpoint / Ollama), bounded payloads
 ├── export/             # Code generation, token export, ZIP, library port
 ├── workers/            # Off-main-thread analysis workers
 ├── tests/              # Unit, integration, E2E specs

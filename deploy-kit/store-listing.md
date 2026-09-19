@@ -62,7 +62,7 @@ on the listing.
 - **contextMenus** — adds the "Inspect with Vizquo" right-click action.
 - **activeTab** — the most conservative permission in Chrome: active only while you invoke the extension (toolbar click, context menu, or shortcut) so the screenshot studio and context-menu hand-off work without any prior site grant.
 - **Host permissions** (`<all_urls>`) — **required at install**: the statically-declared content script must run on every web page for inspection, scanning, asset extraction, and Time Machine to work with zero per-site prompts. This is what the browser labels "Read and change all your data on all websites."
-- **Optional host permissions** (`https://openrouter.ai/*`, `http://localhost/*`) — subsumed by the `<all_urls>` grant; listed so the AI provider toggles stay explicit. Enabling AI never triggers an extra prompt.
+- **Optional host permissions** (`http://localhost/*`) — subsumed by the `<all_urls>` grant; listed so the local-AI toggle stays explicit. The custom (OpenAI-compatible) AI endpoint's origin is derived from the base URL you enter and requested on demand. Enabling AI never triggers an extra prompt for built-in features.
 
 ## 7. Privacy form answers (Chrome Web Store)
 
@@ -70,7 +70,7 @@ on the listing.
 - Single purpose: see section 4.
 - Data usage: **No user data collected**.
   - No personal data · No web history · No authentication data · No health/financial data · No user activity/tracking · No analytics.
-  - Note: AI features are **off by default**; the only outbound requests are the user's own, consent-gated AI requests (their own OpenRouter key, or none at all with the local Ollama provider). This does not constitute collection.
+  - Note: AI features are **off by default**; the only outbound requests are the user's own, consent-gated AI requests to an endpoint the user configures (their own key and model, or none at all with the local Ollama provider). This does not constitute collection.
 - Remote code: **No** — all code is bundled; the analysis worker loads bundled code from the package.
 - Privacy policy URL: see `deploy-kit/privacy-policy.md` (host it — GitHub Pages, or any static host — and paste the URL).
 

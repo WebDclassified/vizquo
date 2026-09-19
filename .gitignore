@@ -41,3 +41,7 @@ Thumbs.db
 # implementation but are not project documentation — see README + CHANGELOG
 # for the outcomes. The release pipeline tolerates their absence.
 _extra/
+
+# Job-application recording plans — local only, never shipped.
+LOOM_RECORDING_PLAN.md
+RECORDING_STEPS.md

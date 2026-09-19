@@ -36,12 +36,13 @@ in scope, source traces, and a ≤ 160-char HTML snippet with `value`/`name`/
 spacing, radius, component counts, and the consistency score — never page
 HTML or DOM. Input values and data attributes are excluded by construction.
 
-The `openrouter.ai` host permission is subsumed by the extension's required
+The AI provider's host permission is subsumed by the extension's required
 `<all_urls>` host grant (see `PERMISSIONS.md`) — enabling AI never triggers
 an extra permission prompt. Your API key is stored locally and used only by
-the background worker. Vizquo is **fully keyless** — no key ships with the
-extension; the only key involved is the one you paste in Settings (or none
-at all, with the local Ollama provider), and you can remove it any time.
+the background worker. Vizquo ships **no AI vendor, key, or model** — the
+only key involved is the one you paste in Settings for your own
+OpenAI-compatible endpoint (or none at all, with the local Ollama provider),
+and you can remove it any time.
 
 Every non-AI feature works with AI fully disabled. AI is additive, never
 load-bearing.

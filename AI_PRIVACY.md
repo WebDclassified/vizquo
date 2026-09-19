@@ -34,10 +34,14 @@ payload itself is bounded and redacted by construction.
 
 ## Providers
 
-- **OpenRouter** — the default; requires a key the user pastes in Settings.
+- **Custom (OpenAI-compatible)** — the user's own endpoint (OpenAI, DeepSeek,
+  Together, LM Studio, vLLM, a private proxy…), configured with their base
+  URL, their key, and the exact model slug. No built-in vendor or model ships
+  with Vizquo.
 - **Ollama** — fully local inference on `localhost`, no key at all, the
-  strictest privacy posture. Both providers are requested on demand only
-  (`optional_host_permissions`).
+  strictest privacy posture. Provider origins are requested on demand only
+  (`optional_host_permissions`); the custom endpoint's origin is derived from
+  the base URL the user enters.
 
 ## Page content is data, not instructions
 
@@ -52,7 +56,7 @@ payload itself is bounded and redacted by construction.
 ## The consent flow
 
 1. AI starts disabled.
-2. Enabling it asks for the provider (and key, for OpenRouter).
+2. Enabling it asks for the provider (and key, for the custom endpoint).
 3. The first request shows the privacy gate with the exact `payloadSummary`.
 4. The user approves; subsequent requests reuse the consent for this session.
 

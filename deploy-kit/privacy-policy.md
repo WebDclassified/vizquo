@@ -41,10 +41,12 @@ default** and must be explicitly enabled in Settings.
   a ≤160-character HTML snippet with `value`/`name`/`data-*` attributes
   stripped, computed styles, and CSS variables in scope. Form input values and
   data attributes are excluded by construction.
-- **Cloud provider (OpenRouter):** requests go to the provider only when you
-  enable cloud AI and only with your confirmation. The API key is stored
-  locally in your browser and is never logged or transmitted to the pages you
-  inspect. You may use your own key, or none at all.
+- **Custom endpoint (OpenAI-compatible):** requests go to the AI endpoint
+  you configure (base URL, your API key, your chosen model) only when you
+  enable AI and only with your confirmation. The API key is stored locally in
+  your browser and is never logged or transmitted to the pages you inspect.
+  Vizquo ships no AI vendor of its own — you bring the endpoint, the key,
+  and the model.
 - **Local provider (Ollama):** with this option, requests never leave your
   machine (they go to your local Ollama server at `localhost`).
 
@@ -59,8 +61,9 @@ saved only to locations you choose (your Downloads folder or saved locally).
 
 Vizquo contains **no third-party analytics, advertising, or tracking code** and
 loads **no external resources** (fonts, scripts, or libraries) from the
-network. The only optional third-party connection is the OpenRouter AI service,
-used solely when you enable cloud AI, under the terms described in section 3.
+network. The only optional third-party connection is the AI endpoint you
+configure yourself (an OpenAI-compatible server, or a local Ollama), used
+solely when you enable AI, under the terms described in section 3.
 
 ## 6. Children's privacy
 

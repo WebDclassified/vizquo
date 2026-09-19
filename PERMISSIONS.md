@@ -25,11 +25,11 @@ grant — the shipped build never carries `scripting` or `offscreen`. Unused
 permissions are flagged by store review and erode trust, so the manifest
 carries only what runs.
 
-The AI-provider origins (`https://openrouter.ai/*` and `http://localhost/*`)
-are listed as optional host permissions and are **subsumed** by the required
-`<all_urls>` grant — the Settings/AI toggles report them as granted with no
-extra prompt. They remain listed so the intent is explicit and the toggle UI
-stays honest.
+The localhost AI origin is listed as an optional host permission and is
+**subsumed** by the required `<all_urls>` grant — the Settings/AI toggle
+reports it as granted with no extra prompt. The custom (OpenAI-compatible)
+endpoint has no static origin: it is derived from the base URL the user
+enters and requested on demand. Vizquo ships no built-in AI vendor origins.
 
 Data flows are local-first regardless of the permission surface: nothing is
 sent anywhere by default; page content only reaches a cloud AI provider when

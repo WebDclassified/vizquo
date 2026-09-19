@@ -45,10 +45,11 @@ injects on every http/https page at load time. There are no per-site grants,
 no reloads, and no prompts — the panel connects the instant it opens. The
 earlier on-demand model (optional `<all_urls>`, "Grant access to this tab",
 tab reload after grant) was replaced because it added friction for the exact
-inspection workflow the product exists to serve. The AI-provider origins
-(openrouter.ai / localhost) are subsumed by the grant and never prompt.
-Data remains local-first regardless — page content leaves the browser only
-when the user opts into AI with their own key.
+inspection workflow the product exists to serve. The localhost AI origin is
+subsumed by the grant and never prompts; the custom endpoint's origin is
+derived from the user-entered base URL and requested on demand. Data remains
+local-first regardless — page content leaves the browser only when the user
+opts into AI with their own key.
 
 ### Eviction order: kind first, then LRU
 Per Section 2.3, screenshots/large blobs are evicted before inspection token
@@ -361,9 +362,9 @@ The privacy gate is a UX layer; the real guarantee is that `ai/prompts.ts`
 can only produce bounded, sanitized payloads (text ≤ 200 chars, HTML snippets
 ≤ 160 chars with `value`/`name`/`data-*` stripped, no input values by
 construction). The gate shows the builder's exact `payloadSummary`, so what
-is displayed is byte-for-byte what is sent. Free `:free` OpenRouter models
-are the defaults so the feature costs users nothing; rate-limit errors are
-surfaced honestly.
+is displayed is byte-for-byte what is sent. The AI layer costs users nothing
+on its own — it runs only against endpoints the user configures; provider
+errors (401/404/429) are surfaced honestly.
 
 ### AI runs in the background worker only
 The API key never crosses into the content script, the page, or the panel's
@@ -438,9 +439,9 @@ single source of truth for the brand.
 The panel says which provider it wants, but the worker re-reads the stored
 provider setting and routes the request itself — a compromised or stale panel
 can never send your key to the wrong host. The consent gate requests the
-right optional host permission per provider (`https://openrouter.ai/*` vs
-`http://localhost/*`), so local AI never asks for network permissions it
-doesn't need.
+right optional host permission per provider (the custom endpoint's derived
+origin vs `http://localhost/*`), so local AI never asks for network
+permissions it doesn't need.
 
 ### Ollama is the same adapter, not a parallel feature
 `ai/ollama.ts` implements the existing `AIProvider` interface with an
@@ -495,3 +496,20 @@ Settings Diagnostics reports the live `navigator.storage.estimate()`
 the repository's internal cache stats. The two numbers answer different
 questions (global browser budget vs Vizquo's own LRU), and both are shown,
 labeled, rather than one masquerading as the other.
+
+## Post-1.0 — AI is bring-your-own-endpoint only
+
+### No built-in AI vendor, key, or model
+Vizquo 1.0 offered OpenRouter/OpenAI/Anthropic/Gemini/Groq as first-class
+providers. In practice every built-in vendor carries the same three hidden
+costs: a preset model list that drifts ("model not found" 404s), vendor
+origins hardcoded in the manifest, and the implication that Vizquo endorses
+a provider. The provider surface is now exactly two user-owned options:
+`custom` (any OpenAI-compatible endpoint — the user's base URL, key, and
+exact model slug) and `ollama` (fully local). The model field starts EMPTY
+and persists as it is typed — the old code skipped the empty custom default
+and silently kept the previous provider's model slug, which is what produced
+the 404s. Vendor files (`openrouter.ts`, `anthropic.ts`, `gemini.ts`) and
+the bundled-key fallback in `ai/config.ts` were deleted; legacy stored
+provider ids normalize to `custom` on load with the user's key preserved.
+Unit tests now pin that the request's model slug is sent verbatim.

@@ -86,9 +86,10 @@ master spec (Section 3) and must not silently diverge.
 - **`AIExplainResult`** — `{ ok: true; text; model; provider }` or an honest
   error string. AI output is always labeled `ai-generated` in the UI
   (confidence law #2).
-- **`AIProviderId`** — the supported backends (`openrouter` today); the
-  `AIProvider` interface in `ai/provider.ts` is the swap point for local
-  models (Ollama) later.
+- **`AIProviderId`** — the supported backends (`custom` — any OpenAI-compatible
+  endpoint the user configures — and `ollama` for fully-local inference);
+  Vizquo ships no built-in AI vendor. The `AIProvider` interface in
+  `ai/provider.ts` remains the swap point for future backends.
 
 ## Phase 6 entities (Create)
 
