@@ -15,7 +15,7 @@
   <a href="https://github.com/WebDclassified/vizquo/actions/workflows/ci.yml">
     <img src="https://github.com/WebDclassified/vizquo/actions/workflows/ci.yml/badge.svg" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/version-1.0.0-6E7BFF" alt="Version 1.0.0">
+  <img src="https://img.shields.io/badge/version-1.1.0-6E7BFF" alt="Version 1.1.0">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license">
   <img src="https://img.shields.io/badge/Chrome-MV3-4285F4" alt="Chrome MV3">
   <img src="https://img.shields.io/badge/Firefox-MV3-FF7139" alt="Firefox MV3">
