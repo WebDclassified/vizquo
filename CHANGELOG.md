@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.1.0 — Bring-your-own-endpoint AI
+
+The AI layer now ships **no built-in vendor, key, or model**. Two user-owned
+backends remain: any OpenAI-compatible endpoint you configure (base URL,
+your key, the exact model slug) and the fully-local Ollama.
+
+**AI (breaking for AI users — everything else is unchanged)**
+- Providers reduced to **Custom (OpenAI-compatible)** + **Ollama (local)**;
+  the OpenRouter/OpenAI/Anthropic/Gemini/Groq entries are gone, along with
+  the preset model list and every vendor origin in the manifest
+- **Fixed: "model not found" 404s.** Switching providers silently kept the
+  previous provider's model slug, and the model field only persisted on
+  Enter — both fixed. The model field now starts empty and saves as you
+  type; the request sends your slug verbatim (pinned by unit tests)
+- Keyless by construction: only the user's own key is ever used; the
+  bundled-key fallback was removed from `ai/config.ts`
+- Docs, store listing, privacy policy, and the landing page synced with the
+  new provider model
+
 ## 1.0.0 — First stable release
 
 A milestone release: Vizquo ships the final brand identity, a unified
